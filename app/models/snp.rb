@@ -1,0 +1,2 @@
+class Snp < ApplicationRecord
+end

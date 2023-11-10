@@ -1,0 +1,35 @@
+
+
+<% if @phenotype %>
+
+<%# @h_snps.to_json %>
+<%# raw @h_snps["X_8149138_SNP"] %>
+<%# raw @all_snps.to_json if admin? %>
+
+<div class='float-end'>
+  <%= link_to "Back to phenotype", phenotype_path(@phenotype), {:data => {:turbo => 'false', :method => 'get'}, :class => 'btn btn-secondary'} %>
+</div>
+
+<% s = Study.find(17) %>
+<h1><%= @phenotype.name %> phenotype</h1>
+
+<div class='alert alert-info'>
+  GWAS results were precomputed for all phenotypes using <a href='https://www.cog-genomics.org/plink/2.0/'>PLINK2</a> [v2.00a3LM (1 Jul 2021)] and corrected for the 6 main covariates defined in <%= display_reference_short2(s) %>. These covariates are the same than the ones used in the <a href='http://dgrp2.gnets.ncsu.edu/'>DGRP2</a> website.
+</div>
+
+
+<% if @phenotype.obsolete == true %>
+<div class='alert alert-warning'>WARNING: This phenotype was deactivated and thus is considered as obsolete.</div>
+<% end %>
+
+<% end %>
+
+<%# raw @h_files.to_json %>
+
+ <%= render :partial => 'all_gwas_analysis', :locals => {:phenotype => @phenotype, :h_output => @h_output, :h_files => @h_files, :anova => @anova, :h_gwas_results => @h_gwas_results, :output_dir => @gwas_dir, :download_namespace => 'gwas', :md5 => nil} %>
+
+<%= javascript_tag do %>
+  document.addEventListener('DOMContentLoaded', function () {
+<%= render :partial => 'gwas_analysis_js', :locals => {} %>
+})
+<% end %>

@@ -1,0 +1,51 @@
+<h3>
+  <% if params[:dataset] == 'new' %>
+  Upload new raw dataset
+  <% elsif params[:dataset] == 'summary' %>
+  Upload summary dataset
+  <% elsif m = params[:dataset].match(/by_sample_(\d+)/) %>
+  Re-upload raw dataset <%= m[1] %> 
+  <% end %>
+</h3>
+
+<%= file_field_tag 'dataset_file' %>
+
+<button id='preparse_btn' type='button' class='btn btn-primary'>Upload</button>
+
+<div id='preparsing_result'></div>
+
+<%= javascript_tag do %>
+
+ $("#preparse_btn").click(function(){
+  var data = new FormData();
+  //data.append()
+$.each($('#dataset_file')[0].files, function(i, file) {
+    console.log(file)
+    data.append('file', file);
+});
+data.append('dataset', '<%= params[:dataset] %>');
+ console.log(data)
+  $.ajax({
+    url: '<%= raw parse_dataset_study_path(@study) %>',
+    data: data,
+    beforeSend: function(){
+      $("#preparse_btn").prop("disabled", true)
+    },
+    headers: {
+//      "Content-Type": "application/json",
+      "X-CSRF-Token": document.querySelector("meta[name='csrf-token']").content,
+    },
+    cache: false,
+    contentType: false,
+    processData: false,
+    method: 'POST',
+    type: 'POST', // For jQuery < 1.9
+    success: function(data){
+				  $("#preparsing_result").html(data)
+				   $("#preparse_btn").prop("disabled", false)
+    }
+  });
+ })
+
+
+<% end %>

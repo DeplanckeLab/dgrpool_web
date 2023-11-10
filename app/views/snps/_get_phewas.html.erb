@@ -1,0 +1,74 @@
+<h3><%=  @gwas_results.size %> results for variant <%= @snp.identifier %></h3>
+
+<div class='alert alert-info'>
+These results were computed across all phenotypes on DGRPool. We display only p-values <= 0.01
+</div>
+
+<table>
+  <thead>
+<!--    <tr>
+      <th>Reference</th>
+      <th>Variant</th>
+    </tr>-->
+  </thead>
+  <tbody>
+    <tr>
+      <th>Reference</th>
+      <td><%= @snp.ref %></td>
+    </tr>
+    <tr>
+      <th>Variant</th>
+      <td><%= @snp.alt %></td>
+    </tr>
+    <tr>
+      <th>Coordinates</th>
+      <td><%= @snp.chr %> <%= @snp.pos %></td>
+    </tr>
+  </tbody>
+</table>
+
+<table id='phewas_table'>
+  <thead>
+    <tr>
+      <th>Phenotype</th>
+      <th>Study</th>
+      <th>Study status</th>
+      <th>p-value</th>
+<!--      <th>FDR_BH</th>-->
+    </tr>
+  </thead>
+  <tbody>
+
+    <% @gwas_results.each do |gwas_result| %>
+
+    <tr>
+      <td><%= raw display_phenotype(@h_phenotypes[gwas_result.phenotype_id]) %></td>
+      <td><%= raw display_reference(@h_studies[@h_phenotypes[gwas_result.phenotype_id].study_id]) %></td>
+      <td><%= raw display_status(@h_studies[@h_phenotypes[gwas_result.phenotype_id].study_id], @h_statuses) %></td>
+      <td><%= raw display_corr_num(2, gwas_result.p_val) %></td>
+  <!--    <td><%=  raw display_corr_num(2, gwas_result.fdr) %></td> -->
+    </tr>
+    
+    <% end %>
+    
+  </tbody>
+</table>
+
+<%= javascript_tag do %>
+
+
+/*  var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+  var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+    return new Bootstrap.Tooltip(tooltipTriggerEl)
+  })
+*/
+
+ var table = new DataTable('#phewas_table', {
+        pageLength:100,
+        order : [[1, 'asc']]
+        })
+
+//$(".pheno_link").tooltip()
+     initTooltips();
+
+<% end %>

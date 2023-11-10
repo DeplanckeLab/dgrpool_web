@@ -1,0 +1,17 @@
+<%= form_with(model: dgrp_line_study) do |form| %>
+  <% if dgrp_line_study.errors.any? %>
+    <div style="color: red">
+      <h2><%= pluralize(dgrp_line_study.errors.count, "error") %> prohibited this dgrp_line_study from being saved:</h2>
+
+      <ul>
+        <% dgrp_line_study.errors.each do |error| %>
+          <li><%= error.full_message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div>
+    <%= form.submit %>
+  </div>
+<% end %>

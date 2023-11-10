@@ -1,0 +1,21 @@
+<% if snp_genes.size > 0 %>
+
+<table id='genes'>
+  <thead>
+    <tr>
+      <th>Gene name</th>
+      <th>SNP ID</th>
+    </tr>
+  </thead>
+  <tbody>
+     <% snp_genes.each do |snp_gene| %>
+     <tr>
+       <td class='gene_name' title='<%= @h_genes[snp_gene.gene_id].name %>'><%= @h_genes[snp_gene.gene_id].name %></td>
+       <td class=''><%= @h_snps[snp_gene.snp_id].identifier %></td>
+     </tr>
+     <% end %>
+  </tbody>
+</table>
+
+
+<% end %>

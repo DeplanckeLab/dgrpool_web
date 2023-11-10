@@ -1,0 +1,21 @@
+if ($("#ordered_plot").length > 0){
+var traces = []
+<% sex_list.each do |sex| %>
+var trace = {
+x: <%= raw ordered_index[params[:dgrp_order]].map{|i| dgrp_lines[i]}.to_json %>,
+y: <%= raw ordered_index[params[:dgrp_order]].map{|i| (h_mean_values[sex][dgrp_lines[i]]) ? h_mean_values[sex][dgrp_lines[i]] : 0 }.to_json %>,
+marker : {color: '<%= @h_sex_color[sex] %>'},
+name: '<%= sex %>',
+type: 'bar'
+};
+traces.push(trace)
+<% end %>
+
+var layout = {
+title : 'Ordered values by DGRP line',
+yaxis : {title : "<%= raw phenotype.description.gsub(/(.{30,50}) /, '\1<br>').gsub(/\n/, '<br>').gsub(/\"/, "\\\"") %> <%= (u = phenotype.unit) ? "[#{u.label_html}]" : "[No unit]" %>"}
+}
+
+
+Plotly.newPlot('ordered_plot', traces, layout, opt);
+}

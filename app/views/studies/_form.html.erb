@@ -1,0 +1,362 @@
+<%= form_with(model: study) do |form| %>
+    <% if study.errors.any? %>
+    <div style="color: red">
+      <h2><%= pluralize(study.errors.count, "error") %> prohibited this study from being saved:</h2>
+
+      <ul>
+        <% study.errors.each do |error| %>
+          <li><%= error.full_message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+<!--  <div class="form-group row">
+    <%= label_tag "DOI", nil,  {:class => 'col-sm-2 col-form-label'} %>
+    <div class="col-sm-10">
+      <%= form.text_field :doi, {:class => 'form-control'} %>
+    </div>
+  </div>
+  -->
+
+<%# @h_phenotypes.to_json %>
+  
+  <div class='card mb-2'>
+    <div class='card-body'>
+      <h3>Reference</h3>
+      <%= raw display_reference(study) %>
+      <%= label_tag "Title", nil,  {:class => 'fw-bold col-sm-2 col-form-label'} %>
+      <div class="col-sm-12">
+	<%= form.text_area :title, {:rows => 8, :class => 'form-control'} %>
+      </div>
+      <%= label_tag "Authors", nil,  {:class => 'fw-bold col-sm-2 col-form-label'} %>
+      <div class="col-sm-12">
+	<%= form.text_area :authors_json, {:rows => 8, :class => 'form-control'} %>
+      </div>
+    </div>
+  </div>
+  
+  <div class='card mb-2'>
+    <div class='card-body'>
+      <h3>Status</h3>
+      <% l = Status.all.map{|s| [s.label.capitalize, s.id]} %>
+      <%= form.select :status_id, l, {}, {:class => 'form-select'} %>
+    </div>
+  </div>
+
+  <div class='card mb-2'>
+    <div class='card-body'>
+      <h3>Comments from curator</h3>
+      <%= form.text_area :comment, {:rows => 8, :class => 'form-control'} %>
+    </div>
+  </div>
+  <div class='card mb-2'>
+    <div class='card-body'>
+      <h3>Description</h3>
+      <%= form.text_area :description, {:rows => 8, :class => 'form-control'} %>
+    </div>
+  </div>
+
+  <div class='card mb-2'>
+    <div class='card-body'>
+      <h3>Other external data available</h3>
+      <%= form.text_area :repository_identifiers, {:placeholder => "GEO or SRA identifiers with comments\nGSE12345: Optional comment about the link", :rows => 8, :class => 'form-control'} %>
+    </div>
+  </div>
+  
+  <div class='card mb-2'>
+    <div class='card-body'>
+      <h3>Categories</h3>
+      <% l = Category.all.map{|c| [c.name, c.id]}.sort %>
+      <% l.unshift ["Select a category to add it", ""] %>
+      <%= select_tag 'study_category', options_for_select(l), {:class => 'form-select'} %>
+      <div id='list_study_categories'>
+	<%= render :partial => 'categories', :locals => {:study => study} %>
+      </div>
+    </div>
+  </div>
+
+  <div class='card mb-2'>
+    <div class='card-body'>
+      <h3>Deactivate phenotypes</h3>
+      <% l = study.phenotypes.map{|p| [p.name, p.id]} %>
+      <% l.unshift(["Select a phenotype to deactivate", '']) %>
+      <%= select_tag 'disabled_phenotype_id', options_for_select(l), {:class => "form-select"} %>
+      <div id='disabled_phenotypes'>
+        <%= render :partial => 'disabled_phenotypes', :locals => {:study => study} %>
+      </div>
+      
+    </div>
+  </div>
+
+  <div class='card mb-2'>
+    <div class='card-body'>
+      <h3>Deactivate DGRP lines</h3>
+      <% l = DgrpLine.select("dgrp_lines.*, dgrp_line_studies.id as dgrp_line_study_id").joins(:dgrp_line_studies).where({:dgrp_line_studies => {:study_id => study.id}}).all.map{|e| [e.name, e.dgrp_line_study_id]} %>
+       <% l.unshift(["Select a DGRP line to deactivate", '']) %>
+      <%= select_tag 'disabled_dgrp_line_study_id', options_for_select(l), {:class => "form-select"} %>
+       <div id='disabled_dgrp_line_studies'>
+         <%= render :partial => 'disabled_dgrp_line_studies', :locals => {:study => study} %>
+      </div>
+    </div>
+  </div>
+
+  
+  <div class='card mb-2'>
+    <div class='card-body'>
+      <h3>Datasets</h3>
+
+      <% if  @h_pheno['summary'] or @h_pheno['raw'] %> 
+      <table class='topaligned'>
+	<thead>
+	  <th>Dataset</th>
+	  <th>Phenotypes</th>
+	  <th>DGRP lines</th>
+	  <th></th>
+	</thead>
+	<tbody>
+	  <% if @h_pheno['summary'] %>
+	  <% dgrp_lines = @h_pheno['summary'].keys %>
+	  <% phenotypes = @h_pheno['summary'].keys.map{|dgrp_line| @h_pheno['summary'][dgrp_line].keys}.flatten.uniq.sort - ['sex']%>
+	  <tr>
+	    <td>Summary dataset</td>
+	    <td><%= phenotypes.size %> phenotypes<br/>
+	      <%= raw phenotypes.select{|e| @h_phenotypes[[nil, e]]}.map{|e| display_phenotype(@h_phenotypes[[nil, e]])}.join(" ") %></td>
+	    <td><%= dgrp_lines.size %> DGRP lines<br/>
+	      <%= raw dgrp_lines.sort.map{|e| display_dgrp_line @h_dgrp_lines[e], @h_dgrp_statuses}.join(" ") %></td>
+	    <td>
+	      <%= link_to "Download", get_file_study_path(study, :name => 'summary.tsv'), {:class => 'btn btn-secondary btn-sm mb-2'} %>
+	       <button id='upd_dataset_btn-summary' type='button' class='btn btn-success btn-sm upd_dataset_btn mb-2'>
+                Update
+               </button>
+	       <button id='del_dataset_btn-summary' type='button' class='btn btn-danger btn-sm del_dataset_btn'>
+                 Delete
+               </button>
+	    </td>
+	  </tr>
+	  <% end %>
+	  <% if @h_pheno['raw'] %>
+	  <% @h_pheno['raw'].each_key do |dataset_id| %>
+	  <% if  @h_pheno['raw'][dataset_id] %>
+	  <tr>
+	    <% dgrp_lines =  @h_pheno['raw'][dataset_id].keys %>
+            <% phenotypes = @h_pheno['raw'][dataset_id].keys.map{|dgrp_line| @h_pheno['raw'][dataset_id][dgrp_line].keys}.flatten.uniq.sort - ['sex'] %>
+	    <td>Raw dataset #<%= dataset_id %></td>
+	    <td><%= phenotypes.size %> phenotypes<br/>
+	      <%= raw phenotypes.select{|e| @h_phenotypes[[dataset_id.to_i, e]]}.map{|e| display_phenotype(@h_phenotypes[[dataset_id.to_i, e]])}.join(" ") %></td>
+	    <td>
+	      <%= dgrp_lines.size %> DGRP lines<br/>
+	      <%= raw dgrp_lines.sort.map{|e| display_dgrp_line @h_dgrp_lines[e], @h_dgrp_statuses}.join(" ") %></td>
+            <td>
+	      <%= link_to "Download", get_file_study_path(study, :name => "raw_#{dataset_id}.tsv"), {:class => 'btn btn-secondary btn-sm mb-2'} %>
+	      <button id='upd_dataset_btn-raw_<%= dataset_id %>' type='button' class='btn btn-success btn-sm upd_dataset_btn mb-2'>
+		Update
+	      </button>
+	      <button id='del_dataset_btn-raw_<%= dataset_id %>' type='button' class='btn btn-danger btn-sm del_dataset_btn'>
+                Delete
+              </button>
+	    </td>
+	  </tr>
+	  <% end %>
+	  <% end %>
+	  <% end %>
+	</tbody>
+      </table>
+      <% end %>
+      <% if !@h_pheno['summary'] %>
+      <button id='upd_dataset_btn-summary_2' type='button' class='btn btn-success upd_dataset_btn'>
+        Create summary dataset
+      </button>
+      <% end %>
+      <div id='upd_dataset_btn-new' class='btn btn-success upd_dataset_btn'>
+	New raw dataset
+      </div>
+      <%# data_file = Pathname.new(APP_CONFIG[:data_dir]) + 'studies' + "#{study.id}.csv"  %>
+      <%# data = (File.exist? data_file) ? File.read(data_file) : '' %>
+      <%# text_area_tag 'pheno_data', data, {:rows => 10, :placeholder => 'Data in CSV format', :class => 'form-control'} %>
+    </div>
+  </div>
+
+  
+  <div>
+    <%= form.submit "Update study", {:class => 'btn btn-success', :data => {:turbo => false}} %>
+  </div>
+<% end %>
+
+<%= javascript_tag do %>
+
+document.addEventListener('DOMContentLoaded', function () {
+
+$(".del_dataset_btn").click(function(){
+
+ if (confirm("Are you sure to delete this dataset? WARNING!!! This will delete all related data.")){
+
+ var button = this
+  var dataset =  this.id.split("-")[1]
+  if(dataset == 'summary_2'){
+   dataset = 'summary'
+  }
+  var data = new FormData();
+  data.append("dataset", dataset)
+  $.ajax({
+    url: '<%= raw del_dataset_study_path(@study) %>',
+   data: data,
+   beforeSend: function(){
+    $(button).prop("disabled", true)
+   },
+    headers: {
+      "X-CSRF-Token": document.querySelector("meta[name='csrf-token']").content,
+    },
+    cache: false,
+    contentType: false,
+    processData: false,
+    method: 'POST',
+    type: 'POST', // For jQuery < 1.9
+    success: function(data){
+       window.location.href = "<%= edit_study_path(@study) %>"
+    }
+  });
+}
+})
+
+$(".upd_dataset_btn").click(function(){
+  var dataset =  this.id.split("-")[1]
+  if(dataset == 'summary_2'){
+   dataset = 'summary'
+  }
+  refresh('ontop_popup_container2', "<%= raw upload_form_study_path(study) %>?dataset=" + dataset, {loading:'fa-2x'})
+
+   var w = $(window).width()
+   var h = $(window).height()
+   $("#ontop_popup_container2").css({
+   height:h-240
+    })
+   $("#ontop_popup_window2").css({
+        left: 240,
+        width:w - 250,
+        height:h-210,
+        top: 200
+   }).show(100);
+
+})
+
+function upd_cats(){
+var p = [{name : "categories", value : $("#list_categories").val() }]
+refresh_post("list_study_categories", '<%= upd_cats_study_path(study) %>', p, "post", {loading:'fa-2x'} )
+}
+
+$("#list_study_categories").on("click", ".del_cat_btn", function(){
+ var id = this.id.split("_")[3]
+ var l = ($("#list_categories").val() != '') ? $("#list_categories").val().split(",") : []
+var l2 = []
+for (var i=0; i< l.length; i++){
+		 if (l[i] != id){
+		 l2.push(l[i])
+		 }
+		 }
+		  $("#list_categories").val(l2.join(","))
+                upd_cats()		 
+})
+
+function upd_disabled_phenotypes(){
+var p = [{name : "disabled_phenotypes", value : $("#list_disabled_phenotypes").val() }]
+refresh_post("disabled_phenotypes", '<%= upd_disabled_phenotypes_study_path(study) %>', p, "post", {loading:'fa-2x'} )
+}
+		 
+$("#disabled_phenotypes").on("click", ".del_disabled_phenotype_btn", function(){
+ var id = this.id.split("_")[4]
+console.log(id)
+		 var l = ($("#list_disabled_phenotypes").val() != '') ? $("#list_disabled_phenotypes").val().split(",") : []
+var l2 = []
+for (var i=0; i< l.length; i++){
+                 if (l[i] != id){
+                 l2.push(l[i])
+                 }
+                 }
+                  $("#list_disabled_phenotypes").val(l2.join(","))
+                upd_disabled_phenotypes()
+})
+
+$("#disabled_phenotype_id").change(function(){
+ var id = $(this).val()
+ var l = ($("#list_disabled_phenotypes").val() != '') ? $("#list_disabled_phenotypes").val().split(",") : []
+ var check = 0
+ console.log(l)
+ for(var i=0; i< l.length; i++){
+   if (l[i] == id){
+     check =1;
+     break;
+   }
+ }
+ if (check == 0){
+  l.push(id)
+ }
+
+                console.log(l)
+                $("#list_disabled_phenotypes").val(l.join(","))
+                upd_disabled_phenotypes()
+                })
+ 		 
+function upd_disabled_dgrp_line_studies(){
+var p = [{name : "disabled_dgrp_line_studies", value : $("#list_disabled_dgrp_line_studies").val() }]
+refresh_post("disabled_dgrp_line_studies", '<%= upd_disabled_dgrp_line_studies_study_path(study) %>', p, "post", {loading:'fa-2x'} )
+}
+
+$("#disabled_dgrp_line_studies").on("click", ".del_disabled_dgrp_line_study_btn", function(){
+ var id = this.id.split("_")[6]
+console.log(id)
+                 var l = ($("#list_disabled_dgrp_line_studies").val() != '') ? $("#list_disabled_dgrp_line_studies").val().split(",") : []
+var l2 = []
+for (var i=0; i< l.length; i++){
+                 if (l[i] != id){
+                 l2.push(l[i])
+                 }
+                 }
+                  $("#list_disabled_dgrp_line_studies").val(l2.join(","))
+                upd_disabled_dgrp_line_studies()
+})
+
+$("#disabled_dgrp_line_study_id").change(function(){
+ var id = $(this).val()
+ var l = ($("#list_disabled_dgrp_line_studies").val() != '') ? $("#list_disabled_dgrp_line_studies").val().split(",") : []
+ var check = 0
+ console.log(l)
+ for(var i=0; i< l.length; i++){
+   if (l[i] == id){
+     check =1;
+     break;
+   }
+ }
+ if (check == 0){
+  l.push(id)
+ }
+
+                console.log(l)
+                $("#list_disabled_dgrp_line_studies").val(l.join(","))
+                upd_disabled_dgrp_line_studies()
+                })
+		 
+		 
+$("#study_category").change(function(){
+var id = $(this).val()
+var l = ($("#list_categories").val() != '') ? $("#list_categories").val().split(",") : []
+
+var check = 0
+console.log(l)
+for(var i=0; i< l.length; i++){
+		if (l[i] == id){
+		check =1;
+		break;
+		}
+		}
+		if (check == 0){
+		l.push(id) 
+		}
+
+		console.log(l)
+		$("#list_categories").val(l.join(","))
+		upd_cats()		 
+		})
+		})
+		
+<% end %>

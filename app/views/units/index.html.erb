@@ -1,0 +1,50 @@
+<p style="color: green"><%= notice %></p>
+
+<div class='float-end'>
+  <%= link_to "New unit", new_unit_path, {:class => 'btn btn-primary'} %>
+</div>
+
+<h1>Units</h1>
+
+<!--<div id="units">
+  <% @units.each do |unit| %>
+    <%= render unit %>
+    <p>
+      <%= link_to "Show this unit", unit %>
+    </p>
+  <% end %>
+</div>
+
+<%= link_to "New unit", new_unit_path %>
+-->
+
+<table id='units'>
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Label plain</th>
+      <th>Label HTML</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <% @units.each do |e| %>
+    <tr>
+      <td><%= e.id %></td>
+      <td><%= e.label %></td>
+      <td><%= e.label_html %></td>
+      <td>
+        <%# link_to 'Show', summary_type_path(e), {:class => 'btn btn-primary'} %>
+        <%= link_to 'Edit', edit_unit_path(e), {:class => 'btn btn-success'} %></td>
+    </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<%= javascript_tag do %>
+
+document.addEventListener('DOMContentLoaded', function () {
+let table = new DataTable('#units', {pageLength:100})
+});
+
+<% end %>

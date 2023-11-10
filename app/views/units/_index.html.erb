@@ -1,0 +1,37 @@
+<table id='units' class='table-striped'> <!-- class="table" data-controller="datatable">-->
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Label</th>
+      <th>Label HTML</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <% @units.each do |u| %>
+    <tr>
+      <td><%= u.id %></td>
+      <td><%= u.label %></td>
+      <td><%= raw u.label_html %></td>
+      <td>
+        <div style='white-space:nowrap'>
+        <%= link_to "Show", unit_path(u), :class => 'btn btn-primary' %>
+        <% if curator? %>
+        <%= link_to "Edit", edit_unit_path(u), :class => 'btn btn-success' %>
+        <% end %>
+        </div>
+      </td>
+
+    </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<%= javascript_tag do %>
+
+
+  document.addEventListener('DOMContentLoaded', function () {
+   let table = new DataTable('#units', {pageLength:100})
+});
+
+<% end %>

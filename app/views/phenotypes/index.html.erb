@@ -1,0 +1,15 @@
+<p style="color: green"><%= notice %></p>
+
+<% if admin? %>
+<div class='float-end'><%= link_to "New study", new_study_path, :class => 'btn btn-primary' %></div>
+<% end %>
+
+<div class='alert alert-info'>
+  For robustness of the results we restrict by default the available phenotypes to curated studies but if you prefer to be able to access the whole dataset that was automatically extracted, you can change this behaviour below.<br/>
+  <%= check_box_tag 'only_integrated_studies', 1, ((params[:only_curated_studies]=='1') ? true : false) %> Only curated studies
+</div
+
+<h1>Phenotypes</h1>
+
+<%= render :partial => "index", :cached => true %>
+

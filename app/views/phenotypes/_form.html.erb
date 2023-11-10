@@ -1,0 +1,84 @@
+<%= form_with(model: phenotype) do |form| %>
+  <% if phenotype.errors.any? %>
+    <div style="color: red">
+      <h2><%= pluralize(phenotype.errors.count, "error") %> prohibited this phenotype from being saved:</h2>
+
+      <ul>
+        <% phenotype.errors.each do |error| %>
+          <li><%= error.full_message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <% if phenotype.obsolete == true %>
+  <div class='alert alert-warning'>WARNING: This phenotype was deactivated and thus is considered as obsolete.</div>
+  <% end %>
+
+   <div class="form-group row">
+    <%= label_tag "Name", nil,  {:class => 'col-sm-2 col-form-label'} %>
+    <div class="col-sm-10">
+      <%= form.text_field :name, {:maxlength => 20, :class => 'form-control'} %>
+      <div id="info-short_name" class="form-text text-danger">
+Phenotype name should be max. 20 characters and containing only letter, numbers and "_" character.
+      </div>
+      <!-- <div class="col-sm-2 col-form-label"><%= phenotype.name %></div> -->
+    </div>
+  </div>
+  
+   <div class="form-group row">
+    <%= label_tag "Description", nil,  {:class => 'col-sm-2 col-form-label'} %>
+    <div class="col-sm-10">
+      <%= form.text_area :description, {:rows => 10, :class => 'form-control'} %>
+    </div>
+   </div>
+
+   <div class="form-group row">
+     <%= label_tag "Type of values", nil,  {:class => 'col-sm-2 col-form-label'} %>
+     <div class="col-sm-10">
+       <% l = [['Continuous', 'true'], ['Discrete', 'false']] %>
+       <%= form.select :is_continuous, l, {}, {:class => 'form-select'} %>
+     </div>
+   </div>
+
+   <div class="form-group row">
+     <%= label_tag "Numerical / Text", nil,  {:class => 'col-sm-2 col-form-label'} %>
+     <div class="col-sm-10">
+       <% l = [['Numerical', 'true'], ['Text', 'false']] %>
+       <%= form.select :is_numeric, l, {}, {:class => 'form-select'} %>
+     </div>
+   </div>
+
+   
+   <div class="form-group row">
+     <%= label_tag "Summary type", nil,  {:class => 'col-sm-2 col-form-label'} %>
+     <div class="col-sm-10">
+       <% l = SummaryType.all.map{|s| [s.name, s.id]} %>
+       <% l.unshift(['Not applicable', nil]) %>
+       <%= form.select :summary_type_id, l, {}, {:class => 'form-select'} %>
+     </div>
+   </div>
+
+   <div class="form-group row">
+     <%= label_tag "Unit", nil,  {:class => 'col-sm-2 col-form-label'} %>
+     <div class="col-sm-10">
+       <% l = Unit.all.map{|s| [s.label, s.id]} %>
+       <% l.unshift(['No unit', nil]) %>
+       <%= form.select :unit_id, l, {}, {:class => 'form-select'} %>
+     </div>
+   </div>
+
+      <div class="form-group row">
+     <%= label_tag "Obsolete", nil,  {:class => 'col-sm-2 col-form-label'} %>
+     <div class="col-sm-10">
+       <%= form.check_box :obsolete %>
+     </div>
+   </div>
+  
+  <div>
+    <%= form.submit "Update",  {:data => {:turbo => 'false', :method => 'get'}, :class => 'btn btn-success'} %>
+  </div>
+
+  <%# render :partial => "phenotype_plots" %>
+
+  <% end %>

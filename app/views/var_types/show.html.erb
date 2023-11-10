@@ -1,0 +1,10 @@
+<p style="color: green"><%= notice %></p>
+
+<%= render @var_type %>
+
+<div>
+  <%= link_to "Edit this var type", edit_var_type_path(@var_type) %> |
+  <%= link_to "Back to var types", var_types_path %>
+
+  <%= button_to "Destroy this var type", @var_type, method: :delete %>
+</div>

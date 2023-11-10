@@ -1,0 +1,17 @@
+<%= form_with(model: snp_gene) do |form| %>
+  <% if snp_gene.errors.any? %>
+    <div style="color: red">
+      <h2><%= pluralize(snp_gene.errors.count, "error") %> prohibited this snp_gene from being saved:</h2>
+
+      <ul>
+        <% snp_gene.errors.each do |error| %>
+          <li><%= error.full_message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div>
+    <%= form.submit %>
+  </div>
+<% end %>

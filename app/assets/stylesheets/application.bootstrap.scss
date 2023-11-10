@@ -1,0 +1,91 @@
+$fa-font-path: "/webfonts";
+$lightgreen: #90EE90;
+//@import "@fortawesome/fontawesome-free/css/all";
+
+@import 'bootstrap/scss/bootstrap';
+@import 'bootstrap-icons/font/bootstrap-icons';
+@import "datatables.net-bs5/css/dataTables.bootstrap5";
+@import 'jquery-ui';
+//@import 'tooltipster.bundle.min';
+
+body {margin:60px}
+
+.tooltip {z-index:1000000}
+.pointer {cursor:pointer}
+.nowrap {white-space:nowrap}
+.nodec {text-decoration:none}
+.test_ui {background-color:white}
+.test_ui li {cursor:pointer}
+.badge-link {text-decoration:none; color:white}
+.ui-tooltip {background-color:white; border-radius:5px; z-index:1000000}
+.hidden {display:none}
+//.datatable_base {table-layout:fixed;width:100%}
+.bg-lightgreen {background-color:$lightgreen}
+
+.topaligned tr td {vertical-align:top}
+
+
+.ui-menu-item-wrapper{text-decoration: none; color:black;}
+.ui-widget.ui-widget-content {
+  border: 1px solid #c5c5c5;
+}
+.ui-state-default, .ui-widget-content .ui-state-default, .ui-widget-header .ui-state-default, .ui-button, html .ui-button.ui-state-disabled:hover, html .ui-button.ui-state-disabled:active {
+  border: 1px solid #c5c5c5;
+  background: #f6f6f6;
+  font-weight: normal;
+  color: #454545;
+}
+.ui-corner-all, .ui-corner-bottom, .ui-corner-right, .ui-corner-br {
+  border-bottom-right-radius: 3px;
+}
+.ui-corner-all, .ui-corner-bottom, .ui-corner-left, .ui-corner-bl {
+  border-bottom-left-radius: 3px;
+}
+.ui-corner-all, .ui-corner-top, .ui-corner-right, .ui-corner-tr {
+  border-top-right-radius: 3px;
+}
+.ui-corner-all, .ui-corner-top, .ui-corner-left, .ui-corner-tl {
+  border-top-left-radius: 3px;
+}
+
+#main_footer {position:fixed;bottom:0; width:100%; left:0; margin:0}
+//#navbarSupportedContent.show ul {background-color:white}
+
+#ontop_popup_window {
+    position: fixed;
+    z-index:1000000;
+    margin-right:15px;
+    padding:20px;
+    background: #ccc;
+    border: 1px solid;
+    border-radius: .5rem;
+    cursor:hand;
+    display:none
+}
+
+#ontop_popup_window2 {
+    position: fixed;
+    z-index:1000000;
+    margin-right:15px;
+    padding:20px;
+    background: #fff;
+    border: 1px solid;
+    border-radius: .5rem;
+    cursor:hand;
+    display:none
+}
+
+#ontop_popup_container2 {
+overflow:scroll
+}
+
+.phenotype_M {background-color:#AAEEEE !important}
+.phenotype_F {background-color:#fecbc0 !important}
+.phenotype_NA {background-color:#EEEECC !important}
+
+#corr_table {font-size:.7em}
+#phenotypes {font-size:.8em}
+#studies {font-size:.8em}
+#covariates tr th {border: 1px solid black; padding:.5em}
+#covariates tr td {border: 1px solid black; padding:.5em}
+.gwas_res_table {font-size: 12px}

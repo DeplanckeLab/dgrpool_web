@@ -1,0 +1,14 @@
+<p style="color: green"><%= notice %></p>
+
+<h1>Snps</h1>
+
+<div id="snps">
+  <% @snps.each do |snp| %>
+    <%= render snp %>
+    <p>
+      <%= link_to "Show this snp", snp %>
+    </p>
+  <% end %>
+</div>
+
+<%= link_to "New snp", new_snp_path %>

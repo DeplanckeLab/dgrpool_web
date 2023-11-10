@@ -1,0 +1,14 @@
+<p style="color: green"><%= notice %></p>
+
+<h1>Snp genes</h1>
+
+<div id="snp_genes">
+  <% @snp_genes.each do |snp_gene| %>
+    <%= render snp_gene %>
+    <p>
+      <%= link_to "Show this snp gene", snp_gene %>
+    </p>
+  <% end %>
+</div>
+
+<%= link_to "New snp gene", new_snp_gene_path %>

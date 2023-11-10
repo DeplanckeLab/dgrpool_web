@@ -1,0 +1,112 @@
+<%# raw @h_traces.to_json %>
+<%# raw @dgrps.map{|e| e.id} %>
+<%# @dgrps.size %>
+<%# @geno_table.to_json %>
+<%# raw @h_res.to_json %>
+<%# raw @h_dgrp_lines.to_json %>
+
+<% @h_traces.each_key do |k| %>
+<div id='gwas_boxplot_<%= k %>' width='100%'></div>
+<% end %>
+
+<%= javascript_tag do %>
+
+$( document ).ready(function(){
+  var opt = {
+    modeBarButtonsToRemove: ['toImage', 'sendDataToCloud'],
+    modeBarButtonsToAdd: [
+      {
+        name: 'Save PNG',
+        icon: Plotly.Icons.camera,
+        click: function(gd) {
+          Plotly.downloadImage(gd, {format: 'png', height: 600, width: 600});
+        }
+      },
+      {
+        name: 'Save SVG',
+        icon: Plotly.Icons.camera,
+        click: function(gd) {
+          Plotly.downloadImage(gd, {format: 'svg', height: 600, width: 600});
+        }
+      },
+         {
+        name: 'Save HTML',
+        icon: Plotly.Icons.camera,
+        click: function(gd) {
+	      var layout = JSON.stringify(gd.layout);
+          var data = JSON.stringify(gd.data);
+          
+         var htmlContent =
+            '<html>' +
+            '<head>' +
+            '<script src="https://cdn.plot.ly/plotly-latest.min.js"></' +'script>' +
+            '</head>' +
+            '<body>' +
+            '<div id="plotly-div"></div>' +
+            '<script>' +
+            'var layout = ' + layout + ';' +
+            'var data = ' + data + ';' +
+            'Plotly.newPlot("plotly-div", data, layout);' +
+            '</' + 'script>' +
+            '</body>' +
+            '</html>';
+
+          var blob = new Blob([htmlContent], { type: 'text/html' });
+          var link = document.createElement('a');
+          link.href = window.URL.createObjectURL(blob);
+          link.download = 'gwas_boxplot.html';
+          link.click();
+          }
+		} ,
+      {
+        name: 'Export data to TSV',
+        icon: Plotly.Icons.camera,
+        click: function(gd) {
+          var data = gd.data;
+		  var header = 'DGRP\tPhenotype\tVariant';
+
+		  var rows = [];
+		  var cnt = 0;
+		  for (var i = 0; i < gd.data.length; i++) {
+			for (var j = 0; j < gd.data[i].y.length; j++) {
+				rows[cnt] = gd.data[i].text[j] + '\t' + gd.data[i].y[j] + '\t' + gd.data[i].name;
+				cnt++;
+			}
+		  }
+		  		  
+		  var tsvContent = header + '\n' + rows.join('\n');
+		  
+          var blob = new Blob([tsvContent], { type: 'text/tab-separated-values' });
+          var link = document.createElement('a');
+          link.href = window.URL.createObjectURL(blob);
+          link.download = 'gwas_boxplot_data.tsv';
+          link.click();
+        }
+      }
+    ]
+  }
+
+
+<% @h_traces.each_key do |k| %>
+var traces = <%= raw @h_traces[k].to_json %>
+var w = $("#ontop_popup_window2").width()
+var h = 500; // $("#ontop_popup_window2").height()-100
+console.log(h)
+console.log("#gwas_boxplot_<%= k %>: " + w)
+var layout = {
+title : {
+ text : 'Distribution of phenotype <%= @phenotype_name %>, sex=<%= k %><br>for DGRP lines having or not <%= @snp.identifier %>',
+ font: {size : 13 }},
+yaxis : {title : "<%= @phenotype_name %> <%= (@phenotype and u = @phenotype.unit) ? "[#{u.label_html}]" : '' %>"},
+width : h,
+height : h+100,
+autosize : false
+}
+
+Plotly.newPlot('gwas_boxplot_<%= k %>', traces, layout, opt);
+
+<% end %>
+
+});
+
+<% end %>

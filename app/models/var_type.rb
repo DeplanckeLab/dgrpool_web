@@ -1,0 +1,2 @@
+class VarType < ApplicationRecord
+end

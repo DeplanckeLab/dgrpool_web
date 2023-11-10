@@ -1,0 +1,10 @@
+<p style="color: green"><%= notice %></p>
+
+<%= render @dgrp_status %>
+
+<div>
+  <%= link_to "Edit this dgrp status", edit_dgrp_status_path(@dgrp_status) %> |
+  <%= link_to "Back to dgrp statuses", dgrp_statuses_path %>
+
+  <%= button_to "Destroy this dgrp status", @dgrp_status, method: :delete %>
+</div>

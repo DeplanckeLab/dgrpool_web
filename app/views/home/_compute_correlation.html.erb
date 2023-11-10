@@ -1,0 +1,236 @@
+<%# raw @all_data.to_json %>
+<% if @all_data.size == 0 %>
+<%# @sex_comparisons.to_json %>
+<%# @distinct_sex.to_json %>
+
+<i>No data found</i>
+<% else %>
+
+<!--<h3>Correlation results</h3>-->
+<%# @sex_comparisons.to_json %>
+
+<%# @common_studies.map{|e| e.id}.to_json %>
+<%# @phenotypes.to_json %>
+<%# @dgrp_line_ids.to_json %>
+
+<!--<%# @common_studies.size %> studies  -->
+
+<div class='card mt-2'>
+  <div class='card-body'>
+    <h3>General information</h3>
+    <% @phenotypes.each do |p| %>
+    Number of DGRP lines in <%= p.name %>: <%= p.nber_dgrp_lines %><br/>
+    <% end %>
+    Number of DGRP lines in common: <%= @common_dgrp_lines.size %>
+  </div>
+</div>
+
+<div class='card mt-2'>
+  <div class='card-body'>
+     <h3>Correlation plots</h3>
+     <% @all_data.each_index do |i| %>  
+     <div class='card float-begin col-md-6'>
+       <div class='card-header'>
+	 <div class='float-end'>
+           <%= raw download_buttons(i) %>
+         </div>
+
+<!--	 <button id='save-png-btn_<%= i %>' type='button' class='btn btn-sm btn-primary save-png-btn' style='float:right'>Download PNG</button>-->
+       </div>
+       <div class='card-body'>
+	 <div id='plot_<%= i %>'></div>
+       </div>
+     </div>
+<% end %>
+<div class='clear'></div>
+  </div>
+  </div>
+<% if admin? %>
+<%# @h_data["M"][:x] %>
+<%# @h_data["M"][:y].size %>
+<%# @h_data["M"][:text] %>
+<%# raw @h_data.to_json %>
+<% end %>
+<div class='card mt-2'>
+  <div class='card-body'>
+    <h3>All against all correlations</h3>
+    <%= render :partial => 'correlation_table', :locals => {:h_corr => @h_corr} %>
+  </div>
+</div>
+<%= javascript_tag do %>
+
+//console.log('titi')
+
+$(".download-btn").click(function(){
+var id = this.id.split("_")[1]
+var h_data = all_data[id]
+console.log(h_data)
+var filename = "correlation_plot_<%= @phenotypes[0].id %>_" + sex_comparisons[id][0] + "_<%= @phenotypes[1].id %>_" + sex_comparisons[id][1] + ".txt";
+//console.log(filename)
+var text = ["DGRP", "<%= @phenotypes[0].name %>", "<%= @phenotypes[1].name %>"].join("\t") + "\n";
+//console.log( h_data[1]["x"].length)
+if (h_data[0]){
+//console.log(h_data[1])
+for (var i=0; i < h_data[1]["x"].length; i++){
+ text += [ h_data[1]["text"][i], h_data[1]["x"][i], h_data[1]["y"][i]].join("\t") + "\n"
+		  }
+		  }
+//console.log(text)
+var blob = new Blob([text], {type:'text/plain'});
+var link = document.createElement("a");
+link.download = filename;
+link.innerHTML = "Download File";
+link.href = window.URL.createObjectURL(blob);
+link.style = "color:white"
+document.body.appendChild(link);
+ link.click();
+        setTimeout(() => {
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(link.href);
+        }, 100);
+ })
+
+
+  $(".save-svg-btn").click(function(){
+                                      //console.log(this)
+                                     // console.log($(this).attr("id"));
+                                    var id = this.id.split("_")[1]
+ $("#plot_" + id + " .modebar-btn").each(function(){
+  let e = $( this ).attr("data-title")
+  if (e == 'Save SVG'){
+   this.click();
+  }
+  })                                    
+  
+ })
+
+    $(".save-png-btn").click(function(){
+                                      //console.log(this)
+                                     // console.log($(this).attr("id"));
+                                    var id = this.id.split("_")[1]
+ $("#plot_" + id + " .modebar-btn").each(function(){
+  let e = $( this ).attr("data-title")
+  if (e == 'Save PNG'){
+   this.click();
+  }
+  })
+
+ })
+
+
+var h_sex_color = <%= raw @h_sex_color.to_json %>
+var sex_comparisons = <%= raw @sex_comparisons.to_json %>
+var all_data = <%= raw @all_data.to_json %>
+
+for (var j=0; j < all_data.length; j++){
+var traces = all_data[j]
+//		  var sex = Object.keys(h_data)
+		//  var traces = 
+//for (var i=0; i<data_traces.length; i++){
+//var h_data = data_traces[i]			    
+/*var trace = {
+  x: h_data['x'],
+  y: h_data['y'],
+  mode: 'markers',
+  type: 'scatter',
+//  name: "sex = " + sex_comparisons[j][0] + " vs. " +  sex_comparisons[j][1],
+  text: h_data['text'],
+  marker: { size: 12, color: ((sex_comparisons[j][0] == sex_comparisons[j][1]) ? h_sex_color[sex_comparisons[j][0]] : 'grey') }
+				    };
+				    */
+// traces.push(trace)
+				      //}
+
+var updatemenus=[
+    {
+				      buttons: [
+				      {
+                args: ['xaxis.type', 'linear'],
+                label: 'Linear x-axis',
+                method: 'relayout'
+                                      },
+                                      {
+        args: ['xaxis.type', 'log'],
+                label: 'Log x-axis',
+                method: 'relayout'
+
+                                      }
+				      
+				      ],
+        direction: 'down',
+        pad: {'r': 10, 't': 10},
+        showactive: true,
+        type: 'dropdown',
+        x: -0.2,
+        xanchor: 'left',
+        y: 1.3,
+        yanchor: 'top'
+				      },
+				      {buttons:[
+
+  {
+                args: ['yaxis.type', 'linear'],
+                label: 'Linear y-axis',
+                method: 'relayout'
+                                      },
+                                      {
+        args: ['yaxis.type', 'log'],
+                label: 'Log y-axis',
+                method: 'relayout'
+
+                                      }
+
+				      ],
+				       direction: 'down',
+        pad: {'r': 10, 't': 10},
+        showactive: true,
+        type: 'dropdown',
+        x: 0.1,
+        xanchor: 'left',
+        y: 1.3,
+				      yanchor: 'top'
+				      }
+				      ]
+				      
+				      var layout = {
+				      updatemenus: updatemenus,
+   xaxis : {title : (($("#data_source1_container").hasClass("hidden")) ? '<%= raw @phenotypes[0].name %>' : ($("#data_source1").val()) + "(<%= raw @phenotypes[0].name %>)") + " [" + sex_comparisons[j][0] + "]" + "<br>(<%= raw display_reference_short(@phenotypes[0].study) %>)"},
+   yaxis : {title : (($("#data_source2_container").hasClass("hidden")) ? '<%= raw @phenotypes[1].name %>' : ($("#data_source2").val()) + "(<%= raw @phenotypes[1].name %>)") + " [" + sex_comparisons[j][1] + "]" + "<br>(<%= raw display_reference_short(@phenotypes[1].study) %>)"},
+			  //  title:'Correlation plot',
+			    width:600,
+	      height:600,
+				      showlegend: true,
+				      margin:{},
+	legend: {"orientation": "h", "y" : 1.15}
+};
+
+
+var opt = {
+  modeBarButtonsToRemove: ['toImage', 'sendDataToCloud'],
+  modeBarButtonsToAdd: [
+  {
+    name: 'Save PNG',
+    icon: Plotly.Icons.camera,
+    click: function(gd) {
+      Plotly.downloadImage(gd, {format: 'png', height:600,width:600})
+    }
+  },
+ {
+    name: 'Save SVG',
+    icon: Plotly.Icons.camera,
+    click: function(gd) {
+      Plotly.downloadImage(gd, {format: 'svg', height:600,width:600})
+    }
+  }]
+}
+				      
+Plotly.newPlot('plot_' + j, traces, layout, opt);
+
+
+				      }
+				      
+				      
+				      
+
+<% end %>
+<% end %>

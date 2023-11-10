@@ -1,0 +1,2 @@
+module FigureTypesHelper
+end

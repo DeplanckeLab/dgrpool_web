@@ -1,0 +1,165 @@
+
+var h_snps = <%= raw @h_snps.to_json %> 
+
+$(".gwas_res_table").on("click", '.binding_site_annot_btn', function(){
+var t = this.id.split("-")
+var w = $(window).width()
+var h = $(window).height()
+var ww = 800
+var snp_id = t[1]
+var var_type = t[2]
+var feat_name = t[3]
+if (h_snps[snp_id]){
+
+var list_bsa = h_snps[snp_id]['binding_site_annot'][var_type][feat_name]
+
+$("#ontop_popup_container2").css({
+height:h-240
+})
+$("#ontop_popup_window2").css({
+left: 240,
+width:ww,
+height:h-110,
+top: 100
+}).show(0)
+
+$("#ontop_popup_container2").css({
+height:h-240
+})
+$("#ontop_popup_window2").css({
+left: 240,
+width:ww,
+height:h-110,
+top: 100
+}).show(0)
+
+var bsa_table = $('<table width="750">');
+  for(i=0; i<list_bsa.length; i++){
+                              var row = $('<tr>').addClass('') //.text('<td>' + genes[i] + '</td>');
+                              var cell = $('<td>')
+                              var identifier = list_bsa[i]
+                              var link = $('<a class="" target="_blank" href="http://flybase.org/reports/' + identifier + '.html">'+ identifier +'</a>')
+			      
+                              cell.append(link)
+                              cell.append($('<span>').text(" "))
+			      
+                              
+                              row.append(cell)
+			      
+			      bsa_table.append(row);
+			      }
+			      
+			      $("#ontop_popup_container2").html(bsa_table)
+			      }else{
+			      console.log("ERROR: snp_id:" + snp_id + " not found")
+                              }
+			      
+			      
+			      })
+			      
+			      
+			      $(".gwas_res_table").on("click", '.transcript_annot_btn', function(){
+			      var t = this.id.split("-")
+			      var w = $(window).width()
+			      var h = $(window).height()
+			      var ww = 800 
+			      var snp_id = t[1]
+			      var var_type = t[2]
+			      if (h_snps[snp_id]){
+			      var h_ta = h_snps[snp_id]['transcript_annot'][var_type]
+			      var genes = Object.keys(h_ta)
+			      
+			      $("#ontop_popup_container2").css({
+			      height:h-240
+			      })
+			      $("#ontop_popup_window2").css({
+			      left: 240,
+			      width:ww,
+			      height:h-110,
+			      top: 100
+			      }).show(0)
+			      
+			      var ta_table = $('<table width="750">');
+			      for(i=0; i<genes.length; i++){
+						       var row = $('<tr>').addClass('') 
+						       var cell = $('<td>').text(genes[i])
+				   row.append(cell)
+				   var cell = $('<td>')
+				   for(j=0; j<h_ta[genes[i]].length; j++){
+                             var identifier = h_ta[genes[i]][j]
+			      var link = $('<a class="" target="_blank" href="http://flybase.org/reports/' + identifier + '.html">'+ identifier +'</a>') 
+								     cell.append(link)
+								     
+													  cell.append($('<span>').text(" "))
+													 
+								     }
+								     
+				  row.append(cell)
+
+    ta_table.append(row);
+   }
+
+        $("#ontop_popup_container2").html(ta_table)
+
+//        $("#ontop_popup_window2").show(0);
+								     }else{
+console.log("ERROR: snp_id:" + snp_id + " not found")
+								     }
+	})
+
+								     
+	$(".gwas_res_table").on("click", '.phewas-link', function(){
+        var t = this.id.split("-")
+        var snp_id = t[2]
+        var sex = t[3]
+        refresh('ontop_popup_container2', "<%= raw snps_path() %>/" + snp_id + "/get_phewas", {loading:'fa-2x'})
+
+        var w = $(window).width()
+        var h = $(window).height()
+        $("#ontop_popup_container2").css({
+        height:h-240
+        })
+        $("#ontop_popup_window2").css({
+        left: 240,
+        width:800,
+        height:h-110,
+        top: 100
+        }).show(0);
+								     
+        })
+<% if @phenotype or @md5 %>
+								     
+	$(".gwas_res_table").on("click", '.boxplot-link', function(){
+	var t = this.id.split("-")
+	var snp_id = t[2]
+	var sex = t[3]
+<% if @phenotype %>
+refresh('ontop_popup_container2', "<%= raw get_gwas_boxplot_phenotypes_path() %>?phenotype_id=<%= @phenotype.id %>&sex=" + sex + "&snp_id=" + snp_id, {loading:'fa-2x'})
+<% elsif @md5 %>
+refresh('ontop_popup_container2', "<%= raw get_gwas_boxplot_phenotypes_path() %>?md5=<%= @md5 %>&phenoname=<%= params[:phenoname] %>&sex=" + sex + "&snp_id=" + snp_id, {loading:'fa-2x'})
+<% end %>
+	var w = $(window).width()
+	var h = $(window).height()
+	$("#ontop_popup_container2").css({
+	height:h-240
+	})
+	$("#ontop_popup_window2").css({
+        left: 240,
+        width:600,
+        height:h-110,
+        top: 100
+	}).show(0);
+
+	
+	})
+
+<% end %>
+
+//	$( document ).tooltip();
+<% if !@phenotype %> 
+initTooltips()
+<% end %>
+
+<%# if @phenotype %>				   
+//	});
+	<%# end %>

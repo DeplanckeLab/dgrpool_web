@@ -1,0 +1,8 @@
+<% h_dgrp_lines = {} %>
+<% dp =  study.dgrp_line_studies.select{|p| p.obsolete == true} %>
+<% DgrpLine.where(:id => dp.map{|e| e.dgrp_line_id}).all.map{|e| h_dgrp_lines[e.id] =e} %>
+<% dp.each do |p| %>
+<span class='badge bg-secondary'><%= raw h_dgrp_lines[p.dgrp_line_id].name %> <span id='del_disabled_dgrp_line_study_btn_<%= p.id.to_s %>' class='text-danger del_disabled_dgrp_line_study_btn pointer'><i class='fas fa-times'></i></span></span>
+<% end %>
+<%= hidden_field_tag 'list_disabled_dgrp_line_studies', dp.map{|p| p.id}.join(",") %>
+

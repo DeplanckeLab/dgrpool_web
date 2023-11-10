@@ -1,0 +1,7 @@
+<% cats = study.categories %>
+<% if cats.size == 0 %>
+<i>None</i>
+<% else %>
+<%= raw cats.map{|cat| "<span class='badge bg-info'>" + cat.name + " <span id='del_cat_btn_" + cat.id.to_s + "' class='text-danger del_cat_btn pointer'><i class='fas fa-times'></i></span></span>"}.join(" ") %>
+<% end %>
+<%= hidden_field_tag 'list_categories', cats.map{|c| c.id}.join(",") %>

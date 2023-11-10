@@ -1,0 +1,10 @@
+<p style="color: green"><%= notice %></p>
+
+<%= render @snp %>
+
+<div>
+  <%= link_to "Edit this snp", edit_snp_path(@snp) %> |
+  <%= link_to "Back to snps", snps_path %>
+
+  <%= button_to "Destroy this snp", @snp, method: :delete %>
+</div>

@@ -1,0 +1,29 @@
+<p style="color: green"><%= notice %></p>
+
+
+<h1><%= @category.name %> studies </h1>
+
+<p style="margin-bottom:30px; margin-top:20px;"><%= @category.description %></p>
+
+<% studies = @category.studies %>
+<h2 style="font-size:20px"><%= studies.size %> studies contained in the category : </h2>
+
+<%= render :partial => 'studies/index', :locals => {:studies => studies, :show_phenotypes => false} %>
+
+<div>
+  <% if curator? %>
+  <%= link_to "Edit", edit_category_path(@category), {:class => 'btn btn-success'} %>
+  <%= link_to "Back to categories", categories_path, {:class => 'btn btn-secondary'} %>
+  <% end %>
+  <% if admin? %>
+  <%= link_to "Destroy", @category, {:method => :delete, :class => 'btn btn-danger'} %>
+  <% end %>
+</div>
+
+<%= javascript_tag do %>
+
+  document.addEventListener('DOMContentLoaded', function () {
+    let table = new DataTable('#studies')
+  });
+
+<% end %>

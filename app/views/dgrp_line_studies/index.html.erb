@@ -1,0 +1,14 @@
+<p style="color: green"><%= notice %></p>
+
+<h1>Dgrp line studies</h1>
+
+<div id="dgrp_line_studies">
+  <% @dgrp_line_studies.each do |dgrp_line_study| %>
+    <%= render dgrp_line_study %>
+    <p>
+      <%= link_to "Show this dgrp line study", dgrp_line_study %>
+    </p>
+  <% end %>
+</div>
+
+<%= link_to "New dgrp line study", new_dgrp_line_study_path %>

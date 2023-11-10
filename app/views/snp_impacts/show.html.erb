@@ -1,0 +1,10 @@
+<p style="color: green"><%= notice %></p>
+
+<%= render @snp_impact %>
+
+<div>
+  <%= link_to "Edit this snp impact", edit_snp_impact_path(@snp_impact) %> |
+  <%= link_to "Back to snp impacts", snp_impacts_path %>
+
+  <%= button_to "Destroy this snp impact", @snp_impact, method: :delete %>
+</div>

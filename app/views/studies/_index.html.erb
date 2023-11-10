@@ -1,0 +1,58 @@
+<%# h_cats_by_study.to_json %>
+
+<table id='studies' class='table-striped'> <!-- class="table" data-controller="datatable">-->
+  <thead>
+    <tr>
+      <% if curator? %>
+      <th>ID</th>
+      <% end %>
+      <th>Reference</th>
+      <% if show_phenotypes %>
+       <th>Phenotypes</th>
+      <% end %>
+      <% if @h_cats_by_study %>
+      <th>Categories</th>
+      <% end %>      
+      <th>Status</th>
+      <th>Publication date</th>
+      <th>Submitted by</th>
+      <% if curator? %>
+      <th>Curated by</th>
+      <% end %>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <% studies.each do |s| %>
+    <tr>
+      <% if curator? %>
+      <td><%= s.id %></td>
+      <% end %>
+      <td><%= raw display_reference(s) %></td>
+       <% if show_phenotypes %>
+       <td><%= raw s.phenotypes.sort{|a, b| a.name <=> b.name}.map{|p| display_phenotype(p)}.join(" ") %></td>
+      <% end %>
+      <% if @h_cats_by_study %>
+      <td><%= raw display_categories(s, @h_cats_by_study, @h_cats) %></td>
+      <% end %>
+      <td><%= raw display_status(s, @h_statuses) %></td>
+      <td><%= raw display_date(s.published_at) %></td>
+      <td><%= raw (s.submitter_id) ? display_user(@h_users[s.submitter_id]) : '<i>Anonymous</i>' %></td>
+      <% if curator? %>
+      <td><%= raw (s.validator_id) ? display_user(@h_users[s.validator_id]) : '<i>Anonymous</i>' %></td>
+      <% end %>
+      <td>
+	<div class='nowrap'>
+	<%= link_to "Show", study_path(s), {:data => {:turbo => 'false', :method => 'get'}, :class =>'btn btn-sm btn-primary'} %>
+	<% if curator? %>
+	<%= link_to "Edit", edit_study_path(s), {:data => {:turbo => 'false', :method => 'get'}, :class =>'btn btn-sm btn-success'} %>
+	<% end %>
+	<% if admin? %>
+	<%# link_to "Delete", study_path(s), {:data => { "turbo-method" => :delete, :method => :delete}, :class => 'btn btn-sm btn-danger'} %>
+	<% end %>
+	</div>
+      </td>
+    </tr>
+    <% end %>
+  </tbody>
+</table>

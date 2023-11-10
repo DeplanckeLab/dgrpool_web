@@ -1,0 +1,266 @@
+<% study_dataset_types = @h_stats['sex'].keys %>
+
+<!--<div class='mb-4'>
+  <% if admin? %>
+  <div class='float-end'>
+    <%= link_to "Update export file for GWAS analysis", upd_export_home_index_path(), {:class => 'btn btn-primary'} %>
+  </div>
+  <% end %>
+</div>
+<br/><br/>
+-->
+
+<div class='row'>
+  <div class="col-md-6 mb-2">
+    <div class="card h-100">
+      <div class='card-body'>
+	<h3>DGRPool</h3>
+	A database on studies about DGRP lines and phenotypes
+      </div>
+    </div>
+  </div>
+  <div class="col-md-6 mb-2">
+    <div class="card h-100">
+      <div class='card-body'>
+	Cannot find a paper in DGRPool?	
+	<div class="form-group row">
+	  <%= label_tag "Submit a new paper", nil,  {:class => 'col-sm-5 col-form-label'} %>
+	  <div class="col-sm-7">
+	    <div class="btn-group" role="group" aria-label="Basic example">
+	      <%= text_field_tag :doi, '', {:placeholder => 'DOI (e.g. 10.1038/ncomms8829)', :class => 'form-control'} %>
+	      <button id='submit_paper_btn' type="button" class="btn btn-primary">Submit</button><br/>
+	    </div>
+	  </div>
+	</div>
+	<div id='result_submit_paper'></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class='row'>
+  
+  <div class="col-md-6 mb-2">
+    <div class="card h-100">
+      <div class='card-body'>
+        <h3>Stats</h3>
+	<ul>
+	  <li><%= @h_stats["dgrp_lines"]["nber"] %> DGRP lines</li>
+	  <li><%= @h_stats["all_studies"]["nber_all"] %> studies</li>
+	  <ul>
+	    <li><%= @h_stats["all_studies"]["nber_submitted"] %> <%= @h_statuses['submitted'].label.downcase %> studies</li>
+	    <li><%= @h_stats["all_studies"]["nber_validated"] %> studies <%= @h_statuses['accepted'].label.downcase %></li>
+	    <li><%= @h_stats["all_studies"]["nber_integrated"] %> <%= @h_statuses['integrated'].label.downcase %> studies</li>
+	  </ul>
+	  
+	  <li><%= @h_stats["phenotypes"]["nber_validated"] %> phenotypes</li>
+	  
+	  <li><%= @h_stats["categories"]["nber"] %> phenotype categories</li>
+	</ul>
+	
+	<div class="row">
+	  <div class="column">
+	    <b>All studies</b>
+	    <ul>
+	      <li><%= @h_stats["all_studies"]["nber_phenotypes_with_data"] %> phenotypes with associated data</li>
+	      <ul>
+		<li><%=  @h_stats["all_studies"]["nber_phenotypes_male"] %> phenotypes with male data</li>
+		<li><%= @h_stats["all_studies"]["nber_phenotypes_female"] %> phenotypes with female data</li>
+		<li><%= @h_stats["all_studies"]["nber_phenotypes_na"] %> phenotypes with undefined sex data</li>
+	      </ul>
+	    </ul>
+	  </div>
+	  <div class="column">
+	    <b><%= @h_statuses['integrated'].label.capitalize %> studies</b>
+	     <ul>
+              <li><%= @h_stats["integrated_studies"]["nber_phenotypes_with_data"] %> phenotypes with associated data</li>
+              <ul>
+                <li><%=  @h_stats["integrated_studies"]["nber_phenotypes_male"] %> phenotypes with male data</li>
+                <li><%= @h_stats["integrated_studies"]["nber_phenotypes_female"] %> phenotypes with female data</li>
+                <li><%= @h_stats["integrated_studies"]["nber_phenotypes_na"] %> phenotypes with undefined sex data</li>
+              </ul>
+            </ul>
+	  </div>
+	</div> 
+	
+<!--	<table>
+	  <thead>
+	    <tr>
+	      <th>All studies</th>
+	      <th>Integrated studies</th>
+	    </tr>
+	  </thead>
+	  <tbody>
+	    <tr>
+	      <td></td>
+	      <td></td>
+	    </tr>
+	    <tr>
+              <td></td>
+              <td></td>
+            </tr>
+	    <tr>
+              <td></td>
+              <td></td>
+            </tr>
+
+	  </tbody>
+	  </table>
+	-->
+	<!--<table>
+	  <thead>
+	    <tr>
+	      <td width='250px'></td>
+	      <td></td>
+	      </tr>
+	  </thead>
+	  <tbody>
+	    
+	    <tr>
+              <td>Number of DGRP lines</td>
+              <td><%# dgrp_lines.count %></td>
+            </tr>
+	    <tr>
+	      <td>Number of integrated studies</td>
+	      <td><%# Study.where(:status_id => 4).count %></td>
+	    </tr>
+	  </tbody>
+	</table> -->
+      </div>
+    </div>
+  </div>
+  <div class="col-md-6">
+    <div class="card mb-2" style='height:30%'>
+      <div class='card-body'>
+	<h3>How to cite this work</h3>
+        <p>DGRPool: A web tool leveraging harmonized Drosophila Genetic Reference Panel phenotyping data for the study of complex traits. <i>Gardeux et al.</i> <%= link_to "BioRXiv", "https://www.biorxiv.org/content/10.1101/2023.06.01.543194v1" %></p> 
+      </div>
+    </div>
+        <div class="card mb-2" style='height:30%'>
+      <div class='card-body'>
+        <h3>Contributions</h3>
+        We are looking for volunteers to curate and maintain this resource. If you are interested in participating to this effort, please signup and <a href="mailto:bioinfo.epfl@gmail.com?subject=Request to contribute to DGRPool">contact us</a> with your login email.
+      </div>
+    </div>
+
+    <div class="card mb-2" style='height:35.5%'>
+      <div class='card-body'>
+        <h3>Downloads</h3>
+	<% dummy_study = Study.first %>
+        <%= link_to 'DGRP lines (TSV)', get_file_study_path(dummy_study, :namespace => 'downloads', :name => 'dgrp_lines.tsv'), {:class => 'btn btn-sm btn-secondary'} %>
+	<%= link_to 'Phenotypes (TSV)', get_file_study_path(dummy_study, :namespace => 'downloads', :name => 'phenotypes.tsv'), {:class => 'btn btn-sm btn-secondary'} %>
+	<%= link_to 'Studies (TSV)', get_file_study_path(dummy_study, :namespace => 'downloads', :name => 'studies.tsv'), {:class => 'btn btn-sm btn-secondary'} %>
+	<%= link_to "All phenotype mean (numerical) data by sex (TSV)", get_file_study_path(dummy_study, :namespace => "downloads", :name => 'all_phenotype_mean_data.tsv'), {:class => 'btn btn-sm btn-secondary'} %>
+	
+      </div>
+    </div>
+  </div>
+</div>
+<div class='row'>
+  <div class="col-md-7 mb-2">
+    <div class="card h-100">
+      <div class='card-body'>
+	<div id='category_plot'></div>
+    </div></div>
+  </div>
+  <div class="col-md-5 mb-2">
+    <div class="card h-100">
+      <div class='card-body'>
+	<div class='row'>
+	  <% study_dataset_types.each do |k| %>
+	  <div id='sex_plot_<%= k %>_container' class='col'>
+	    <div id='sex_plot_<%= k %>'></div>
+	  </div>
+	  <% end %>
+	</div>
+	<div>
+	  <i>
+	    <!--For each study, we count the number of DGRP lines that are represented for each sex at least once.-->
+	    For each study, we count the unique (DGRP, sex) pairs
+	  </i>
+	</div>
+      </div>
+    </div>
+  </div>
+</div>
+<%= javascript_tag do %>
+
+document.addEventListener('DOMContentLoaded', function () {
+
+  var opt = {
+  modeBarButtonsToRemove: ['toImage', 'sendDataToCloud'],
+  modeBarButtonsToAdd: [
+  {
+    name: 'Save PNG',
+    icon: Plotly.Icons.camera,
+    click: function(gd) {
+      Plotly.downloadImage(gd, {format: 'png', height:600,width:600})
+    }
+  },
+ {
+    name: 'Save SVG',
+    icon: Plotly.Icons.camera,
+    click: function(gd) {
+      Plotly.downloadImage(gd, {format: 'svg', height:600,width:600})
+    }
+  }]
+}
+
+$("#submit_paper_btn").click(function(){
+ var p = [{name : 'study[doi]', value : $("#doi").val()}, {name : 'format', value : 'html'}]
+//console.log("test")
+refresh_post("result_submit_paper",  "<%= studies_path %>", p, "post", {loading: 'fa-2x'})
+})
+
+var data = []
+<% ['integrated', 'all'].each do |k| %>
+var trace = {
+    x: <%= raw @category_ids.map{|cid| @h_categories[cid].name}.to_json %>,
+    y: <%= raw @category_ids.map{|cid| (k == 'all') ? (@h_stats['by_category'][cid.to_s][k] - @h_stats['by_category'][cid.to_s]['integrated']) : @h_stats['by_category'][cid.to_s][k] }.to_json %>,
+    name: '<%= (@h_statuses[k]) ? @h_statuses[k].label.capitalize : k.capitalize %> studies',
+    type: 'bar'
+  };
+data.push(trace)
+<% end %>
+
+var layout = {
+title: 'Number of studies by category',
+barmode: 'stack'
+}
+
+Plotly.newPlot('category_plot', data, layout, opt);
+
+
+<% study_dataset_types.each do |k| %>
+<% sex =  @h_stats['sex']['all'].keys %>
+var data = [{
+  values: <%= raw sex.map{|s| @h_stats['sex'][k][s]}.to_json %>,
+  labels: <%= raw sex.map{|s| @h_legend[:sex][s]}.to_json %>,
+  marker:{colors: <%= raw sex.map{|s| @h_sex_color[s] }.to_json %>},
+  type: 'pie',
+  textinfo: "label+percent"
+}];
+
+var dim = $("#sex_plot_<%= k %>_container").width()
+
+var layout = {
+ title:{
+  text:"DGRP lines across <%= (@h_statuses[k]) ? @h_statuses[k].label.downcase : k %> studies",
+  font: {     
+      size: 9
+   }},
+  height: dim,
+  width: dim,
+//  scale: 1,
+autosize:true,
+  showlegend: false
+};
+
+
+Plotly.newPlot('sex_plot_<%= k %>', data, layout, opt);
+
+<% end %>
+})
+
+<% end %>

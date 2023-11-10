@@ -1,0 +1,10 @@
+<p style="color: green"><%= notice %></p>
+
+<%= render @gene %>
+
+<div>
+  <%= link_to "Edit this gene", edit_gene_path(@gene) %> |
+  <%= link_to "Back to genes", genes_path %>
+
+  <%= button_to "Destroy this gene", @gene, method: :delete %>
+</div>

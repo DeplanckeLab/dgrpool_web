@@ -1,0 +1,56 @@
+<div class='float-end'>
+  <%= link_to "Back to phenotype", phenotype_path(@phenotype), {:data => {:turbo => 'false', :method => 'get'}, :class => 'btn btn-secondary'} %>
+</div>
+
+<div class='alert alert-info'>
+  For robustness of the results we restrict by default the available phenotypes to curated studies but if you prefer to be able to access the whole dataset that was automatically extracted, you can change this behaviour below.<br/>
+  <%= check_box_tag 'only_integrated_studies', 1, ((params[:only_curated_studies]=='1') ? true : false) %> Only curated studies
+</div
+
+
+
+<nav>
+  <div class="nav nav-tabs" id="nav-tab" role="tablist">
+    <% @ordered_list_sex.each do |i| %>
+    <% sex = @list_sex[i] %>
+    <!--  <li class="nav-item">-->
+      <!--    <a class="nav-link <%= (@cur_sex == sex) ? "active" : "" %>" aria-current="page" href="#"><%= @h_legend[:sex][sex] %></a> -->
+      <button class="nav-link <%= (@cur_sex == sex) ? "active" : "" %>" id="nav-<%= sex %>-tab" data-bs-toggle="tab" data-bs-target="#nav-<%= sex %>" type="button" role="tab" aria-controls="nav-<%= sex %>" aria-selected="true"><%= @h_legend[:sex][sex] %> <span class='badge rounded-pill bg-<%= (@h_res[:res][@list_sex[i]].size > 0) ? 'success' : 'danger' %>'><%= @h_res[:res][@list_sex[i]].size %></span></button>
+    </li>
+    <% end %>
+  </div>
+</nav>
+
+<div class="tab-content" id="nav-tabContent">
+  <% @ordered_list_sex.each do |i| %>
+  <% sex = @list_sex[i] %>
+  <div class="tab-pane fade <%= (@cur_sex == sex) ? "show active" : "" %>" id="nav-<%= sex %>" role="tabpanel" aria-labelledby="nav-<%= sex %>-tab">    
+    <%# @list_sex.each_index do |i| %>
+    <% if @h_res[:res][@list_sex[i]].size > 0 %>
+     <%= render :partial => "home/correlation_results", :locals => {:h_correlation_res => @h_res, :sex => @list_sex[i]} %>
+    <% else %>
+    <div class='alert alert-warning mt-3'>No result</div>
+    <% end %>
+    <%# end %>
+  </div>
+  <% end %>
+</div>
+
+<%= javascript_tag do %>
+document.addEventListener('DOMContentLoaded', function () {
+<% @list_sex.each_index do |i| %>
+  table = new DataTable('#results_<%= @list_sex[i] %>', {pageLength:100, order:[[4, 'asc'], [3, 'desc']]})
+<% end %>
+
+$("#only_integrated_studies").click(function(){
+//console.log($(this).prop("checked"))
+if ($(this).prop("checked") == true){
+location.href='<%= raw compute_correlation_phenotype_path(@phenotype.id) %>?only_curated_studies=1'
+}else{
+location.href='<%= raw compute_correlation_phenotype_path(@phenotype.id) %>?only_curated_studies=0'
+}
+});
+
+})
+
+<% end %>

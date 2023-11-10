@@ -1,0 +1,2 @@
+class SnpImpact < ApplicationRecord
+end

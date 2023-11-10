@@ -1,0 +1,53 @@
+<table id='corr_table'>
+  <thead>
+    <tr>
+      <th><%= @phenotypes[0].name %> sex</th>
+      <th><%= @phenotypes[1].name %> sex</th>
+      <th>DGRP in common</th>
+      <th>Pearson's r <span data-bs-toggle='tooltip' data-bs-placement='bottom' data-bs-html='true' title='Pearson correlation coefficient' style='color:blue'><i class='fa fa-circle-info'></i></span></th>
+      <th>r pval <span data-bs-toggle='tooltip' data-bs-placement='bottom' data-bs-html='true' title='p-value associated to Pearson correlation coefficient' style='color:blue'><i class='fa fa-circle-info'></i></span></th>
+      <th>Spearman's &rho;<span data-bs-toggle='tooltip' data-bs-placement='bottom' data-bs-html='true' title='Spearman correlation coefficient' style='color:blue'><i class='fa fa-circle-info'></i></span></th>
+      <th>&rho; pval <span data-bs-toggle='tooltip' data-bs-placement='bottom' data-bs-html='true' title='p-value associated to Spearman correlation coefficient' style='color:blue'><i class='fa fa-circle-info'></i></span></th>
+      <th>lm a <span data-bs-toggle='tooltip' data-bs-placement='bottom' data-bs-html='true' title='Slope of the linear model' style='color:blue'><i class='fa fa-circle-info'></i></span></th>
+      <th>lm b <span data-bs-toggle='tooltip' data-bs-placement='bottom' data-bs-html='true' title='Intercept of the linear model' style='color:blue'><i class='fa fa-circle-info'></i></span></th>
+      <th>lm p <span data-bs-toggle='tooltip' data-bs-placement='bottom' data-bs-html='true' title='p-value of linear model' style='color:blue'><i class='fa fa-circle-info'></i></span></th>
+      <th>lm R<sup>2</sup> <span data-bs-toggle='tooltip' data-bs-placement='bottom' data-bs-html='true' title='R squared between data and linear model' style='color:blue'><i class='fa fa-circle-info'></i></span></th>
+      <th>lm adj R<sup>2</sup> <span data-bs-toggle='tooltip' data-bs-placement='bottom' data-bs-html='true' title='Adjusted r squared between data and linear model' style='color:blue'><i class='fa fa-circle-info'></i></span></th>
+    </tr>
+  </thead>
+  <tbody>
+        
+    <% h_corr.keys.select{|e| h_corr[e]}.each do |k| %>
+    <% tmp_sex = k.split("_") %>
+    <tr>
+      <td><%= tmp_sex[0] %></td>
+      <td><%= tmp_sex[1] %></td>
+      <td><%= h_corr[k]["common.notNA.dgrp"] %></td>
+      <td><%= h_corr[k]["pearson_cor"] %></td>
+      <td><%= raw display_corr_num(2, h_corr[k]["pearson_p"]) %></td>
+      <td><%= h_corr[k]["spearman_cor"] %></td>
+      <td><%= raw display_corr_num(2, h_corr[k]["spearman_p"]) %></td>
+      <td><%= h_corr[k]["lm_a"] %></td>
+      <td><%= h_corr[k]["lm_b"] %></td>
+      <td><%= raw display_corr_num(2, h_corr[k]["lm_p"]) %></td>
+      <td><%= h_corr[k]["lm_r_squared"] %></td>
+      <td><%= h_corr[k]["lm_adj_r_squared"] %></td>
+    </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<%= javascript_tag do %>
+
+
+$(document).ready(function(){
+    $('[data-bs-toggle="tooltip"]').tooltip();   
+});
+
+
+ // document.addEventListener('DOMContentLoaded', function () {
+  new DataTable('#corr_table', {dom: 't', paging:false})
+//});
+
+<% end %>
+

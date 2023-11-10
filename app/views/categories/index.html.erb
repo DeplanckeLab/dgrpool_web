@@ -1,0 +1,40 @@
+<p style="color: green"><%= notice %></p>
+
+<% if curator? %>
+ <div class='float-end'>
+   <%= link_to "New category", new_category_path, :class => 'btn btn-primary' %>
+ </div>
+<% end %>
+
+<h1>Categories</h1>
+
+<!--<h2 style= "color:#1f528c; font-size:20px" > In addition to being a powerful community resource, DGRP studies cover a very broad scope of phenotypes. To have a better overview of the latter, we decided to order our collected studies into <b>?</b> different categories. Feel free to scroll down to discover more about them ! </h2>
+-->
+<div id="categories" class="row row-cols-1 row-cols-md-2 g-4">
+  <% @categories.each do |category| %>
+  <div class="col">
+    <div class="card h-100">
+      <div class="card-body">
+	<div class='float-end'><span class='badge bg-info'><%= @h_nber_studies[category.id] %> studies</span></div>
+	<h5 class="card-title"><%= category.name %></h5>
+	<!--  <p style="font-size:18px"><%= category.name %></p> -->
+	<p>
+	  <%= raw category.description %>
+	</p>
+      </div>
+      <div class='card-footer'>
+	<div class='float-end'>
+	  <%= link_to "Show", category_path(category), {:data => {:turbo => 'false', :method => 'get'}, :class => 'btn btn-primary'} %>
+	  <% if curator? %>
+	  <%= link_to "Edit", edit_category_path(category), {:data => {:turbo => 'false', :method => 'get'}, :class => 'btn btn-success'} %>
+	  <% end %>
+	</div>
+      </div>
+    </div>
+  </div>
+  <% end %>
+</div>
+
+<%# @res.to_json %>
+
+<%= link_to "New category", new_category_path %>

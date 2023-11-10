@@ -1,0 +1,10 @@
+<p style="color: green"><%= notice %></p>
+
+<%= render @dgrp_line_study %>
+
+<div>
+  <%= link_to "Edit this dgrp line study", edit_dgrp_line_study_path(@dgrp_line_study) %> |
+  <%= link_to "Back to dgrp line studies", dgrp_line_studies_path %>
+
+  <%= button_to "Destroy this dgrp line study", @dgrp_line_study, method: :delete %>
+</div>

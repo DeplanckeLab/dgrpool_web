@@ -1,0 +1,43 @@
+<p style="color: green"><%= notice %></p>
+
+<div class='float-end'>
+  <%= link_to "New figure type", new_figure_type_path, {:class => 'btn btn-primary'} %>
+</div>
+
+<h1>Figure types</h1>
+
+<!--<div id="figure_types">
+  <% @figure_types.each do |figure_type| %>
+    <%= render figure_type %>
+    <p>
+      <%= link_to "Show this figure type", figure_type %>
+    </p>
+  <% end %>
+</div>
+-->
+
+<table id='figure_types'>
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Name</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% @figure_types.each do |figure_type| %>
+    <tr>
+      <td><%= figure_type.id %></td>
+      <td><%= figure_type.name %></td>
+    </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<%= javascript_tag do %>
+
+  document.addEventListener('DOMContentLoaded', function () {
+$( document ).tooltip();
+let table = new DataTable('#figure_types', {pageLength:100})
+});
+
+<% end %>

@@ -1,0 +1,75 @@
+<h4 class=''> SNP records (<%= @snp_genes.total_entries %> of <%= @h_counts[:all] %>) </h4>
+
+<div class='float-right'>
+  <div class='float-left mr-1 pt-2'><span class=''>Page</span></div>
+  <div class='float-left'>
+    <%= text_field_tag 'article_page', session[:gs_settings][:page], {:class => 'form-control mr-2 gene_page', :style => 'width:60px'} %>
+  </div>
+  <div class='float-left'>
+    <div class="input-group btn-group" role="group" aria-label="nav_search_btns">
+      <button id='gene_prev_btn' type="button" class="gene_page_nav-btn btn btn-outline-primary" <%= "disabled='disabled'" if session[:gs_settings][:page] ==1 %>><i class="fas fa-chevron-left"></i> Prev page</button>
+      <button id='gene_next_btn' type="button" class="gene_page_nav-btn btn btn-outline-primary" <%= "disabled='disabled'" if session[:gs_settings][:page] == (@snp_genes.total_entries.to_i / session[:gs_settings][:per_page].to_i ).round + 1 %>>Next page <i class="fas fa-chevron-right"></i></button>
+    </div>
+  </div>
+</div>
+<% l = [5, 25, 50, 100, 500].map{|e| ["#{e} results per page", e]} %>
+<%= select_tag 'gene_per_page', options_for_select(l, session[:gs_settings][:per_page] || 5), {:class => 'form-control col-md-2 per_page'} %>
+
+<%= hidden_field_tag 'gene_total', @snp_genes.total_entries %>
+<%= hidden_field_tag 'gene_gene_ids', @snp_genes.map{|p| p.id}.join(",") %>
+
+<%= render :partial => ("search_" + session[:gs_settings][:search_view_type] + "_view"), :locals => {:snp_genes => @snp_genes, :type => ''} %>
+
+</div>
+
+<%= javascript_tag do %>
+
+ document.addEventListener('DOMContentLoaded', function () {
+
+
+$("#gene_per_page").change(function(){
+ var t = this.id.split("_")
+ var h = {loading:'fa-2x'}
+ gene_search([], h)
+})
+
+$("#search_menu-nav li .nav-link").click(function(){
+ console.log("bla")
+ var p = [{name : 'search_type', value :  this.id.split("_")[0]}];
+ refresh_post(null, "<%= set_search_session_genes_path %>", p, 'post', {})
+})
+
+$(".gene_page_nav-btn").click(function(){
+ var t = this.id.split("_")
+ // var search_type = t[0]
+ var direction = t[0]
+ var cur_val = parseInt($("#gene_page").val())
+ if (direction == 'prev'){
+  $("#gene_page").val(cur_val - 1)
+ }else{
+  $("#gene_page").val(cur_val + 1)
+ }
+ console.log("#gene_page: " + $("#gene_page").val())
+ var h = {loading:'fa-2x'}
+ gene_search([], h)
+})
+
+$(".gene_page").keyup(function(e){
+ var t = this.id.split("_")
+// var type = t[0]
+ // console.log("KEY:" + e.key)
+ if (e.key == 'Enter'){
+  // validate page #
+  if (parseInt($("#gene_total").val()) < (parseInt($("#gene_page").val())-1) * parseInt($("#gene_per_page").val())){
+   console.log("Too high page number!")
+   $("#gene_page").val(Math.round(parseInt($("#gene_total").val())/parseInt($("#gene_per_page").val()))+1)
+  }
+  var h = {loading:'fa-2x'}
+  gene_search([], h)
+ }
+})
+
+					    })
+
+<% end %>
+

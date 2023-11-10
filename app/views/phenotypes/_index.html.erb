@@ -1,0 +1,68 @@
+<table id='phenotypes' class='table-striped'> <!-- class="table" data-controller="datatable">-->
+  <thead>
+    <tr>
+      <% if curator? %>
+      <th>ID</th>
+      <% end %>
+      <th>Name</th> 
+      <th>Study</th>
+      <th>Description</th>
+      <th>Source type</th>
+      <th>Value type</th>
+      <th># DGRP lines</th>
+      <th># female</th>
+      <th># male</th>
+      <th># unclassified sex</th>      
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <% @phenotypes.each do |p| %>
+    <tr>
+      <% if curator? %>
+      <td><%= p.id %></td>
+      <% end %>
+      <td><%= p.name %></td>
+      <td>
+	<!--<span class='badge bg-info'><%= (@h_studies[p.study_id]) ? display_reference_short(@h_studies[p.study_id]) : 'NA' %></span></td>-->
+      <%= display_reference_short2(@h_studies[p.study_id]) %>
+      </td>
+      <td><small><%= raw p.description %></small></td>
+      <td><%= raw display_source_type(p, @h_summary_types) %></td>
+      <td><%= raw display_value_type(p) %></td>
+      <td><%= p.nber_dgrp_lines %></td>
+      <td><%= p.nber_sex_female %></td>
+      <td><%= p.nber_sex_male %></td>
+      <td><%= p.nber_sex_na %></td>
+      <td>
+        <div style='white-space:nowrap'>
+	  <%= link_to "Show", phenotype_path(p), :data => {:turbo => 'false', :method => 'get'}, :class => 'btn btn-sm btn-primary' %>
+          <%= link_to "GWAS", gwas_analysis_phenotype_path(p), :data => {:turbo => 'false', :method => 'get'}, :class => 'btn btn-sm btn-primary' %>
+        <% if curator? %>
+        <%= link_to "Edit", edit_phenotype_path(p), :data => {:turbo => 'false', :method => 'get'}, :class => 'btn btn-sm btn-success' %>
+        <% end %>
+        </div>
+      </td>
+
+    </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<%= javascript_tag do %>
+
+
+  document.addEventListener('DOMContentLoaded', function () {
+   let table = new DataTable('#phenotypes', {pageLength:100})
+
+$("#only_integrated_studies").click(function(){
+//console.log($(this).prop("checked"))
+if ($(this).prop("checked") == true){
+location.href='https://dgrpool.epfl.ch/phenotypes?only_curated_studies=1'
+}else{
+location.href='https://dgrpool.epfl.ch/phenotypes?only_curated_studies=0'
+}
+  })
+});
+
+<% end %>

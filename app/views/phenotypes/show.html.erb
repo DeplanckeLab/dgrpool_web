@@ -1,0 +1,14 @@
+<p style="color: green"><%= notice %></p>
+
+<%= render @phenotype %>
+
+<div>
+  <% if curator? %>
+  <%= link_to "Edit", edit_phenotype_path(@phenotype), {:class => 'btn btn-success'} %>
+  <%= link_to "All phenotypes", phenotypes_path, {:data => {:turbo => false}, :class => 'btn btn-secondary'} %>
+  <%= link_to "Go to study", study_path(@phenotype.study), {:data => {:turbo => false}, :class => 'btn btn-secondary'} %>
+  <% end %>
+  <% if admin? %>
+  <%= button_to "Destroy", @phenotype, {:data => {:confirm => "Are you sure?", :turbo => false}, :method => :delete, :class => 'btn btn-danger'} %>
+  <% end %>
+</div>

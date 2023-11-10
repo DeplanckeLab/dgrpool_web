@@ -1,0 +1,87 @@
+<%# h_correlation_res[:md5] %>
+<%# h_correlation_res[:h_output] %>
+<%# h_correlation_res[:output_json] %>
+<%# h_correlation_res[:res] %>
+
+<!--<% if params[:phenotype_name] %>
+<h3><%= params[:phenotype_name] %></h3>
+<% end %>
+-->
+<% if !@phenotype %>
+<h3>Results for <%= params[:file].original_filename %> > <%= params[:phenotype_name] %> <%# @h_legend[:sex][sex] if sex %></h3>
+<% end %>
+
+<div class="nav nav-tabs" id="nav-tab_res_type" role="tablist">                                                                                                                                                                 
+    <% t = (@phenotype) ?  ["Correlation"] :  ["Correlation", "GWAS"] %>                    
+    <% if t.size > 1 %>              
+    <% t.each do |e| %>                                            
+    <button class="nav-link <%= (e == 'Correlation') ? "active" : "" %>" class='<%= e %>-tab' id="nav-<%= e %>-tab" data-bs-toggle="tab" data-bs-target="#nav-<%= e %>" type="button" role="tab" aria-controls="nav-<%= e %>" aria-selected="true"><%= e %>                                                                                                                                                                       
+     <% if e == 'GWAS' %>                                                                                                          
+      <% if gwas_output.keys.size > 0 %>                                                               
+      <% if gwas_output[:displayed_error] %>                                                                                                
+      <i class='text-danger fas fa-times-circle'></i>                                                                                                                                                           
+      <% else %>                                                                                                                                                                                          
+      <i class='text-success fas fa-circle-check'></i>
+      <% end %>                                                                                                                                  
+      <% else %>                                                                                
+      <i class='text-warning fa fa-spinner fa-pulse'></i>       
+      <% end %>
+      <% end %>
+    </button>
+  <% end %>                                                                                                                                                                                                                      
+<% end %>                                                                                                                                                                                                                         
+  </div>                            
+
+<div class="tab-content" id="nav-tabContent">                                                                                                                                                                                 
+   <div class="tab-pane fade show active" id="nav-Correlation" role="tabpanel" aria-labelledby="nav-Correlation-tab">    
+ 
+<nav>
+  <div class="nav nav-tabs" id="nav-tab-Correlation" role="tablist">
+    <% @ordered_list_sex.select{|s| h_correlation_res[:res][s]}.each do |sex| %>
+      <button class="nav-link <%= (@cur_sex == sex) ? "active" : "" %>" id="nav-<%= sex %>-tab" data-bs-toggle="tab" data-bs-target="#nav-Correlation-<%= sex %>" type="button" role="tab" aria-controls="nav-Correlation-<%= sex %>" aria-selected="true"><%= @h_legend[:sex][sex] %> <span class='badge rounded-pill bg-<%= (h_correlation_res[:res][sex].size > 0) ? 'success' : 'danger' %>'><%= h_correlation_res[:res][sex].size %></span></button>
+    </li>
+    <% end %>
+  </div>
+</nav>
+
+<div class="tab-content" id="nav-tabContent-Correlation">
+  <% if  @h_correlation_res[:h_output]['displayed_error'] %>
+  <div class='alert alert-danger mt-3'>
+    <%= @h_correlation_res[:h_output]['displayed_error'] %>
+  </div>
+  <% else %>
+  <% @ordered_list_sex.select{|s| h_correlation_res[:res][s]}.each do |sex| %>
+   <div class="tab-pane fade <%= (@cur_sex == sex) ? "show active" : "" %>" id="nav-Correlation-<%= sex %>" role="tabpanel" aria-labelledby="nav-Correlation-<%= sex %>-tab">
+
+     <% if h_correlation_res[:res][sex].size > 0 %>
+
+     <%= render :partial => "home/correlation_results", :locals => {:h_correlation_res => h_correlation_res, :sex => sex} %>
+    <% else %>
+    <div class='alert bg-warning mt-3'>No result</div>
+    <% end %>
+    <%# end %>
+  </div>
+   <% end %>
+   <% end %>
+</div>
+
+
+   </div>
+   <% if !@phenotype %>
+   <div class="tab-pane fade" id="nav-GWAS" role="tabpanel" aria-labelledby="nav-GWAS-tab">
+     <%= h_correlation_res[:md5] %>
+   </div>
+   <% end %>
+</div>
+<%= javascript_tag do %>
+
+function refresh_gwas() {
+refresh("nav-GWAS", "<%= raw get_gwas_results_home_index_path(:phenoname => params[:phenotype_name], :list_sex =>  h_correlation_res[:res].keys.join(","), :md5 => h_correlation_res[:md5]) %>", {loading:'fa-2x'})
+}
+
+refresh_gwas()
+repeat_refresh_gwas = setInterval(refresh_gwas, 10000);
+
+$("#compare_phenotype_btn").prop("disabled", false)
+
+<% end %>

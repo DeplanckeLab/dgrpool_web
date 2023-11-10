@@ -1,0 +1,89 @@
+<% if @h_res[:errors].size > 0 %>
+<% @h_res[:errors].each do |error| %>
+<div class='alert bg-danger mt-2'>
+  <%= raw error %>
+</div>
+<% end %>
+<% else %>
+
+<% if @h_res[:discarded_phenotypes].size > 0 %>
+<div class='alert bg-warning mt-2'>
+  Non numerical phenotypes (<%= @h_res[:discarded_phenotypes].join(", ") %>) were excluded.
+</div>
+<% end %>
+
+<% @h_res[:warnings].each do |warning| %>
+<div class='alert bg-warning mt-2'>
+  <%= raw warning %>
+</div>
+<% end %>
+
+<% l = @h_res[:phenotypes] %>
+<%# l.unshift "Select a phenotype to compare" %>
+<p>Please select the phenotype for which you want to have correlation and GWAS results</p>
+<%= select_tag 'phenotype_name', options_for_select(l), {:class => 'form-select'} %>
+
+<button id='compare_phenotype_btn' class='mt-3 btn btn-success' <%= (@h_res[:errors].size > 0) ? "disabled='disabled'" : '' %>>Compare this phenotype</button>
+
+<!--
+<%# if @md5s.size > 5 %>
+<div class='alert alert-danger'>
+The job queue is full (5) please come back later to perform new request
+</div>
+<%# else %>
+<div class='alert alert-info'>
+Currently <%# @md5s.size %> jobs in the queue (max autorized = 5).
+</div>
+<%# end %>
+-->
+
+<% end %>
+
+<div id='comparison_results' class='mt-3'>
+</div>
+
+
+<%= javascript_tag do %>
+
+$("#phenotype_name").change(function(){
+clearInterval(repeat_refresh_gwas)
+})
+
+$("#compare_phenotype_btn").click(function(){
+
+$(this).prop("disabled", true)
+  var data = new FormData();
+  //data.append()
+  $.each($('#dataset_file')[0].files, function(i, file) {
+    data.append('file', file);
+  });
+ data.append('phenotype_name', $("#phenotype_name").val())
+ data.append('compare', '1')
+  console.log(data)
+  $.ajax({
+    url: '<%= raw compute_my_pheno_correlation_path() %>',
+    data: data,
+    headers: {
+      "X-CSRF-Token": document.querySelector("meta[name='csrf-token']").content
+    },
+    cache: false,
+    contentType: false,
+    processData: false,
+    method: 'POST',
+    type: 'POST', // For jQuery < 1.9
+    success: function(res){
+				  $("#comparison_results").html(res)
+				  <% @h_sex.each_key do |sex| %>
+				  if ($("#results_<%= sex %>").length > 0){
+				  new DataTable('#results_<%= sex %>', {pageLength:100, order:[[4, 'asc'], [3, 'desc'], [6, 'desc']]})
+				  }
+                                  <% end %>
+    }
+  });
+
+})
+
+$("#preparse_btn").prop("disabled", false)
+
+				  
+<% end %>

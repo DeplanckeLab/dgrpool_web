@@ -1,0 +1,68 @@
+<div id="<%= dom_id dgrp_line %>">
+
+  <% if @h_dgrp_statuses[dgrp_line.dgrp_status_id].name == 'unavailable' %>
+  <div class='alert alert-danger'>
+    This line is NOT available in Bloomington for purchase.
+  </div>
+  <div class='alert alert-danger'>
+    This line was NOT part of the 205 lines genotyped using WGS, so GWAS studies CANNOT be applied to this fly.
+  </div>
+  <% elsif  @h_dgrp_statuses[dgrp_line.dgrp_status_id].name == 'available' %>
+  <div class='alert alert-success'>
+    This line is available in Bloomington for purchase (follow "available" link below)
+  </div>
+  <div class='alert alert-success'>
+    This line was part of the 205 lines genotyped using WGS, so GWAS studies can be applied to this fly.
+  </div>
+  <% elsif @h_dgrp_statuses[dgrp_line.dgrp_status_id].name == 'genotyped' %>
+  <div class='alert alert-danger'>
+    This line is NOT available in Bloomington for purchase.
+  </div>
+  <div class='alert alert-success'>
+    This line was part of the 205 lines genotyped using WGS, so GWAS studies can be applied to this fly.
+  </div>
+  <% end %>
+    
+  <div class='float-end'>
+    <%= raw display_dgrp_status(dgrp_line, @h_dgrp_statuses) %>
+  </div>
+  
+  <h1><%= @dgrp_line.name %> line</h1>
+
+  <% studies = Study.where(:id => dgrp_line.dgrp_line_studies.map{|e| e.study_id}).all %>
+  <div class='card mb-2'>
+    <div class='card-body'>
+      <% if studies.size > 0 %>
+      <h2 style="font-size:20px"><%= studies.size %> <%= (studies.size > 1) ? "studies" : "study" %> describing this DGRP line</h2>
+      <%= render :partial => 'studies/index', :locals => {:studies => studies, :show_phenotypes => true} %>
+      <% else %>
+      <i>No study yet describing this DGRP line</i>
+      <% end %>
+    </div>
+  </div>
+
+  <div class='card mb-2'>
+    <div class='card-body'>
+      <% if @phenotypes.size > 0 %>
+      <h2 style="font-size:20px"><%= @phenotypes.size %> <%= (@phenotypes.size > 1) ? "phenotypes" : "phenotype" %> associated</h2>
+      <%= raw @phenotypes.sort{|a,b| a.name <=> b.name}.map{|p| display_phenotype(p)}.join(" ") %> 
+      <% else %>
+      <i>No phenotype yet associated to this DGRP line</i>
+      <% end %>
+    </div>
+  </div>
+
+  
+  
+</div>
+
+
+<%= javascript_tag do %>
+
+document.addEventListener('DOMContentLoaded', function () {
+$(document).tooltip()
+let table = new DataTable('#studies')
+  });
+
+
+<% end %>

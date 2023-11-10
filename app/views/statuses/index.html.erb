@@ -1,0 +1,37 @@
+<p style="color: green"><%= notice %></p>
+
+<div class='float-end'>
+  <%= link_to "New status", new_status_path, {:class => 'btn btn-primary'} %>
+</div>
+
+
+<h1>Statuses</h1>
+
+<table id='statuses'>
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Name</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <% @statuses.each do |e| %>
+    <tr>
+      <td><%= e.id %></td>
+      <td><%= e.name %></td>
+      <td>
+        <%# link_to 'Show', summary_type_path(e), {:class => 'btn btn-primary'} %>
+        <%= link_to 'Edit', edit_status_path(e), {:class => 'btn btn-success'} %></td>
+    </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<%= javascript_tag do %>
+
+document.addEventListener('DOMContentLoaded', function () {
+let table = new DataTable('#statuses', {pageLength:100})
+});
+
+<% end %>

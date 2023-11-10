@@ -1,0 +1,10 @@
+<p style="color: green"><%= notice %></p>
+
+<%= render @gwas_result %>
+
+<div>
+  <%= link_to "Edit this gwas result", edit_gwas_result_path(@gwas_result) %> |
+  <%= link_to "Back to gwas results", gwas_results_path %>
+
+  <%= button_to "Destroy this gwas result", @gwas_result, method: :delete %>
+</div>

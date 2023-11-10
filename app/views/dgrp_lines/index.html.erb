@@ -1,0 +1,53 @@
+<p style="color: green"><%= notice %></p>
+
+<% if curator? %>
+<div class='float-end'>
+  <%= link_to "New DGRP line", new_dgrp_line_path, :class=> 'btn btn-primary' %>
+</div>
+<% end %>
+
+<h1>DGRP lines</h1>
+
+<table id='dgrp_lines' class="table-striped" width='100%'> <!-- class="table" data-controller="datatable">-->
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Flybase ID</th>
+      <th>Bloomington ID</th>
+      <th># studies</th>
+      <th># phenotypes</th>
+      <th>Status</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <% @dgrp_lines.each do |p| %>
+    <tr>
+      <td><%= p.name %></td>
+      <td><%= (p.fbsn) ? link_to(p.fbsn, "https://flybase.org/reports/#{p.fbsn}.html", {:target => '_blank'}) : '' %></td>
+      <td><%= (p.bloomington_id) ? p.bloomington_id : 'NA' %></td>
+      <td><%= p.nber_studies %> (<%= (@nber_studies > 0) ? (p.nber_studies*100/@nber_studies) : 0 %>%)
+	<!--.map{|sid| "<span class='badge bg-info'>" + display_reference_short(@h_studies[sid]) + "</span>"}.join(" ") %>
+	  -->
+      </td>
+      <td><%= p.nber_phenotypes %><%# (@h_phenotypes_by_dgrp_line[p.id]) ? @h_phenotypes_by_dgrp_line[p.id].size : 0 %></td>
+      <td><%= raw display_dgrp_status(p, @h_dgrp_statuses) %></td>
+      <td>
+	<%= link_to "Show", dgrp_line_path(p) , {:data => {:turbo => 'false', :method => 'get'}, :class =>'btn btn-primary'} %>
+      </td>
+    </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<%# @res.to_json %>
+
+<%= javascript_tag do %>
+
+
+  document.addEventListener('DOMContentLoaded', function () {
+let table = new DataTable('#dgrp_lines', {pageLength:100})
+});
+
+<% end %>
+

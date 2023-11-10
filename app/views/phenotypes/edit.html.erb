@@ -1,0 +1,16 @@
+ <div class='float-end'>
+    <span class='badge bg-info'><%= (@phenotype.is_summary == true) ? 'Summary' : 'By sample' %></span>
+    <span class='badge bg-info'><%= (@phenotype.is_continuous == true) ? 'Continuous' : 'Discrete' %></span>
+    <span class='badge bg-info'><%= (@phenotype.is_numeric == true) ? 'Numeric' : 'Text' %></span>
+  </div>
+
+<h1>Editing phenotype</h1>
+
+<%= render "form", phenotype: @phenotype %>
+
+<br>
+
+<div>
+  <%= link_to "Show", @phenotype, {:data => {:turbo => 'false', :method => 'get'}, :class => 'btn btn-primary'} %>
+  <%= link_to "Back to phenotypes", phenotypes_path,  {:data => {:turbo => 'false', :method => 'get'}, :class => 'btn btn-secondary'} %>
+</div>

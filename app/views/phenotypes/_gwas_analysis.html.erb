@@ -1,0 +1,236 @@
+<%# h_files.to_json %>
+<%# output_dir + h_files[:annot] %>
+<% if h_output and sex and h_output['results'] and h_output['results'][sex] and  h_output['results'][sex]['error_message'] %>
+<div class='alert alert-danger mt-3'>
+  <%= h_output['results'][sex]['error_message'] %>
+</div>
+<% end %>
+
+<% if h_files[:annot] %>
+<% s = Study.find(17) %>
+
+    <% if File.exist?(output_dir + h_files[:annot]) %>
+    <%# sex %>
+    <%#  @h_files[sex][:qqplot] %>
+    <div class='alert alert-info mt-3'>
+      GWAS results were computed on dm3 genome.
+    </div>
+    <% if File.exist?(output_dir + h_files[:dgrp2]) or File.exist?(output_dir + h_files[:plink2]) %>
+    <div class='alert alert-info mt-3'>
+      If you want to make an independent analysis with <a href='http://dgrp2.gnets.ncsu.edu/'>DGRP2</a> or <a href='https://www.cog-genomics.org/plink/2.0/'>PLINK2</a>, you can find here prepared input files for this phenotype:
+      <%= link_to raw("<i class='fa fa-download'></i> DGRP2 results"), get_file_study_path(@study, :namespace => download_namespace, :name => h_files[:dgrp2]), {:target => '_blank', :class => 'btn btn-sm btn-secondary'} %>
+      <%= link_to raw("<i class='fa fa-download'></i> PLINK2 results"), get_file_study_path(@study, :namespace => download_namespace, :name => h_files[:plink2]), {:target => '_blank', :class => 'btn btn-sm btn-secondary'} %>
+    </div>
+    <% end %>
+
+    <div class='card'>
+      <div class='card-body'>
+	<h3>Covariates</h3>
+	
+	<div class='alert alert-success'>
+	  We tested for association of this phenotypes with known covariates <%= display_reference_short2(s) %>.
+	</div>
+	<% if anova and anova.size > 0 %>    
+	<div class='alert alert-warning mt-3'>      
+	 <!-- The following covariates (phenotypes from study <%= display_reference_short2(s) %>) were included in the GWAS model. -->A preliminary ANOVA association analysis was carried out to check if any of the covariates was associated with the phenotype, prior correction.
+	  
+	  <div class='row'>
+	    <div class='col-5'>
+	      <table id='covariates' class='mt-2'>
+		<thead>
+		  <tr>
+		    <th>Phenotype</th>
+		    <th>P-value</th>
+		    <th>Significance</th>
+		  </tr>
+		</thead>
+		<tbody>
+		  <% anova.each do |e| %>
+		  <tr>
+		    <td><%= link_to e[0], phenotype_path(@h_covariate_mapping[e[0]]), {:class => '', :target => '_blank'} %></td>
+		    <td><%= e[4] %></td>
+		    <th><%= raw "<i class='fa fa-star'></i>" * e[5] %><%= raw "<i class='far fa-star'></i>" * (4-e[5]) %></th>
+		  </tr>
+		  <% end %>
+		</tbody>
+	      </table>
+	    </div>
+	    <div class='col-5'>
+	      <%= link_to raw("<i class='fa fa-download'></i> Full covariate identification results"), get_file_study_path(@study, :namespace => download_namespace, :name => h_files[:anova]), {:target => '_blank', :class => 'btn btn-sm btn-secondary'}  %>
+	    </div>
+	    
+	  </div>
+	</div>
+	<% elsif anova and anova.size == 0 %>
+	<div class='alert alert-success mt-3'>
+	  <% if File.exist? (output_dir + h_files[:anova]) %>
+	  <div class='row'>
+	    <div class='col-5'>
+	      There is no covariate that is significantly associated with this phenotype.
+	    </div>
+	    <div class='col-5'>
+	      <%= link_to raw("<i class='fa fa-download'></i> Full covariate identification results"), get_file_study_path(@study, :namespace => download_namespace, :name => h_files[:anova]), {:target => '_blank', :class => 'btn btn-sm btn-secondary'}  %>
+	    </div>
+	  </div>
+	  <% else %>
+	  <i>No covariate identification file found</i>
+	  <% end %>
+	</div>
+	<% else %>
+	<div class='alert alert-danger mt-3'>
+	  An error occured while evaluating covariates. 
+	  <%= link_to raw("<i class='fa fa-download'></i> Full covariate identification results"), get_file_study_path(@study, :namespace => download_namespace, :name => h_files[:anova]), {:target => '_blank', :class => 'btn btn-sm btn-secondary'}  %>
+	  
+	</div>
+	<% end %>
+      </div>
+    </div>
+    
+    <div class='row ms-0 me-0'>
+      <div class='card col-md-6'>
+	<div class='card-body'>
+	  <div class='float-end'>
+	             <%= link_to raw("<i class='fa fa-download'></i> PNG"), get_file_study_path(@study, :namespace => download_namespace, :name => h_files[:qqplot]), {:target => '_blank', :class => 'btn btn-sm btn-secondary'} %>
+	    <%= link_to raw("<i class='fa fa-download'></i> PDF"), get_file_study_path(@study, :namespace => download_namespace, :name => h_files[:qqplot].gsub(/png$/, "pdf")), {:target => '_blank', :class => 'btn btn-sm btn-secondary'} %>
+	  </div>
+	  <h3>QQplot</h3>
+          <%= image_tag image_path(get_file_study_path(@study, :namespace => download_namespace, :name => h_files[:qqplot])) if File.exist?(output_dir + h_files[:qqplot]) %>
+	</div>
+      </div>
+      <div class='card col-md-6'>
+	<div class='card-body'>
+	  <div class='float-end'>
+	    <%= link_to raw("<i class='fa fa-download'></i> PNG"), get_file_study_path(@study, :namespace => download_namespace, :name => h_files[:manhattan]), {:target => '_blank', :class => 'btn btn-sm btn-secondary'} %>
+            <%= link_to raw("<i class='fa fa-download'></i> PDF"), get_file_study_path(@study, :namespace => download_namespace, :name => h_files[:manhattan].gsub(/png$/, "pdf")), {:target => '_blank', :class => 'btn btn-sm btn-secondary'} %>
+          </div>
+	  <h3>Manhattan plot</h3>
+	  <%= image_tag image_path(get_file_study_path(@study, :namespace => download_namespace, :name => h_files[:manhattan])) if File.exist?(output_dir + h_files[:manhattan]) %>
+	</div>
+      </div>
+    </div>
+    <div class='card'>
+      <div class='card-body'>
+	
+	<%# nber_res = -1 %>
+	<%# if File.exist? output_dir + h_files[:annot] %>
+	<%# nber_res = `less #{output_dir + h_files[:annot]} | wc -l`.to_i - 1 %>
+	<%# end %>
+	<% if @h_nber_res[sex] == -1 %>
+	<h3>GWAS results</h3>
+	<div class='alert bg-warning'>
+          <i>No results</i> Sorry, the GWAS analysis was not yet performed for this phenotype (or maybe failed). Please contact us if you need it.
+	</div>
+	<% else %>
+	<% if @h_nber_res[sex] > 0 %>
+	<div class='float-end'><%= link_to raw("<i class='fa fa-download'></i> GWAS results"), get_file_study_path(@study, :namespace => download_namespace, :name => h_files[:annot]), {:target => '_blank', :class => 'btn btn-sm btn-secondary'}  %>
+        </div>
+	<% end %>
+	
+	<h3>GWAS results <small><b><%= @h_nber_res[sex] %></b> significant hits at p-value < 0.01.
+	 <% if @h_nber_res[sex] > 1000 %>
+	      The 1000 top results are displayed in this table.
+	 <% end %>
+	<!--      First 1000 results over <%# nber_res %> are displayed.-->
+	</small></h3>
+	<% if @h_nber_res[sex] > 0 %>
+
+	<div class='legend_annotations'>
+	  <b>Variant impact</b> <%= raw @h_impact.keys.map{|k| "<span class='badge bg-#{@h_impact[k]}'>#{k}</span>"}.join(" ") %>
+	</div>
+	
+	<table id='gwas_res_<%= sex %>' width="100%" class='gwas_res_table table-striped mt-3'>
+	  <thead>
+	    <tr>
+	      <!--	  #CHROM  POS     ID      REF     ALT     BETA    P       FDR_BH -->
+	      <th>Chromosome</th>
+	      <th>Position</th>
+	      <th>ID</th>
+	      <th>Reference</th>
+	      <th>Variant</th>
+	      <th>p-value</th>
+	      <th>FDR_BH</th>
+	      <th>Transcript annotation</th>
+	      <th>Binding site annotation</th>
+	      <th></th>
+	    </tr>
+	  </thead>
+	  <tbody>
+	    <% h_gwas_results.each do |t| %>
+	     <tr>
+	      <td><%= t[0] %></td>
+	      <td><%= t[1] %></td>
+	      <td><%= t[2] %></td>
+              <td><small>
+		  <%= display_variant(t[3]) %>
+	      </small></td>
+              <td><small>
+		  <%= display_variant(t[4]) %>
+	      </small></td>
+              <td><%= raw display_corr_num(2, t[6]) %></td>
+              <td><%= raw display_corr_num(2, t[7]) %></td>
+	      <%# raw (0 .. 6).to_a.map{|i| "<td>#{t[i]}</td>"}.join("") %>
+	      <td><% if @h_snps[t[2]] %>
+
+		<%= raw @h_snps[t[2]]['transcript_annot'].keys.map{|k| display_var_type(t[2], @h_var_types[k], @h_snps[t[2]]['transcript_annot'][k])}.join("<br/>") %>
+	      <% end %></td>
+	      <td><% if @h_snps[t[2]] %>
+		<% @h_snps[t[2]]['binding_site_annot'].each_key do |k| %>
+		<b><%= k.gsub("_", " ") %></b>
+		<small><%= raw @h_snps[t[2]]['binding_site_annot'][k].map{|e| "<span id='binding_site_annot_btn-" + t[2] + "-" + k + "-" + e[0] + "' class='pointer badge bg-success binding_site_annot_btn'>#{e[0]}</span>"}.join(" ") %></small>
+		<br/><% end %>
+		<% end %>
+	      </td>
+	      <td>
+		<span class='nowrap'>
+		<button type='button' id='boxplot-link-<%= t[2] %>-<%= sex %>' class='boxplot-link btn btn-sm btn-primary'>Boxplot</button>
+		<button type='button' id='phewas-link-<%= t[2] %>-<%= sex %>' class='phewas-link btn btn-sm btn-primary'>PheWAS</button>
+		</span>
+	      </td>
+	    </tr>
+	    <%# end
+	      # i+=1
+	      # break if i> 1000 %>
+	   <% end %> <%# } %>
+	  </tbody>
+	</table>
+	<% end %>
+	<%= javascript_tag do %>
+	   <% if @h_nber_res[sex] > 0 %>
+  document.addEventListener('DOMContentLoaded', function () {
+
+           new DataTable('#gwas_res_<%= sex %>', {
+        pageLength:100,
+        order : [[6, 'asc']]
+                                   })
+	   })
+
+                                   <% end %>
+
+	<% end %>
+	
+	    <% end %>
+      </div>
+    </div>
+
+    <% elsif md5 %>
+    <div class='alert alert-danger mt-3'>No results available yet for this dataset. Computing time takes usually approx. 2mn. Please wait. (If it takes more than 10mn without a change in the queue report below, please contact us, as it may have failed unexpectedly)
+      <% data_dir = Pathname.new(APP_CONFIG[:data_dir])
+	 tmp_dir = data_dir + 'tmp'
+	 md5s =  Dir.entries(tmp_dir).map{|e| m = e.match(/(\w+)\.tmp/); ((m and m[1]) ? m[1] : nil)}.compact.select{|e| File.exist?(tmp_dir + e + 'output.json') and !File.exist?(tmp_dir + e + 'done')}.sort{|a, b| File.ctime(tmp_dir + (a + '.tmp')) <=> File.ctime(tmp_dir + (b + '.tmp'))} %>
+      <% pos = (md5s.size >0) ? md5s.index(md5) + 1 : nil %>
+      <br/>
+      <b>Position in queue: <%= pos %> over <%= md5s.size %></b>
+      <% if admin? %>
+      <%# md5s.to_json %>
+      <%# md5s.map{|e|  File.ctime(tmp_dir + e + 'output.json')}.to_json %>
+      <%# md5 %>
+      <% end %>
+    </div>
+    
+    <% else %>
+    <div class='alert alert-danger mt-3'>Missing results</div>
+    <% end %>
+
+
+<% end %>
+

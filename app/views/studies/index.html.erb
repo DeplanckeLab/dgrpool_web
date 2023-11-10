@@ -1,0 +1,62 @@
+<p style="color: green"><%= notice %></p>
+
+<% if curator? %>
+<div class='float-end'>
+<%= link_to "New study", new_study_path, :class => 'btn btn-primary' %>  
+</div>
+<% end %>
+
+<h1>Studies</h1>
+
+<div class='mb-3'>
+<% @h_nber_studies_by_status.each_key do |status_id| %>
+<% if @h_nber_studies_by_status[status_id] > 0 %>
+<span class='badge bg-<%= @h_statuses[status_id].css_class %>'><%= @h_nber_studies_by_status[status_id] %> <%= @h_statuses[status_id].label %></span>
+<% end %>
+<% end %>
+</div>
+
+<%= render :partial => 'index', :locals => {:studies => @studies, :show_phenotypes => false} %>
+ 
+<%= javascript_tag do %>
+
+<% order = (!current_user) ? [[2, 'asc'], [3, 'desc']] : [[0, 'asc']] %>
+
+  document.addEventListener('DOMContentLoaded', function () {
+$( document ).tooltip();
+let table = new DataTable('#studies', {pageLength:100,order:<%= raw order.to_json %>})
+});
+
+/*
+$(document).ready(function(){
+ let table = new DataTable('#studies')
+})
+*/
+
+/*window.addEventListener('load', 
+  function() { 
+$("#studies").DataTable()
+});
+*/
+/*window.onload = function() {
+$("#studies").DataTable()
+}
+*/
+
+/*import { Controller } from '@hotwired/stimulus'
+ 
+ export default class extends Controller {
+   connect () {
+        document.addEventListener('DOMContentLoaded', function () {
+        let table = new DataTable('#studies');
+     });
+   }
+ }
+*/
+//let table = new DataTable('#studies')
+//const table = $(this.element.querySelector('studies'))
+
+// prepare options, optional add remote processing (not yet implemented)
+
+//let dtable = $(table).DataTable()
+<% end %>

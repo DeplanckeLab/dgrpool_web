@@ -1,0 +1,69 @@
+<% if admin? %>
+<%# @h_files.to_json %>
+<%# @h_gwas_results.to_json %>
+<% end %>
+  
+<% if @h_output[:displayed_warning] %>
+<div class='alert bg-warning'>
+  <%= @h_output[:displayed_warning] %>
+</div>
+<% end %>
+<% if @h_output[:displayed_error] %>
+<div class='alert bg-danger'>
+  <%= @h_output[:displayed_error] %>
+</div>
+
+<% else %>
+<nav>
+  <div class="nav nav-tabs" id="nav-gwas-tab" role="tablist">
+    <% ordered_list_sex = (0 .. @list_sex.size-1).sort{|a, b| @h_nber_res[@list_sex[b]] <=> @h_nber_res[@list_sex[a]]}.map{|i| @list_sex[i]} %>
+    <% @cur_sex = ordered_list_sex.first %>
+    <% ordered_list_sex.each do |sex| %>
+    <button class="nav-link <%= (@cur_sex == sex) ? "active" : "" %>" id="nav-gwas-<%= sex %>-tab" data-bs-toggle="tab" data-bs-target="#nav-gwas-<%= sex %>" type="button" role="tab" aria-controls="nav-gwas-<%= sex %>" aria-selected="true">
+      <%= @h_legend[:sex][sex] %>
+      <% if @h_gwas_results[sex].size == 0 %>
+      <span id='gwas_status_<%= sex %>' class='badge bg-danger'>0</span>
+      <% else %>
+      <span id='gwas_status_<%= sex %>' class='badge bg-success'><%= @h_nber_res[sex] %></span>
+      <% end %>
+    </button>
+</li>
+<% end %>
+</div>
+</nav>
+
+<div class="tab-content" id="nav-gwas-tabContent">
+  <% ordered_list_sex.each do |sex| %>
+  <div class="tab-pane fade <%= (@cur_sex == sex) ? "show active" : "" %>" id="nav-gwas-<%= sex %>" role="tabpanel" aria-labelledby="nav-gwas-<%= sex %>-tab">
+    <%= render :partial => 'phenotypes/gwas_analysis', :locals => {:phenotype => @phenotype, :h_output => @h_output, :h_files => @h_files[sex], :anova => @anova[sex], :h_gwas_results => @h_gwas_results[sex], :sex => sex, :output_dir => output_dir, :download_namespace => download_namespace, :md5 => md5} %>
+    
+  </div>
+  
+  <% end %>
+  
+</div>
+<% end %>
+
+<%= javascript_tag do %>
+<% if @phenotype %>
+if(document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded',afterDOMLoaded);
+} else {
+    afterDOMLoaded();
+}
+
+function afterDOMLoaded(){
+<% end %>
+<% if  @h_files[ordered_list_sex.first] and !@phenotype and File.exist?(output_dir + @h_files[ordered_list_sex.first][:done])  %>
+$('#nav-GWAS-tab').html("GWAS <i class='text-success fas fa-circle-check'></i>") 
+console.log("test")
+console.log(repeat_refresh_gwas)
+console.log("test2")
+clearInterval(repeat_refresh_gwas);
+<% end %>
+<%= render :partial => 'phenotypes/gwas_analysis_js', :locals => {} %>
+<% if @phenotype %>
+//})
+}
+<% end %>
+<% end %>

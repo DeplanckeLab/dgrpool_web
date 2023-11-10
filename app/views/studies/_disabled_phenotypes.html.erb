@@ -1,0 +1,7 @@
+<% dp =  study.phenotypes.select{|p| p.obsolete == true} %>
+<% dp.each do |p| %>
+<!--<span id='disabled_phenotype_<%= p.id %>'><%= p.name %> </span>-->
+<span class='badge bg-secondary'><%= raw p.name %> <span id='del_disabled_phenotype_btn_<%= p.id.to_s %>' class='text-danger del_disabled_phenotype_btn pointer'><i class='fas fa-times'></i></span></span>
+<% end %>
+<%= hidden_field_tag 'list_disabled_phenotypes', dp.map{|p| p.id}.join(",") %>
+

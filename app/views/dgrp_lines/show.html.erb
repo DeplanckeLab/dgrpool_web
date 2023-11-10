@@ -1,0 +1,15 @@
+<p style="color: green"><%= notice %></p>
+
+<%= render @dgrp_line %>
+
+<div>
+
+  <% if curator? %>
+  <%# link_to "Edit", edit_dgrp_line_path(@dgrp_line), {:class => 'btn btn-success'} %>
+  <%= link_to "Back to DGRP lines", dgrp_lines_path, {:class => 'btn btn-secondary', :data => {:turbo => false}} %>
+  <% end %>
+  <% if admin? %>
+  <%# link_to "Destroy", @dgrp_line, {:method => :delete, :class => 'btn btn-danger'} %>
+  <% end %>
+
+</div>

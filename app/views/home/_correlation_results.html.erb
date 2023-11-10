@@ -1,0 +1,124 @@
+<!--<% if @phenotype %>
+<div class='float-end'>
+  <%= link_to "Back to phenotype", phenotype_path(@phenotype), {:class => 'btn btn-secondary'} %>
+</div>
+<% end %>
+  -->
+<%# @content.to_json %>
+<%= h_correlation_res[:cmd] if admin? %>
+<%= sex if admin? %>
+<%# h_correlation_res.to_json %>
+
+  <% if @phenotype %>
+  <h3>Results
+    for <%= @phenotype.name %> <%= @h_legend[:sex][sex] %>
+    </h3>
+  <%# elsif params[:file] %>
+ <!-- for <%# params[:file].original_filename %> > <%# params[:phenotype_name] %> <%# @h_legend[:sex][sex] if sex %> -->
+  <% end %>
+
+      <% gwas_output_file = h_correlation_res[:output_dir] + 'gwas_output.json' %>
+      <% gwas_output = {} %>
+	 <% gwas_output = Basic.safe_parse_json(File.read(gwas_output_file), {}) if File.exist?(gwas_output_file) %>
+<%# gwas_output_file %>
+
+<!--<nav>
+  <div class="nav nav-tabs" id="nav-tab_res_type" role="tablist">
+    <% t = (@phenotype) ?  ["Correlation"] :  ["Correlation", "GWAS"] %>
+    <% if t.size > 1 %>
+    <% t.each do |e| %>
+    <button class="nav-link <%= (e == 'Correlation') ? "active" : "" %>" class='<%= e %>-tab' id="nav-<%= e %>_<%= sex %>-tab" data-bs-toggle="tab" data-bs-target="#nav-<%= e %>_<%= sex %>" type="button" role="tab" aria-controls="nav-<%= e %>_<%= sex %>" aria-selected="true"><%= e %>
+      <% if e == 'GWAS' %>
+      <% if gwas_output.keys.size > 0 %>
+      <% if gwas_output[:displayed_error] %>
+      <i class='text-danger fas fa-times-circle'></i>
+      <% else %>
+	<i class='text-success fas fa-circle-check'></i>
+      <% end %>
+      <% else %>
+      <i class='text-warning fa fa-spinner fa-pulse'></i>
+      <% end %>
+      <% end %>
+    </button>
+    </li>
+<% end %>
+<% end %>
+  </div>
+</nav>
+-->
+
+<!--<div class="tab-content" id="nav-tabContent">
+   <div class="tab-pane fade show active" id="nav-Correlation_<%= sex %>" role="tabpanel" aria-labelledby="nav-Correlation-tab">
+-->
+
+<% if @found_dgrp_lines %>
+<%= @found_dgrp_lines[sex].size %> DGRP lines found. 
+<%# @found_dgrp_lines %>
+<% end %>
+
+<%# @content.to_json %>
+<%# h_correlation_res[:cmd] %>
+<% @h_studies = {}; Study.all.map{|s| @h_studies[s.id] = s} %>
+<% h_header = {'phenotype' => 'Phenotype', 'sex' => 'Sex', 'pearson_corr' => 'Cor.', 'p' => 'p', 'fdr' => 'FDR', 'overlapping_dgrp' => 'DGRP overlap'} %>
+<table id='results<%= "_#{sex}" if sex %>' class='table-striped' width="100%">
+  <thead>
+    <tr>
+      <th>Study</th>
+      <th><%= h_correlation_res[:header][0] %></th>
+      <th>sex</th>
+      <% (1 .. h_correlation_res[:header].size-1).to_a.map{|i| h_correlation_res[:header][i]}.each do |e| %>
+      <th><%= (h_header[e]) ? h_header[e] : e %></th>
+      <% end %>
+    </tr>
+  </thead>
+  <tbody>
+    <% h_correlation_res[:res][sex].each do |e| %>
+    <% pheno = e.shift %>
+    <% t = pheno.split("_") %>
+    <% p = @h_phenotypes[t[0].to_i] %>
+    <% if p and (curator? or p.obsolete == false) %> 
+    <tr>
+      <td>
+	<%= raw display_reference_short2(@h_studies[@h_phenotypes[t[0].to_i].study_id]) %>
+      </td>
+      <td>
+	<%= raw display_phenotype(@h_phenotypes[t[0].to_i]) %> 
+      </td>
+      <td class='phenotype_<%= t[1] %>'>
+	<%= @h_sex[t[1]] %>
+      </td>
+      <% e.each_index do |i| %>
+      <td>
+	<% e2 = e[i] %>
+	<%= raw display_corr_num(i, e2) %> <%# e2 %> 
+      </td>
+      <% end %>
+    </tr>
+    <% end %>
+    <% end %>
+  </tbody>
+</table>
+
+<%= javascript_tag do %>
+<% end %>
+
+<% if !@phenotype %>
+<div class="tab-pane fade" id="nav-GWAS_<%= sex %>" role="tabpanel" aria-labelledby="nav-GWAS_<%= sex %>-tab">
+  
+  <% if gwas_output.keys.size > 0 %>
+  <% if gwas_output[:displayed_error] %>
+  <div class='alert bg-danger'><%= gwas_output[:displayed_error] %></div>
+  <% else %>
+  <!-- <span class='badge bg-success'>-->
+    Loading...
+    <!--</span>-->
+  <% end %>
+  <% else %>
+  Running!
+  <% end %>
+  
+</div>
+<% end %>
+ 
+
+

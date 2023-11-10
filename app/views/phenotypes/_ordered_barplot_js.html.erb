@@ -1,0 +1,28 @@
+var traces = []
+<% ordered_index.each_key do |s| %>
+ <% x = [] %>
+ <% y = [] %>
+ <% ordered_index[params[:dgrp_order_barplot]].each do |i| %>
+  <% d = dgrp_lines[i] %>
+  <% x.push d %>
+  <% y.push h_sum_values[s][d] %>
+ <% end %>
+
+var trace = {
+y: <%= raw y.to_json %><%# raw (h_pheno[d]) ? h_pheno[d][phenotype.name].to_json : [] %>,
+ x : <%= raw x.to_json %>,
+ name : "<%= s %>",
+ marker : {color: '<%= @h_sex_color[s] %>'},
+ type: 'bar'
+ };
+ 
+traces.push(trace)
+<% end %>
+
+var layout = {
+title : 'Ordered barplot of <%= @list_sum_types[params[:displayed_sum_type].to_i] %> values',
+yaxis : {title : "<%= raw phenotype.description.gsub(/(.{30,50}) /, '\1<br>').gsub(/\n/, '<br>').gsub(/"/, "\\\"") %>"},
+boxmode: 'group'
+}
+
+Plotly.newPlot('ordered_barplot', traces, layout, opt);

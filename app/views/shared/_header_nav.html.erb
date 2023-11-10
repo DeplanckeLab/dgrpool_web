@@ -1,0 +1,132 @@
+<nav id='header_nav' class="navbar navbar-expand-sm fixed-top navbar-light bg-light">
+  <div id='page_title' class='ms-3'>
+    <a class="navbar-brand" href="<%= root_path %>" data-turbo="false"> <%= image_tag "LogoHDFinal.png", height: 35%> <small style='color:grey;font-style:italic'></small></a>
+  </div>
+  <div style='position:fixed; top:10px;right:10px'>
+    <!--    <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+	    <span class="navbar-toggler-icon"></span>
+    </button>
+    -->
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul id='main-nav' class="navbar-nav mr-auto" data-turbolinks="false">
+	      <li class="nav-item mr-4">
+          <%= link_to raw("<i class='fa fa-home'></i>"), root_path(), {:data => {:turbo => 'false', :method => 'get'}, :class => 'nav-link' } %>
+        </li>
+
+	<li class="nav-item mr-4">
+          <%= link_to 'DGRP lines', dgrp_lines_path(), {:data => {:turbo => 'false', :method => 'get'}, :class => 'nav-link' } %>
+        </li>
+
+        <li class="nav-item mr-4">
+          <%= link_to 'Studies', studies_path(), {:data => {:turbo => 'false', :method => 'get'}, :class => 'nav-link'} %>
+        </li>
+	
+        <li class="nav-item mr-4">
+          <%= link_to 'Categories', categories_path(), {:data => {:turbo => 'false', :method => 'get'}, :class => 'nav-link' } %>
+        </li>
+
+	<li class="nav-item mr-4">
+          <%= link_to 'Phenotypes', phenotypes_path(), {:data => {:turbo => 'false', :method => 'get'}, :class => 'nav-link' } %>
+        </li>
+
+<!--        <% if current_user %>
+        <li class="nav-item mr-4">
+          <%= link_to "Submit new study", new_study_path(),  {:class => 'nav-link' } %> 
+        </li>
+        <% end %>
+	-->
+	<% if admin? %>
+	<li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            <i class='fa fa-cog'></i> Admin tools
+          </a>
+          <ul class="dropdown-menu">
+	    <li>
+              <%= link_to raw('DGRP statuses'), dgrp_statuses_path(), {:data => {:turbo => 'false', :method => 'get'}, :class => 'dropdown-item'} %>
+            </li>
+	    <li>
+              <%= link_to raw('Figure types'), figure_types_path(), {:data => {:turbo => 'false', :method => 'get'}, :class => 'dropdown-item'} %>
+            </li>
+	    <li>
+              <%= link_to raw('Statuses'), statuses_path(), {:data => {:turbo => 'false', :method => 'get'}, :class => 'dropdown-item'} %>
+            </li>
+	    <li>
+              <%= link_to raw('SNP impacts'), snp_impacts_path(), {:data => {:turbo => 'false', :method => 'get'}, :class => 'dropdown-item'} %>
+            </li>
+	    <li>
+              <%= link_to raw('SNP types'), snp_types_path(), {:data => {:turbo => 'false', :method => 'get'}, :class => 'dropdown-item'} %>
+	    </li>
+	    <li>
+              <%= link_to raw('Summary types'), summary_types_path(), {:data => {:turbo => 'false', :method => 'get'}, :class => 'dropdown-item'} %>
+            </li>
+	    <li>
+              <%= link_to raw('Units'), units_path(), {:data => {:turbo => 'false', :method => 'get'}, :class => 'dropdown-item'} %>
+            </li>
+	    <li>
+	      <%= link_to "Update export file for GWAS analysis", upd_export_home_index_path(), {:class => 'dropdown-item'} %>
+	    </li>
+          </ul>
+        </li> 
+<!--        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            Admin tools
+          </a>
+	  <ul class="dropdown-menu">
+	    <li>
+	      <%= link_to raw('Statuses'), statuses_path(), {:class => 'dropdown-item'} %>
+            </li>
+	  </ul>
+        </li>-->
+        <% end %>
+
+	 <li class="nav-item  dropdown">
+          <a class="nav-link dropdown-toggle" style='margin-right:70px' href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            <i class='fa fa-tools'></i> Tools
+          </a>
+          <ul class="dropdown-menu">
+	    <li>
+              <%= link_to raw('Check your phenotype<br/><small>Correlation & GWAS</small>'), check_pheno_path(), {:target => '_blank', :data => {:turbo => 'false', :method => 'get'}, :class => 'dropdown-item'} %>
+            </li>
+            <li>
+              <%= link_to raw('Phenotype correlation'), pheno_correlation_path(), {:target => '_blank', :data => {:turbo => 'false', :method => 'get'}, :class => 'dropdown-item'} %>
+            </li>
+<!--            <li>
+              <%= link_to raw('GWAS analysis'), gwas_analysis_path(), {:target => '_blank', :data => {:turbo => 'false', :method => 'get'}, :class => 'dropdown-item'} %>
+            </li>-->
+
+          </ul>
+        </li>
+
+
+	<li class='nav-item'>
+          <%# link_to 'Help', tuto_home_index_path, :class => 'nav-link mr-3' %>
+        </li>
+
+        <% if current_user %>
+              <li class='nav-item'>
+		<%= link_to raw("<i class='fa fa-user'></i> ") + display_user(current_user),
+		    
+		    edit_user_registration_path, :class => 'nav-link mr-3', :data => {:turbo => 'false', :method => 'get'} %>
+		
+              </li>
+        <li class='nav-item'>
+          <%= link_to raw("<i class='fa fa-right-from-bracket'></i> Logout"),  destroy_user_session_path, :method => :delete, :data => {:turbo => 'false', :method => 'delete'}, :class => 'nav-link mr-3' %>
+        </li>
+        <% else %>
+        <li class='nav-item'>
+          <%= link_to raw("<i class='fa fa-right-to-bracket'></i> Login"), new_user_session_path, :data => {:turbo => 'false', :method => 'get'}, :class => 'nav-link mr-3' %>
+        </li>
+        <% end %>
+	
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<%= javascript_tag do %>
+<% end %>
+

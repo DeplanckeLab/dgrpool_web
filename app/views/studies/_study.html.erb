@@ -1,0 +1,196 @@
+
+<div id="<%= dom_id study %>">
+
+  <div class='card mb-2'>
+    <div class='card-body'>
+      <div class='float-end'>
+	<a href="mailto:bioinfo.epfl@gmail.com?subject=DGRPool feedback - Study <%= study.doi %>" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-html="true" title='Thanks! :)' class='btn btn-warning'>Report issues</a>
+      </div>
+      <div class='float-start'>
+      <h3>
+	Study
+      </h3>
+      </div>
+      <div class='float-start ms-2 mt-1'>
+	<%= raw display_status(study, @h_statuses) %>
+      </div>
+      <div class='clearfix'></div>
+      
+       <%= raw display_reference(study) %>
+    </div>
+  </div>
+
+  <div class='card mb-2'>
+    <div class='card-body'>
+      <h3>Description</h3>
+      <%= raw study.description %>
+    </div>
+  </div>
+
+  
+  <div class='card mb-2'>
+    <div class='card-body'>
+      <h3>Comments from curator</h3>
+      <%= raw study.comment %>
+    </div>
+  </div>
+
+  <% if !study.repository_identifiers or !study.repository_identifiers.empty? %>
+  <div class='card mb-2'>
+    <div class='card-body'>
+      <h3>Other external data available</h3>
+      <%= raw display_repository_identifiers(study) %>
+    </div>
+  </div>
+  <% end %>
+
+  <div class='row'>
+    <div class="col-md-6 mb-2">
+      <div class='card h-100 mb-2'>
+	<div class='card-body'>
+	  <% cats = study.categories %>
+	  <h3><%= cats.size if cats.size > 0 %> <%= (cats.size ==1) ? 'category' : 'categories' %></h3>
+	  
+	  <% if cats.size == 0 %>
+	  <i>None</i>
+	  <% else %>
+	  <%= raw study.categories.map{|cat| link_to(cat.name, category_path(cat), {:target => '_blank', :class => 'badge bg-info nodec'})}.join(" ") %>
+	  <% end %>
+	  <% phenotypes = (curator?) ? study.phenotypes : study.phenotypes.select{|p| p.obsolete == false} %>
+	  <% if phenotypes.size > 0 %>
+	  <h3 class='mt-3'><%= phenotypes.size %> <%= (phenotypes.size == 1) ? 'phenotype': 'phenotypes' %></h3>
+	  <% else %>
+	  <h3 class='mt-3'><i> No phenotype</i></h3>
+	  <% end %>
+          <%= raw study.phenotypes.sort{|a, b| a.name <=> b.name}.map{|p| display_phenotype(p)}.join(" ") %> <%# link_to(raw(p.name), ((curator?) ? edit_phenotype_path(p) : phenotype_path(p)), {:target => '_blank', "data-bs-toggle" => "tooltip", "data-bs-placement" => "bottom", "data-bs-html" => "true", :title => p.description, :class => 'badge bg-info nodec'})}.join(" ") %>
+
+	</div>
+      </div>
+    </div>
+    <div class="col-md-6 mb-2">
+      <div class='card h-100 mb-2'>
+	<div class='card-body'>
+	  <% if @h_stats['sex'].keys.size > 0 %>
+          <div id='sex_plot'></div>
+	  <% else %>
+	  <i>No data</i>
+	  <% end %>
+	</div>
+      </div>
+    </div>
+  </div>
+
+  <div class='card mb-2'>
+    <div class='card-body'>
+      <% dgrp_line_studies = study.dgrp_line_studies
+	 dgrp_lines = DgrpLine.where(:id => dgrp_line_studies.map{|e| e.dgrp_line_id}).all %>
+      <h3><%= dgrp_lines.size if dgrp_lines.size > 0 %> <%= (dgrp_lines.size != 1) ? "DGRP lines" : "DGRP line" %>
+	<small>
+	  <% h_dgrp_line_counts = {} %>
+	  <% dgrp_lines.map{|e| h_dgrp_line_counts[e.dgrp_status_id]||=0; h_dgrp_line_counts[e.dgrp_status_id]+=1} %>
+	  <% h_dgrp_line_counts.each_key do |k| %>
+	  <span class='badge bg-<%= @h_dgrp_statuses[k].css_class %>'><%= h_dgrp_line_counts[k] %> <%= @h_dgrp_statuses[k].name %></span>
+	  <% end %> 
+	</small>
+      </h3>
+      <% if dgrp_line_studies and dgrp_line_studies.size > 0 %>
+        <%= raw dgrp_lines.sort{|a, b| a.name <=> b.name}.map{|dgrp_line| link_to(dgrp_line.name, dgrp_line_path(dgrp_line), {"data-bs-toggle" => 'tooltip', "data-bs-placement" => 'bottom',  "data-bs-html" => 'true',  "title" => @h_dgrp_statuses[dgrp_line.dgrp_status_id].description, :target => '_blank', :class => 'badge bg-' + @h_dgrp_statuses[dgrp_line.dgrp_status_id].css_class + ' nodec'})}.join(" ") %>
+      <% else %>
+      <i>None</i>
+      <% end %>
+    </div>
+  </div>
+
+  <div class='card mb-2'>
+    <div class='card-body'>
+      <h3>Datasets</h3>
+      
+      <% if  @h_pheno['summary'] or @h_pheno['raw'] %>
+      <table class='topaligned'>
+        <thead>
+          <th>Dataset</th>
+          <th>Phenotypes</th>
+          <th>DGRP lines</th>
+          <th></th>
+        </thead>
+        <tbody>
+          <% if @h_pheno['summary'] %>
+          <% dgrp_lines = @h_pheno['summary'].keys %>
+          <% phenotypes = @h_pheno['summary'].keys.map{|dgrp_line| @h_pheno['summary'][dgrp_line].keys}.flatten.uniq.sort - ['sex']%>
+          <tr>
+            <td>Summary dataset</td>
+            <td><%= phenotypes.size %> phenotypes<br/>
+              <%= raw phenotypes.select{|e| @h_phenotypes[[nil, e]]}.map{|e| display_phenotype(@h_phenotypes[[nil, e]])}.join(" ") %></td>
+            <td><%= dgrp_lines.size %> DGRP lines<br/>
+              <%= raw dgrp_lines.sort.map{|e| display_dgrp_line(@h_dgrp_lines[e], @h_dgrp_statuses)}.join(" ") if @h_dgrp_lines %></td>
+            <td>
+              <%= link_to "Download", get_file_study_path(study, :name => 'summary.tsv'), {:class => 'btn btn-secondary btn-sm mb-2'} %>
+            </td>
+          </tr>
+          <% end %>
+          <% if @h_pheno['raw'] %>
+          <% @h_pheno['raw'].each_key do |dataset_id| %>
+          <% if  @h_pheno['raw'][dataset_id] %>
+          <tr>
+            <% dgrp_lines =  @h_pheno['raw'][dataset_id].keys %>
+	    
+            <% phenotypes = dgrp_lines.map{|dgrp_line| @h_pheno['raw'][dataset_id][dgrp_line].keys}.flatten.uniq.select{|e| p = @h_phenotypes[[dataset_id.to_i, e]] and (curator? or p.obsolete == false)}.sort - ['sex'] %>
+            <td>Raw dataset #<%= dataset_id %></td>
+            <td>
+	      <%# if admin? %>
+	      <%# @h_phenotypes.keys %>
+	      <%# dgrp_lines.map{|dgrp_line| @h_pheno['raw'][dataset_id][dgrp_line].keys}.flatten.uniq %>
+	      <%# end %>
+	      <%= phenotypes.size %> phenotypes<br/>
+              <%= raw phenotypes.select{|e| @h_phenotypes[[dataset_id.to_i, e]]}.map{|e| display_phenotype(@h_phenotypes[[dataset_id.to_i, e]])}.join(" ") %>
+	    </td>
+            <td>
+              <%= dgrp_lines.size %> DGRP lines<br/>
+	      <%# "UNKNOWN:" + raw(dgrp_lines.sort.select{|e| !@h_dgrp_lines[e]}.join(", ")) %> 
+              <%= raw dgrp_lines.sort.select{|e| @h_dgrp_lines[e]}.map{|e| display_dgrp_line @h_dgrp_lines[e], @h_dgrp_statuses}.join(" ") if @h_dgrp_lines %>
+	    </td>
+            <td>
+              <%= link_to "Download", get_file_study_path(study, :name => "raw_#{dataset_id}.tsv"), {:class => 'btn btn-secondary btn-sm mb-2'} %>
+            </td>
+          </tr>
+          <% end %>
+          <% end %>
+          <% end %>
+        </tbody>
+      </table>
+      <% end %>
+    </div>
+  </div>
+  
+</div>
+
+<%= javascript_tag do %>
+
+
+//$( document ).tooltip();
+
+<% if @h_stats['sex'].keys.size > 0 %>
+<% sex = @h_stats['sex'].keys %>
+
+var data = [{
+  values: <%= raw sex.map{|s| @h_stats['sex'][s]}.to_json %>,
+  labels: <%= raw sex.map{|s| @h_legend[:sex][s]}.to_json %>,
+  marker:{colors: <%= raw sex.map{|s| @h_sex_color[s] }.to_json %>},
+  type: 'pie',
+  textinfo: "label+percent"
+}];
+
+
+var layout = {
+  title: "Sex of DGRP lines used in this study",
+  height: 400,
+  width: 400,
+  showlegend: false
+};
+
+
+Plotly.newPlot('sex_plot', data, layout);
+
+<% end %>
+
+<% end %>

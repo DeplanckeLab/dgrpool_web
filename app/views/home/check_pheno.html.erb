@@ -1,0 +1,96 @@
+<h3>Correlation & GWAS Tool - Compare your own phenotype with the DGRPool database</h3>
+
+<div class="card text-center">
+  <div class="card-body">   
+    <%= file_field_tag 'dataset_file' %>
+    
+    <button id='preparse_btn' type='button' class='btn btn-primary'>Upload</button>
+    &nbsp;&nbsp;&nbsp;&nbsp;<i><%= link_to "Example file", get_file_study_path(Study.find(1), :name => 'summary.tsv'), {:target => "_blank"} %></i>
+    
+  </div>
+</div>
+
+<div id='preparsing_result' class='mt-2'>
+  <div class='alert alert-info'>
+    Data should be in the form of a tab separated matrix in a text file/tsv (Excel files will NOT be recognized), with first row as header:<br/><br/>
+	<table class='table table-bordered'>
+		<thead>
+			<tr>
+				<th>DGRP</th>
+				<th>sex</th>
+				<th>Pheno1</th>
+				<th>Pheno2</th>
+				<th>...</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr>
+				<td>DGRP_XXX</td>
+				<td>M</td>
+				<td>0.1</td>
+				<td></td>
+				<td>...</td>
+			</tr>
+			<tr>
+				<td>DGRP_XXX</td>
+				<td>NA</td>
+				<td>0.1</td>
+				<td>0.2</td>
+				<td>...</td>
+			</tr>
+			<tr>
+				<td>...</td>
+				<td>...</td>
+				<td>...</td>
+				<td>...</td>
+				<td>...</td>
+			</tr>
+		</tbody>
+	</table>
+	<br/>
+	<ul>
+		<li>First column should be titled <b>DGRP</b>, and contain DGRP line ids in DGRP_XXX or line_XXX format. <b>Note:</b> each DGRP line should appear only once (summary data per line, not raw data per fly)</li>
+		<li>Second column is optional. If set, it should be titled <b>sex</b>, and values should be one of the following: [F, M, NA]</li>
+		<li>Then there can be any number of phenotyping columns with any phenotype name as title (please avoid exotic characters), with corresponding values for each DGRP</li>
+		<li>Missing values should be 'NA' or left empty.</li>
+	</ul>	
+	You can also check this <a href="https://dgrpool.epfl.ch/studies/1/get_file?name=summary.tsv">example file</a> for an example formatted file.
+  </div>
+</div>
+
+<%= javascript_tag do %>
+
+  document.addEventListener('DOMContentLoaded', function () {
+
+  var repeat_refresh_gwas;
+
+ $("#preparse_btn").click(function(){
+  var data = new FormData();
+//data.append()
+$(this).prop("disabled", true)
+  $.each($('#dataset_file')[0].files, function(i, file) {
+    console.log(file)
+    data.append('file', file);
+  });
+
+  console.log(data)
+  $.ajax({
+    url: '<%= raw compute_my_pheno_correlation_path() %>',
+    data: data,
+    headers: {
+//      "Content-Type": "application/json",
+      "X-CSRF-Token": document.querySelector("meta[name='csrf-token']").content,
+    },
+    cache: false,
+    contentType: false,
+    processData: false,
+    method: 'POST',
+    type: 'POST', // For jQuery < 1.9
+    success: function(data){
+     $("#preparsing_result").html(data)
+    }
+  });
+ })
+
+})
+<% end %>

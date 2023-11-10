@@ -1,0 +1,14 @@
+<p style="color: green"><%= notice %></p>
+
+<h1>Gwas results</h1>
+
+<div id="gwas_results">
+  <% @gwas_results.each do |gwas_result| %>
+    <%= render gwas_result %>
+    <p>
+      <%= link_to "Show this gwas result", gwas_result %>
+    </p>
+  <% end %>
+</div>
+
+<%= link_to "New gwas result", new_gwas_result_path %>

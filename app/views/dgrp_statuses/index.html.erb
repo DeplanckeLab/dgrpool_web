@@ -1,0 +1,36 @@
+<p style="color: green"><%= notice %></p>
+
+<div class='float-end'>
+  <%= link_to "New DGRP status", new_dgrp_status_path, {:class => 'btn btn-primary'} %>
+</div>
+
+
+<h1>DGRP statuses</h1>
+
+<table id='dgrp_statuses'>
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Name</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <% @dgrp_statuses.each do |e| %>
+    <tr>
+      <td><%= e.id %></td>
+      <td><%= e.name %></td>
+      <td>
+        <%= link_to 'Edit', edit_dgrp_status_path(e), {:class => 'btn btn-success'} %></td>
+    </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<%= javascript_tag do %>
+
+document.addEventListener('DOMContentLoaded', function () {
+let table = new DataTable('#dgrp_statuses', {pageLength:100})
+});
+
+<% end %>

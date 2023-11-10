@@ -1,0 +1,28 @@
+var traces = []
+<% ordered_index.each_key do |s| %>
+ <% x = [] %>
+ <% y = [] %>
+ <% ordered_index[params[:dgrp_order]].each do |i| %>
+  <% d = dgrp_lines[i] %>
+  <% x += (0 .. h_pheno[d][phenotype.name].size-1).select{|i| h_pheno[d]['sex'][i] == s}.map{|j| d} %>
+  <% y += (0 .. h_pheno[d]['sex'].size-1).select{|i| h_pheno[d]['sex'][i] == s}.map{|i| h_pheno[d][phenotype.name][i]} %>
+ <% end %>
+
+var trace = {
+y: <%= raw y.to_json %><%# raw (h_pheno[d]) ? h_pheno[d][phenotype.name].to_json : [] %>,
+ x : <%= raw x.to_json %>,
+ name : "<%= s %>",
+ marker : {color: '<%= @h_sex_color[s] %>'},
+ type: 'box'
+ };
+ 
+traces.push(trace)
+<% end %>
+
+var layout = {
+title : 'Ordered boxplot of raw values',
+yaxis : {title : "<%= raw phenotype.description.gsub(/(.{30,50}) /, '\1<br>').gsub(/\n/, '<br>').gsub(/"/, "\\\"") %>"},
+boxmode: 'group'
+}
+
+Plotly.newPlot('ordered_boxplot', traces, layout, opt);

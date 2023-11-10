@@ -1,0 +1,121 @@
+<%# @data %>
+
+<% @h_res[:errors].each do |error| %>
+<div class='alert bg-danger'>
+  <%= error %>
+</div>
+<% end %>
+
+<table>
+  <thead>
+  </thead>
+  <tbody>
+  <!--  <% @diff.each_key do |k| %>
+    <tr>
+      <td><%# @h_diff_description[k] %></td>
+      <td><%# @diff[k].join(", ") %></td>
+    </tr>
+    <% end %>
+    -->
+  <tr>
+    <td>Number of new DGRP lines</td>
+    <td>      
+      <%= @diff[:new_dgrp_lines].size %></td>
+  </tr>
+  <tr>
+    <td>DGRP lines not yet in DB</td>
+    <td>
+      <% if @diff[:new_dgrp_lines_not_in_db].size > 0 %>
+      <%= @diff[:new_dgrp_lines_not_in_db].join(" ") %>
+    <% else %>
+    <i class='fa fa-check text-success'></i> <i>None</i>
+    <% end %>
+    </td>
+  </tr>
+  <% if @h_existing_data and @h_existing_data.keys.size != 0 %>
+  <tr>
+    <td>Removed DGRP lines</td>
+    <td>
+      <% if @diff[:removed_dgrp_lines].size > 0 %>
+      <i class='fa fa-triangle-exclamation text-warning'></i>
+      <%= @diff[:removed_dgrp_lines].join(", ") %>
+      <% else %>
+      <i class='fa fa-check text-success'></i> <i>None</i>
+      <% end %>
+    </td>
+  </tr>
+  <% end %>
+  <tr>
+    <td>Number of new phenotypes</td>
+    <td>
+       <%= @diff[:new_phenotypes].size %>
+    </td>
+  </tr>
+  <% if @h_existing_data and @h_existing_data.keys.size != 0 %>
+  <tr>
+    <td>Removed phenotypes</td>
+    <td>
+      <% if @diff[:removed_phenotypes].size > 0 %>
+      <i class='fa fa-triangle-exclamation text-warning'></i>
+      <%= @diff[:removed_phenotypes].join(", ") %>
+      <% else %>
+      <i class='fa fa-check text-success'></i> <i>None</i>
+      <% end %>
+    </td>
+  </tr>
+  <% end %>
+   <tr>
+    <td>New phenotypes already in other studies</td>
+    <td>
+      <% if @diff[:bad_new_phenotypes].size > 0 %>
+      <i class='fa fa-triangle-exclamation text-warning'></i>
+      <%= @diff[:bad_new_phenotypes].join(", ") %>
+      <% else %>
+      <i class='fa fa-check text-success'></i> <i>None</i>
+      <% end %>
+    </td>
+   </tr>
+  
+  </tbody>
+  </table>
+  <%# @h_res[:stats].to_json %>
+<%# @diff.to_json %>
+
+<button id='btn-submit_dataset' class='btn btn-success' type='button' <%= ( @h_res[:errors].size > 0 or @diff[:new_dgrp_lines_not_in_db].size > 0) ? "disabled='disabled'" : '' %>>Integrate</button>
+
+<%= javascript_tag do %>
+
+$("#btn-submit_dataset").click(function(){
+console.log("test")
+  var data = new FormData();
+  //data.append()
+$.each($('#dataset_file')[0].files, function(i, file) {
+    console.log(file)
+    data.append('file', file);
+});
+data.append('dataset', '<%= params[:dataset] %>');
+data.append('integrate', '1');
+ console.log(data)
+  $.ajax({
+    url: '<%= raw parse_dataset_study_path(@study) %>',
+data: data,
+beforeSend: function(){
+$("#btn-submit_dataset").prop("disabled", true)
+},
+    headers: {
+//      "Content-Type": "application/json",
+      "X-CSRF-Token": document.querySelector("meta[name='csrf-token']").content,
+    },
+    cache: false,
+    contentType: false,
+    processData: false,
+    method: 'POST',
+    type: 'POST', // For jQuery < 1.9
+    success: function(data){
+				  //  $("#preparsing_result").html(data)
+				  window.location.href = "<%= edit_study_path(@study) %>"
+    }
+  });
+})
+
+<% end %>

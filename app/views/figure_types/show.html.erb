@@ -1,0 +1,10 @@
+<p style="color: green"><%= notice %></p>
+
+<%= render @figure_type %>
+
+<div>
+  <%= link_to "Edit this figure type", edit_figure_type_path(@figure_type) %> |
+  <%= link_to "Back to figure types", figure_types_path %>
+
+  <%= button_to "Destroy this figure type", @figure_type, method: :delete %>
+</div>

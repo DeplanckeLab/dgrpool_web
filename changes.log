@@ -1,0 +1,14 @@
+Study SI012 : Lifespan least squares means -> Lifespan least squares means corrected for the effects of body size (thorax length) and experimental block
+Study SI012 : corrected for the effects of body size (thorax length) and experimental block ->  Week 1 Fecundity StdMean (not corrected)
+Study SI012 :  Week 1 Fecundity StdMean (not corrected) ->  Week 1 Fecundity least squares mean corrected for the effects of body size (thorax length) and experimental block
+Study SI012 :  Week 1 Fecundity least squares mean ->  Week 3 Fecundity StdMean (not corrected)
+Study SI012 : corrected for the effects of body size (thorax length) and experimental block ->  Week 3 Fecundity least squares means corrected for the effects of body size (thorax length) and experimental block
+Study SI012 :  Week 3 Fecundity StdMean (not corrected) ->  Week 5 Fecundity StdMean (not corrected)
+Study SI012 :  Week 3 Fecundity least squares means ->  Week 5 Fecundity least squares means corrected for the effects of body size (thorax length) and experimental block
+Study SI012 : corrected for the effects of body size (thorax length) and experimental block ->  Week 7 Fecundity StdMean (not corrected)
+Study SI012 :  Week 5 Fecundity StdMean (not corrected) ->  Week 7 Fecundity least squares means corrected for the effects of body size (thorax length) and experimental block
+Study SI012 :  Week 5 Fecundity least squares means ->  Lifetime Fecundity Standard Mean (not corrected)
+Study SI012 : corrected for the effects of body size (thorax length) and experimental block ->  Lifetime Fecundity least squares means corrected for the effects of body size (thorax length) and experimental block
+Study SI039 : Circadian period computed with MESA (MESA period -> Circadian period computed with MESA (MESA period in hrs.)
+Study SI039 : hrs.) -> Circadian period computed with Chi-squared (Chi-squared period in hrs.)
+Study SI039 : Circadian period computed with Chi-squared (Chi-squared period -> Rythmicity Index

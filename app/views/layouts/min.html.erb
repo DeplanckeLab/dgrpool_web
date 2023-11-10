@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>DGRPool</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+
+    <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
+    <%= javascript_include_tag "application", "data-turbo-track": "reload", defer: true %>
+    <%# stylesheet_link_tag "https://cdn.datatables.net/1.12.1/css/dataTables.bootstrap5.min.css" %>
+    <%# javascript_include_tag "https://cdn.datatables.net/1.12.1/js/jquery.dataTables.min.js" %>
+    <%# javascript_include_tag "https://cdn.datatables.net/1.12.1/js/dataTables.bootstrap5.min.js" %>
+    <%= stylesheet_link_tag "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css" %>
+    <%= javascript_include_tag "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/js/all.min.js" %>
+    <script src="https://cdn.plot.ly/plotly-2.16.1.min.js"></script>
+    
+    <script>
+      /*    window.onload = function(){
+       function loadjscssfile(filename, filetype) {
+       if(filetype == "js") {
+       var cssNode = document.createElement('script');
+       cssNode.setAttribute("type", "text/javascript");
+       cssNode.setAttribute("src", filename);
+       } else if(filetype == "css") {
+       var cssNode = document.createElement("link");
+       cssNode.setAttribute("rel", "stylesheet");
+       cssNode.setAttribute("type", "text/css");
+       cssNode.setAttribute("href", filename);
+       }
+       if(typeof cssNode != "undefined")
+       document.getElementsByTagName("head")[0].appendChild(cssNode);
+       }
+       loadjscssfile("https://cdn.datatables.net/1.12.1/css/dataTables.bootstrap5.min.css", "css")
+       loadjscssfile("https://cdn.datatables.net/1.12.1/js/jquery.dataTables.min.js", "js")
+       loadjscssfile("https://cdn.datatables.net/1.12.1/js/dataTables.bootstrap5.min.js", "js")
+       }    
+      */
+    </script>
+
+    
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-L4CVEG0M4N"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      
+      gtag('config', 'G-L4CVEG0M4N');
+    </script>
+    
+  </head>
+  
+  <body id='body_container'>
+    
+    
+    <%# render :partial => "shared/header_nav" %>
+    
+    <div class="container-fluid">
+      <div id='ontop_popup_window'>
+        <div id='ontop_popup_window_close'><span onclick="$('#ontop_popup_container').html(''); $('#ontop_popup_window').css({display : 'none'}); $('#ontop_autocomplete_window').css({display : 'none'});"><i class='fa fa-times-circle'></i></span></div>
+        <div id='ontop_popup_container'></div>
+      </div>
+      <div id='ontop_popup_window2'>
+        <div id='ontop_popup_window_close2'><span onclick="$('#ontop_popup_container2').html(''); $('#ontop_popup_window2').css({display : 'none'}); $('#ontop_autocomplete_window2').css({display : 'none'});"><i class='fa fa-times-circle'></i></span></div>
+        <div id='ontop_popup_container2'></div>
+      </div>
+    </div>
+    
+    <%= yield %>
+
+    <%# render :partial => 'shared/footer' %>
+
+    <%= javascript_tag do %>
+
+    document.addEventListener('DOMContentLoaded', function () {
+
+/*    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl)
+    })
+*/
+    })
+    
+    <% end %>
+    
+  </body>
+</html>

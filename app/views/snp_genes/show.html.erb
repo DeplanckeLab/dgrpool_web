@@ -1,0 +1,10 @@
+<p style="color: green"><%= notice %></p>
+
+<%= render @snp_gene %>
+
+<div>
+  <%= link_to "Edit this snp gene", edit_snp_gene_path(@snp_gene) %> |
+  <%= link_to "Back to snp genes", snp_genes_path %>
+
+  <%= button_to "Destroy this snp gene", @snp_gene, method: :delete %>
+</div>

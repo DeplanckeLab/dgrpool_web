@@ -1,0 +1,8 @@
+development:
+ data_dir:
+  /data/dgrpool/
+
+production:
+ data_dir:
+  /data/dgrpool/
+
