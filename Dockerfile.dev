@@ -2,7 +2,7 @@ FROM ruby:3.1-bookworm
 
 RUN apt-get update
 
-RUN apt-get install -y postgresql-server-dev-all sqlite3 libsqlite3-dev git build-essential nodejs bash npm yarn busybox curl default-jdk
+RUN apt-get install -y postgresql-server-dev-all sqlite3 libsqlite3-dev git build-essential nodejs bash npm busybox curl default-jdk
 
 RUN mkdir -p /opt/mimemagic
 

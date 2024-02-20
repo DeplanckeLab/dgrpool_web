@@ -2,6 +2,7 @@ docker-compose.yaml
 
 data
 postgres-data
+*.sql
 *.sql.gz
 src/tmp/**
 src/log/**
@@ -15,6 +16,7 @@ src/public/assets/*
 src/Gemfile.lock
 src/package-lock.json
 
+**/*.pid
 *~
 *#
 *.old

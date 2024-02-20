@@ -12,8 +12,6 @@ DGRPool is a web application designed to serve as a comprehensive repository for
 - **User-Submitted Phenotypes**: Researchers can upload their own phenotypic data to the platform for correlation analyses and GWAS, expanding the utility of DGRPool.
 - **Proof-of-Concept Studies**: DGRPool showcases its potential through proof-of-concept studies, providing insights into biological discoveries facilitated by the platform.
 
-## Usage
-
 ### Dataset Repository
 
 Users can explore the repository by searching for keywords or browsing through curated categories such as "ageing", "metabolism", or "olfactory". Each study is meticulously curated to ensure data accuracy and relevance.
@@ -30,9 +28,20 @@ Users can perform various analyses including phenotype correlation and GWAS. Pre
 
 DGRPool provides proof-of-concept studies to showcase its potential in facilitating biological discoveries. These studies highlight associations between phenotypes, providing valuable insights for further research.
 
-## Installation
+## Development Server Setup
 
-DGRPool is a web-based application and does not require installation. Users can access the platform through the provided URL: [dgrpool.epfl.ch](https://dgrpool.epfl.ch)
+To set up the development server for DGRPool, follow these steps:
+
+1. **Obtain the Database Dump**: Get the dump file from the database and place it in the `startdb` folder. If the folder doesn't exist, create one.
+
+2. **Create Data Folder**: Ensure there is a `/data` folder in the root directory of the project. If it doesn't exist, create one.
+
+3. **Copy Files**: Copy all files present in `/data/dgrpool` on the DGRPool server to the local `/data` folder. You can use tools like `rsync` for this purpose.
+
+4. **Build Files**: If the files are not built automatically, navigate to the container and run the following commands: 
+```bash
+   npm run build & npm run build:css
+```
 
 ## Contributing
 
@@ -40,11 +49,11 @@ DGRPool welcomes contributions from the community. Users interested in becoming 
 
 ## Contact
 
-For inquiries or support, please contact the DGRPool team at [dgrpool@example.com](mailto:dgrpool@gmail.com)
+For inquiries or support, please contact the DGRPool team at [dgrpool@gmail.com](mailto:dgrpool@gmail.com)
 
 ## License
 
-DGRPool is open-source software licensed under the [MIT License](https://opensource.org/licenses/MIT).
+See LICENSE file
 
 ---
 
