@@ -117,7 +117,7 @@ module Parse
       h_data = {}
       errors = []
       lines =  data.split(/[\r\n]+/)
-      logger.debug(lines)
+    #  logger.debug(lines)
       header = lines.shift
     #  logger.debug(header)
       t_header = header.split("\t")
@@ -168,7 +168,7 @@ module Parse
             end
           else
             bad_nber_cols.push(j)
-            logger.debug(l.to_json)
+            #   logger.debug(l.to_json)
           end
         end
         if bad_nber_cols.size > 0
@@ -182,7 +182,7 @@ module Parse
     def parse_csv study_id
       studies_dir = Pathname.new(APP_CONFIG[:data_dir]) + 'studies'
       data_file = studies_dir + "#{study_id}.csv" #) d + 'Extract' + (d + ".csv")
-      puts data_file
+    #  puts data_file
       h_data = {}
       if File.exist? data_file
         rows = File.readlines(data_file)
