@@ -49,7 +49,7 @@ DGRPool welcomes contributions from the community. Users interested in becoming 
 
 ## Contact
 
-For inquiries or support, please contact the DGRPool team at [dgrpool@gmail.com](mailto:dgrpool@gmail.com)
+For inquiries or support, please contact the DGRPool team at [bioinfo.epfl@gmail.com](mailto:bioinfo.epfl@gmail.com)
 
 ## License
 
