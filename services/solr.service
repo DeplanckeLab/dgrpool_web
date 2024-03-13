@@ -1,0 +1,16 @@
+[Unit]
+Description=Apache Solr search engine
+After=syslog.target network.target remote-fs.target nss-lookup.target
+
+[Service]
+User=fdavid
+Type=simple
+WorkingDirectory=/srv/dgrpool/
+ExecStart=bundle exec rake sunspot:solr:start
+ExecStop=bundle exec rake sunspot:solr:stop
+KillSignal=SIGINT
+Restart=always
+
+[Install]
+WantedBy=multi-user.target rails.service
+
