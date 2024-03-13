@@ -43,6 +43,39 @@ To set up the development server for DGRPool, follow these steps:
    npm run build & npm run build:css
 ```
 
+5. **Create services**: There are several services that we **create** and **enable** for running at the server start.
+   You can find them in [./services](./services)
+   
+   On a linux system, they should be put in `/etc/systemd/system/`
+   Then, you can reboot the service daemon:
+   ```bash
+   systemctl daemon-reload
+   ```
+
+   After that, you can start all services with the commands:
+   ```bash
+   systemctl start solr
+   systemctl start rails
+   systemctl start jobdemon
+   systemctl start postgresql
+   ```
+
+   And check if they are running properly using:
+   ```bash
+   systemctl status solr
+   systemctl status rails
+   systemctl status jobdemon
+   systemctl status postgresql
+   ```
+
+   The service will automatically restart the programs if they fail. We will also **enable** them so that they automatically start when the server boots:
+   ```bash
+   systemctl enable solr
+   systemctl enable rails
+   systemctl enable jobdemon
+   systemctl enable postgresql
+   ```
+
 ## Contributing
 
 DGRPool welcomes contributions from the community. Users interested in becoming curators or contributing to the development of the platform can reach out through the provided contact information on the website.
