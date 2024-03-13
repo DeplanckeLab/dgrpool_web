@@ -32,7 +32,7 @@ DGRPool provides proof-of-concept studies to showcase its potential in facilitat
 
 To set up the development server for DGRPool, follow these steps:
 
-1. **Obtain the Database Dump**: Get the dump file from the database and place it in the `startdb` folder. If the folder doesn't exist, create one.
+1. **Obtain the Database Dump**: Get the dump file from the database (`pg_dump dgrpool >dgrpool.dump`) and place it in the `startdb` folder. If the folder doesn't exist, create one.
 
 2. **Create Data Folder**: Ensure there is a `/data` folder in the root directory of the project. If it doesn't exist, create one.
 
