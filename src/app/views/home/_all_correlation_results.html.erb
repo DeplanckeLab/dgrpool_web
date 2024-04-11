@@ -29,49 +29,53 @@
       <% end %>
     </button>
   <% end %>                                                                                                                                                                                                                      
-<% end %>                                                                                                                                                                                                                         
+  <% end %>                                                                                                                                                                                                                         
   </div>                            
 
 <div class="tab-content" id="nav-tabContent">                                                                                                                                                                                 
-   <div class="tab-pane fade show active" id="nav-Correlation" role="tabpanel" aria-labelledby="nav-Correlation-tab">    
- 
-<nav>
-  <div class="nav nav-tabs" id="nav-tab-Correlation" role="tablist">
-    <% @ordered_list_sex.select{|s| h_correlation_res[:res][s]}.each do |sex| %>
-      <button class="nav-link <%= (@cur_sex == sex) ? "active" : "" %>" id="nav-<%= sex %>-tab" data-bs-toggle="tab" data-bs-target="#nav-Correlation-<%= sex %>" type="button" role="tab" aria-controls="nav-Correlation-<%= sex %>" aria-selected="true"><%= @h_legend[:sex][sex] %> <span class='badge rounded-pill bg-<%= (h_correlation_res[:res][sex].size > 0) ? 'success' : 'danger' %>'><%= h_correlation_res[:res][sex].size %></span></button>
-    </li>
-    <% end %>
+  <div class="tab-pane fade show active" id="nav-Correlation" role="tabpanel" aria-labelledby="nav-Correlation-tab">    
+    
+    <nav>
+      <div class="nav nav-tabs" id="nav-tab-Correlation" role="tablist">
+	<% @ordered_list_sex.select{|s| h_correlation_res[:res][s]}.each do |sex| %>
+	<button class="nav-link <%= (@cur_sex == sex) ? "active" : "" %>" id="nav-<%= sex %>-tab" data-bs-toggle="tab" data-bs-target="#nav-Correlation-<%= sex %>" type="button" role="tab" aria-controls="nav-Correlation-<%= sex %>" aria-selected="true"><%= @h_legend[:sex][sex] %> <span class='badge rounded-pill bg-<%= (h_correlation_res[:res][sex].size > 0) ? 'success' : 'danger' %>'><%= h_correlation_res[:res][sex].size %></span></button>
+	
+	<% end %>
+      </div>
+    </nav>
+    
+    <div class="tab-content" id="nav-tabContent-Correlation">
+      <% if  @h_correlation_res[:h_output]['displayed_error'] %>
+      <div class='alert alert-danger mt-3'>
+	<%= @h_correlation_res[:h_output]['displayed_error'] %>
+      </div>
+      <% else %>
+      <%# @ordered_list_sex.to_json %>
+      <%# params.to_json %>
+      <%# @h_correlation_res.to_json %>
+      <%# @h_res.to_json %>
+      <% @ordered_list_sex.select{|s| h_correlation_res[:res][s]}.each do |sex| %>
+      <div class="tab-pane fade <%= (@cur_sex == sex) ? "show active" : "" %>" id="nav-Correlation-<%= sex %>" role="tabpanel" aria-labelledby="nav-Correlation-<%= sex %>-tab">
+
+	<% if h_correlation_res[:res][sex].size > 0 %>
+
+	<%= render :partial => "home/correlation_results", :locals => {:h_correlation_res => h_correlation_res, :sex => sex} %>
+	<% else %>
+	<div class='alert bg-warning mt-3'>No result</div>
+	<% end %>
+	<%# end %>
+      </div>
+      <% end %>
+      <% end %>
+    </div>
+    
+    
   </div>
-</nav>
-
-<div class="tab-content" id="nav-tabContent-Correlation">
-  <% if  @h_correlation_res[:h_output]['displayed_error'] %>
-  <div class='alert alert-danger mt-3'>
-    <%= @h_correlation_res[:h_output]['displayed_error'] %>
+  <% if !@phenotype %>
+  <div class="tab-pane fade" id="nav-GWAS" role="tabpanel" aria-labelledby="nav-GWAS-tab">
+    <%= h_correlation_res[:md5] %>
   </div>
-  <% else %>
-  <% @ordered_list_sex.select{|s| h_correlation_res[:res][s]}.each do |sex| %>
-   <div class="tab-pane fade <%= (@cur_sex == sex) ? "show active" : "" %>" id="nav-Correlation-<%= sex %>" role="tabpanel" aria-labelledby="nav-Correlation-<%= sex %>-tab">
-
-     <% if h_correlation_res[:res][sex].size > 0 %>
-
-     <%= render :partial => "home/correlation_results", :locals => {:h_correlation_res => h_correlation_res, :sex => sex} %>
-    <% else %>
-    <div class='alert bg-warning mt-3'>No result</div>
-    <% end %>
-    <%# end %>
-  </div>
-   <% end %>
-   <% end %>
-</div>
-
-
-   </div>
-   <% if !@phenotype %>
-   <div class="tab-pane fade" id="nav-GWAS" role="tabpanel" aria-labelledby="nav-GWAS-tab">
-     <%= h_correlation_res[:md5] %>
-   </div>
-   <% end %>
+  <% end %>
 </div>
 <%= javascript_tag do %>
 

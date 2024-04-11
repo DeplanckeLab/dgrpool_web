@@ -29,7 +29,7 @@ module Basic
       
       #      if !File.exist? output_dir
       Dir.mkdir output_dir if !File.exist? output_dir
-      cmd = "java -jar /srv/dgrpool/lib/DGRPool-1.0.jar AllCorrelations --pheno #{tmp_file} --phenodb #{export_mean_file} -o #{output_dir} 1> #{output_dir + 'output.json'} 2> #{output_dir + 'output.err'}"
+      cmd = "java -jar ./lib/DGRPool-1.0.jar AllCorrelations --pheno #{tmp_file} --phenodb #{export_mean_file} -o #{output_dir} 1> #{output_dir + 'output.json'} 2> #{output_dir + 'output.err'}"
       res = `#{cmd}`
       #      end
       #      File.delete tmp_file if File.exist? tmp_file

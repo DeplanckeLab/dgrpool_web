@@ -68,7 +68,7 @@ class PhenotypesController < ApplicationController
               @h_res.each_key do |k|
                 trace = {
                   :y => @h_res[k].map{|e| (@h_dgrp_lines[e.name]) ? @h_dgrp_lines[e.name][0] : nil}.compact,
-                  :text => @h_res[k].map{|e| e.name}, 
+                  :text => @h_res[k].map{|e| (@h_dgrp_lines[e.name]) ? e.name : nil}.compact,
                   :name => h_legend[k],
                   :type => 'box',
                   :jitter => 0.3,
