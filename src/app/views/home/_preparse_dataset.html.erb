@@ -75,7 +75,7 @@ $(this).prop("disabled", true)
 				  $("#comparison_results").html(res)
 				  <% @h_sex.each_key do |sex| %>
 				  if ($("#results_<%= sex %>").length > 0){
-				  new DataTable('#results_<%= sex %>', {pageLength:100, order:[[4, 'asc'], [3, 'desc'], [6, 'desc']]})
+				  $('#results_<%= sex %>').DataTable({pageLength:100, order:[[4, 'asc'], [3, 'desc'], [6, 'desc']]})
 				  }
                                   <% end %>
     }

@@ -24,39 +24,8 @@
 
   document.addEventListener('DOMContentLoaded', function () {
 $( document ).tooltip();
-let table = new DataTable('#studies', {pageLength:100,order:<%= raw order.to_json %>})
+//let table = new DataTable('#studies', {pageLength:100,order:<%= raw order.to_json %>})
+$("#studies").DataTable({pageLength:100,order:<%= raw order.to_json %>})
 });
 
-/*
-$(document).ready(function(){
- let table = new DataTable('#studies')
-})
-*/
-
-/*window.addEventListener('load', 
-  function() { 
-$("#studies").DataTable()
-});
-*/
-/*window.onload = function() {
-$("#studies").DataTable()
-}
-*/
-
-/*import { Controller } from '@hotwired/stimulus'
- 
- export default class extends Controller {
-   connect () {
-        document.addEventListener('DOMContentLoaded', function () {
-        let table = new DataTable('#studies');
-     });
-   }
- }
-*/
-//let table = new DataTable('#studies')
-//const table = $(this.element.querySelector('studies'))
-
-// prepare options, optional add remote processing (not yet implemented)
-
-//let dtable = $(table).DataTable()
 <% end %>

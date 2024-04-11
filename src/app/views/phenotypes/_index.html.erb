@@ -53,8 +53,8 @@
 
 
   document.addEventListener('DOMContentLoaded', function () {
-   let table = new DataTable('#phenotypes', {pageLength:100})
-
+  // let table = new DataTable('#phenotypes', {pageLength:100})
+  $("#phenotypes").DataTable({pageLength:100})
 $("#only_integrated_studies").click(function(){
 //console.log($(this).prop("checked"))
 if ($(this).prop("checked") == true){

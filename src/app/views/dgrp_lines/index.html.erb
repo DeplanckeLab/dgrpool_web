@@ -45,9 +45,14 @@
 <%= javascript_tag do %>
 
 
-  document.addEventListener('DOMContentLoaded', function () {
+/*
+document.addEventListener('DOMContentLoaded', function () {
 let table = new DataTable('#dgrp_lines', {pageLength:100})
 });
+*/
+
+$('#dgrp_lines').DataTable({pageLength:100})
+
 
 <% end %>
 

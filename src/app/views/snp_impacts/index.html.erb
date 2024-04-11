@@ -30,7 +30,7 @@
 <%= javascript_tag do %>
 
 document.addEventListener('DOMContentLoaded', function () {
-let table = new DataTable('#snp_impacts', {pageLength:100})
+$("#snp_impacts").DataTable({pageLength:100})
 });
 
 <% end %>

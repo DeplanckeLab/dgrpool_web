@@ -14,6 +14,7 @@ src/log/**
 !src/tmp/.keep
 src/vendor/bundle
 src/public/assets/*
+src/solr/pids
 
 */node_modules
 .env.prod

@@ -63,12 +63,11 @@ These results were computed across all phenotypes on DGRPool. We display only p-
   })
 */
 
- var table = new DataTable('#phewas_table', {
+ $("#phewas_table").DataTable('{
         pageLength:100,
         order : [[1, 'asc']]
         })
 
-//$(".pheno_link").tooltip()
      initTooltips();
 
 <% end %>

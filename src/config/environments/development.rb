@@ -17,7 +17,7 @@ Rails.application.configure do
   # Enable server timing
   config.server_timing = true
 
-  config.hosts << "dgrpool.epfl.ch" << "http://0.0.0.0:3000"
+  config.hosts << "dgrpool.epfl.ch" << "http://0.0.0.0:3000" << "biccsrv3.epfl.ch:32786"
   config.force_ssl = false
 
   # Enable/disable caching. By default caching is disabled.

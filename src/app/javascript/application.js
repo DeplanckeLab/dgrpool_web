@@ -1,17 +1,24 @@
 // Entry point for the build script in your package.json
 import "@hotwired/turbo-rails"
 import "./controllers"
+
 import * as bootstrap from "bootstrap"
-//import * as Bootstrap from 'bootstrap'
 import "@popperjs/core"
 
+// Import $ for jQuery operations
 import './src/jquery'
-import './src/jquery-ui'
-import './src/jquery.ui.autocomplete.html'
-import './src/datatables'
+
+console.log("jQuery version: " + $.fn.jquery); // Log jQuery version           
+
+import 'datatables.net' 
+
+//import './src/jquery-ui'
+//import './src/jquery.ui.autocomplete.html'
+
+/*import 'datatables.net'
 import './src/custom'
-//import './src/tooltipster'
-//import 'plotly.js-dist/plotly'
+import './src/tooltipster'
+import 'plotly.js-dist/plotly'
 
 window.initTooltips = function(){
    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
@@ -64,7 +71,7 @@ window.downloadFullHtml = function(el_to_download) {
             // Release the temporary URL
     URL.revokeObjectURL(url);
 }
-
+*/
 //function initTooltips() {
 /*
   var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
