@@ -9,11 +9,3 @@ COPY src/. .
 CMD ["rm ./tmp/pids/server.pid"]
 CMD ["./bin/dev"]
 
-#FROM ruby:3.1-bookworm
-#RUN apt-get update
-#RUN apt-get install -y postgresql-server-dev-all sqlite3 libsqlite3-dev git build-essential nodejs bash npm busybox curl default-jdk less gzip
-#RUN mkdir -p /opt/mimemagic
-#WORKDIR /opt/dgrpool
-#ENV FREEDESKTOP_MIME_TYPES_PATH=/opt/mimemagic RAILS_ENV=development
-#COPY ./src .
-#CMD ["./start.sh"]

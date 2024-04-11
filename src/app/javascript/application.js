@@ -11,9 +11,11 @@ import './src/jquery'
 console.log("jQuery version: " + $.fn.jquery); // Log jQuery version           
 
 import 'datatables.net' 
+import './src/jquery-ui'
+import './src/jquery.ui.autocomplete.html'
 
-//import './src/jquery-ui'
-//import './src/jquery.ui.autocomplete.html'
+import './src/custom'                              
+import './src/tooltipster' 
 
 /*import 'datatables.net'
 import './src/custom'
