@@ -41,6 +41,11 @@ To set up the development server for DGRPool, follow these steps:
 - `git clone` the current repo and build the docker image 'docker-compose build'
 - Create the `docker-compose.yaml` file (symlink or copy from example files if needed)
 - Create the `.env` file and edit it with your information (symlink or copy from example file if needed)
+  - POSTGRES_PASSWORD is the password for the database (pick any you want for your database)
+  - SECRET_KEY_BASE is the secret key (pick any you want)
+  - RAILS_ENV should be picked in [development, production]
+  - ACTION_MAILER_HOST is the url of the host website (e.g. dgrpool.epfl.ch)
+  - ACTION_MAILER_PORT is the port of the host website (e.g. 80)
 
 5. **Build Files**:
 Run the following command
