@@ -44,6 +44,7 @@ To set up the development server for DGRPool, follow these steps:
   - POSTGRES_PASSWORD is the password for the database (pick any you want for your database)
   - SECRET_KEY_BASE is the secret key (pick any you want)
   - RAILS_ENV should be picked in [development, production]
+  - DATA_DIR should be the /data/dgrpool directory (see points 2 & 3)
   - ACTION_MAILER_HOST is the url of the host website (e.g. dgrpool.epfl.ch)
   - ACTION_MAILER_PORT is the port of the host website (e.g. 80)
 
