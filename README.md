@@ -38,9 +38,9 @@ To set up the development server for DGRPool, follow these steps:
 
 3. **Copy Files**:
 - Copy all files present in `/data/dgrpool` on the DGRPool server to the local `/data` folder. You can use tools like `rsync` for this purpose.
-- `git clone` the current repo and build the docker image 'docker build .'
-- symlink the correct `docker-compose.yaml` file (dev or prod)
-- symlink or copy the .env.dev.example (edit it if needed) file in the RoR project
+- `git clone` the current repo and build the docker image 'docker-compose build'
+- Create the `docker-compose.yaml` file (symlink or copy from example files if needed)
+- Create the `.env` file and edit it with your information (symlink or copy from example file if needed)
 
 5. **Build Files**:
 Run the following command
