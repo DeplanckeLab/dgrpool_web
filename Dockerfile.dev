@@ -5,6 +5,7 @@ WORKDIR /opt/dgrpool
 ENV FREEDESKTOP_MIME_TYPES_PATH=/opt/mimemagic
 COPY src/Gemfile .
 RUN bundle install
+RUN yarn install
 COPY src/. .
 CMD ["rm ./tmp/pids/server.pid"]
 CMD ["./bin/dev"]

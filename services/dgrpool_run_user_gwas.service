@@ -6,9 +6,8 @@ After=syslog.target network.target remote-fs.target nss-lookup.target
 Type=simple
 User=fdavid
 Group=fdavid
-WorkingDirectory=/srv/dgrpool/
-#ExecStart=/usr/bin/podman-compose exec website rails run_user_gwas
-ExecStart=rails run_user_gwas
+WorkingDirectory=[DGRPOOL_DIR]
+ExecStart=/usr/bin/podman-compose exec website rails run_user_gwas
 KillSignal=SIGINT
 Restart=always
 
