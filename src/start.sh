@@ -7,9 +7,9 @@ if [ ! -d "node_modules" ]; then
     npm i
 fi
 
-bundle install
+#bundle install
 
-bundle exec rake sunspot:solr:start
+#bundle exec rake sunspot:solr:start
 
 npm run build & npm run build:css & ./bin/rails server -b "0.0.0.0" && fg 
 
