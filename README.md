@@ -32,14 +32,11 @@ DGRPool provides proof-of-concept studies to showcase its potential in facilitat
 
 To set up the development server for DGRPool, follow these steps:
 
-1. **Obtain the Database Dump**: Get the dump file from the database (`pg_dump dgrpool >dgrpool.dump`) and place it in the `startdb` folder. If the folder doesn't exist, create one.
-
-2. **Create Data Folder**: Ensure there is a `/data` folder in the root directory of the project. If it doesn't exist, create one.
-
-3. **Copy Files**:
+1. **Copy Files**:
 - Copy all files present in `/data/dgrpool` on the DGRPool server to the local `/data` folder. You can use tools like `rsync` for this purpose.
-- `git clone` the current repo and build the docker image 'docker-compose build'
-- Create the `docker-compose.yaml` file (symlink or copy from example files if needed)
+- `git clone` the current repo
+- Get the dump file from the database (`pg_dump dgrpool >dgrpool.dump`) and place it in the `startdb` folder (can be gzipped). If the folder doesn't exist, create one.
+- Create and edit the `docker-compose.yaml` file (symlink or copy from example files if needed)
 - Create the `.env` file and edit it with your information (symlink or copy from example file if needed)
   - POSTGRES_PASSWORD is the password for the database (pick any you want for your database)
   - SECRET_KEY_BASE is the secret key (pick any you want)
@@ -48,14 +45,14 @@ To set up the development server for DGRPool, follow these steps:
   - ACTION_MAILER_HOST is the url of the host website (e.g. dgrpool.epfl.ch)
   - ACTION_MAILER_PORT is the port of the host website (e.g. 80)
 
-5. **Build Files**:
+2. **Build Files**:
 Run the following command
 ```bash
    docker-compose build
    #npm run build & npm run build:css
 ```
 
-5. **Create services**: There are several services that we **create** and **enable** for running at the server start.
+3. **Create services**: There are several services that we **create** and **enable** for running at the server start.
    You can find them in [./services](./services)
    
    On a linux system, they should be put in `/etc/systemd/system/`
