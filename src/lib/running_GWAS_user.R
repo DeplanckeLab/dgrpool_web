@@ -7,6 +7,8 @@
 ## Author: Vincent Gardeux (vincent.gardeux@epfl.ch)
 ##################################################
 
+.libPaths("/usr/lib64/R/library/")
+
 # Measure execution time
 start_time = Sys.time()
 

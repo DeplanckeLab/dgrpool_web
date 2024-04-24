@@ -1,5 +1,17 @@
 FROM ruby:3.1.2-alpine
-RUN apk add postgresql-dev git build-base nodejs bash npm yarn busybox-extras curl wget openjdk11-jre
+RUN apk add postgresql-dev git build-base nodejs bash npm yarn busybox-extras curl wget openjdk11-jre less gzip
+#R \
+#R-dev \
+#    curl-dev \
+#    libxml2-dev \
+#    openssl-dev \
+#    udns-dev \
+#    gdal-dev \
+#    geos-dev \
+#    proj-dev
+
+#RUN Rscript -e "install.packages(c('data.table'), repos='http://stat.ethz.ch/CRAN/');"
+
 RUN mkdir -p /opt/mimemagic
 WORKDIR /opt/dgrpool
 ENV FREEDESKTOP_MIME_TYPES_PATH=/opt/mimemagic

@@ -31,6 +31,7 @@ module Parse
       end
       not_same_col_nber = []
       invalid_sex = []
+      invalid_dgrp = []
       dgrp_lines = []
       dgrp_lines_by_sex = {} 
       (2 .. t_header.size-1).to_a.map{|i| t_header[i] = t_header[i].gsub(/[^a-zA-Z0-9]+/, '_')}
@@ -42,47 +43,53 @@ module Parse
         t.insert(1, "NA") if add_sex == true
         h_sex[t[1]] = 1
         nber = t[0].gsub(/[^\d]|-/, '')
-        dgrp_line_name = "DGRP_" + ("0" * (3-nber.size)) + nber
-        t[0] = dgrp_line_name
-        if h_data[dgrp_line_name] and h_data[dgrp_line_name]['sex'].include? t[1]
-          h_duplicated_dgrp_lines[dgrp_line_name + "/" + t[1]] = 1
-        else
-          h_data[dgrp_line_name] = {'sex' => []}
-        end
-        
-        new_lines.push t
-        
-        (2 .. t.size-1).to_a.each do |i|
-          numerical = true
-          if ['', 'na', 'NA'].include? t[i]
-            val = nil
-          elsif t[i].match(/^\-?\d+$/)
-            val = t[i].to_i
-          elsif t[i].match(/^\-?\d*?\.?\d*?$/) or t[i].match(/^-?\d+\.?\d*?[eE][\-+]?\d+$/)
-            val = t[i].to_f
+        if nber != '' and 3-nber.size >= 0
+          dgrp_line_name = "DGRP_" + ("0" * (3-nber.size)) + nber
+          t[0] = dgrp_line_name
+          if h_data[dgrp_line_name] and h_data[dgrp_line_name]['sex'].include? t[1]
+            h_duplicated_dgrp_lines[dgrp_line_name + "/" + t[1]] = 1
           else
-            val = t[i]
-            numerical = false
+            h_data[dgrp_line_name] = {'sex' => []}
           end
-         # logger.debug("NUMERICAL: " + numerical.to_s)
-          if numerical == false
-          #  logger.debug("NUMERICAL FALSE")
-            h_discarded_phenotypes[t_header[i]] = 1 
+        
+          
+          new_lines.push t
+          
+          (2 .. t.size-1).to_a.each do |i|
+            numerical = true
+            if ['', 'na', 'NA'].include? t[i]
+              val = nil
+            elsif t[i].match(/^\-?\d+$/)
+              val = t[i].to_i
+            elsif t[i].match(/^\-?\d*?\.?\d*?$/) or t[i].match(/^-?\d+\.?\d*?[eE][\-+]?\d+$/)
+              val = t[i].to_f
+            else
+              val = t[i]
+              numerical = false
+            end
+            # logger.debug("NUMERICAL: " + numerical.to_s)
+            if numerical == false
+              #  logger.debug("NUMERICAL FALSE")
+              h_discarded_phenotypes[t_header[i]] = 1 
+            end
+            h_data[dgrp_line_name]['sex'].push t[1] if i == 2
+            h_data[dgrp_line_name][t_header[i]]||=[]
+            h_data[dgrp_line_name][t_header[i]].push val
           end
-          h_data[dgrp_line_name]['sex'].push t[1] if i == 2
-          h_data[dgrp_line_name][t_header[i]]||=[]
-          h_data[dgrp_line_name][t_header[i]].push val
-        end
-        
-        dgrp_lines.push dgrp_line_name
-        dgrp_lines_by_sex[t[1]]||=[]
-        dgrp_lines_by_sex[t[1]].push dgrp_line_name
-        
-        if t_header.size != t.size
-          not_same_col_nber.push t[0] + " (#{t.size})"
-        end
-        if !['M', 'F', 'NA'].include? t[1]
-          invalid_sex.push j+2 #errors.push "sex column should contains only "
+          
+          dgrp_lines.push dgrp_line_name
+          dgrp_lines_by_sex[t[1]]||=[]
+          dgrp_lines_by_sex[t[1]].push dgrp_line_name
+          
+          if t_header.size != t.size
+            not_same_col_nber.push t[0] + " (#{t.size})"
+          end
+          if !['M', 'F', 'NA'].include? t[1]
+            invalid_sex.push j+2 #errors.push "sex column should contains only "
+          end
+
+        else
+          invalid_dgrp.push j+2
         end
       end
       if h_duplicated_dgrp_lines.keys.size > 0
@@ -90,6 +97,9 @@ module Parse
       end
       if invalid_sex.size > 0
         errors.push "Sex column should contain only one of ['M', 'F', 'NA'] values which is not the case on line(s) #{invalid_sex.join(", ")}"
+      end
+      if invalid_dgrp.size > 0
+        errors.push "DGRP line column contains a wrong value on lines #{invalid_dgrp.join(", ")}"
       end
       
       if not_same_col_nber.size > 0

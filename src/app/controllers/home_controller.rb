@@ -307,7 +307,7 @@ class HomeController < ApplicationController
 
   def compute_correlation
     @log = []
-#    params[:only_integrated_studies] ||= '1'
+    #    params[:only_integrated_studies] ||= '1'
     phenotypes = [Phenotype.where(:id => params[:phenotype_id1]).first, Phenotype.where(:id => params[:phenotype_id2]).first]
     @phenotypes = phenotypes.sort
     if phenotypes != @phenotypes
@@ -359,7 +359,7 @@ class HomeController < ApplicationController
 
     axis = [:x, :y]
     list_sums = ["mean", "median", "variance", "std_dev", "std_err", "cv"]
-#    @h_studies = {}
+    #    @h_studies = {}
     @all_data = []
 
     h_pheno = {}

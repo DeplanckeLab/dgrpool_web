@@ -66,6 +66,14 @@
         <div id='ontop_popup_container2'></div>
       </div>
     </div>
+
+    <% h_error_classes = {'alert' => 'danger'} %>
+    
+    <% flash.each do |key, value| %>
+    <div class='alert alert-<%= h_error_classes[key] %>'>
+     <%= value %>
+    </div>
+    <% end %>
     
     <%= yield %>
 
