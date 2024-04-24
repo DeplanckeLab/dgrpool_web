@@ -52,7 +52,13 @@ Run the following command
    #npm run build & npm run build:css
 ```
 
-3. **Create services**: There are several services that we **create** and **enable** for running at the server start.
+3. **Run the container**:
+Run the following command
+```bash
+   docker-compose up
+```
+
+4 (TODO). **Create services**: There are several services that we **create** and **enable** for running at the server start.
    You can find them in [./services](./services)
    
    On a linux system, they should be put in `/etc/systemd/system/`
