@@ -13,14 +13,14 @@
     
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
       <ul id='main-nav' class="navbar-nav mr-auto" data-turbolinks="false">
-	      <li class="nav-item mr-4">
+	<li class="nav-item mr-4">
           <%= link_to raw("<i class='fa fa-home'></i>"), root_path(), {:data => {:turbo => 'false', :method => 'get'}, :class => 'nav-link' } %>
         </li>
-
+	
 	<li class="nav-item mr-4">
           <%= link_to 'DGRP lines', dgrp_lines_path(), {:data => {:turbo => 'false', :method => 'get'}, :class => 'nav-link' } %>
         </li>
-
+	
         <li class="nav-item mr-4">
           <%= link_to 'Studies', studies_path(), {:data => {:turbo => 'false', :method => 'get'}, :class => 'nav-link'} %>
         </li>
@@ -33,6 +33,10 @@
           <%= link_to 'Phenotypes', phenotypes_path(), {:data => {:turbo => 'false', :method => 'get'}, :class => 'nav-link' } %>
         </li>
 
+	<li class="nav-item mr-4">
+	  <%= link_to 'Genes', genes_path(), {:data => {:turbo => 'false', :method => 'get'}, :class => 'nav-link' } %>
+        </li>
+	
 <!--        <% if current_user %>
         <li class="nav-item mr-4">
           <%= link_to "Submit new study", new_study_path(),  {:class => 'nav-link' } %> 
