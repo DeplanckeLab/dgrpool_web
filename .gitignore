@@ -16,6 +16,8 @@ src/vendor/bundle
 src/public/assets/*
 src/solr/pids
 src/solr
+src/solr*
+src/nohup.out
 
 */node_modules
 .env.prod
