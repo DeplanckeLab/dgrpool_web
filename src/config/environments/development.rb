@@ -17,7 +17,7 @@ Rails.application.configure do
   # Enable server timing
   config.server_timing = true
 
-  config.hosts << "dgrpool.epfl.ch" << "http://0.0.0.0:3000" << "biccsrv3.epfl.ch:32786"
+  config.hosts << "dgrpool.epfl.ch:3000"
   config.force_ssl = false
 
   # Enable/disable caching. By default caching is disabled.
@@ -40,7 +40,7 @@ Rails.application.configure do
 
   # Don't care if the mailer can't send.
   config.action_mailer.raise_delivery_errors = false
-  config.action_mailer.default_url_options = { :host => "dgrpool.epfl.ch" }
+  config.action_mailer.default_url_options = { :host => "dgrpool.epfl.ch:3000" }
   config.action_mailer.perform_caching = false
 
   # Print deprecation notices to the Rails logger.
