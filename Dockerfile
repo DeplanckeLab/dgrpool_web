@@ -11,4 +11,15 @@ COPY src/Gemfile .
 RUN bundle install
 COPY src/. .
 CMD ["rm ./tmp/pids/server.pid"]
+
+# Add health check script
+COPY healthcheck.sh ./
+
+# Set execute permissions
+RUN chmod +x /opt/dgrpool/healthcheck.sh
+
+# Define health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 CMD /opt/dgrpool/healthcheck.sh || exit 1
+
+# Start solr server, esbuild and scss builders and puma server
 CMD ["sh", "start.sh"]
