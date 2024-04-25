@@ -100,6 +100,8 @@ First, start by editing these two files, with the correct path location: `Workin
    systemctl enable docker_compose
    systemctl enable run_user_gwas
    ```
+**Note**: In case of this error: `ERROR: Couldn’t connect to Docker daemon at http+docker://localhost - is it running?`, you can try adding root into the "docker" group
+
 
 ## Contributing
 
