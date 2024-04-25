@@ -43,8 +43,7 @@ Then, you need to:
 - Get the dump file from a cloud storage, or from the existing database (`pg_dump dgrpool >dgrpool.dump`, for DGRPool team) and place it in the `$srv/startdb` folder (can be gzipped). If the folder doesn't exist, create one.
 - Edit the `$srv/src/config/environments/development.rb` file to add the host server URL at l.20: `config.hosts << "yourhost:3000"`
 - Same at l.43 of `$srv/src/config/environments/development.rb`, add the host server URL: `config.action_mailer.default_url_options = { :host => "yourhost" }`
-- Create and edit the `docker-compose.yaml` file (symlink or copy from example files if needed)
-- Create the `.env` file and edit it with your information (symlink or copy from example file if needed)
+- Edit the `.env` file with your information (symlink or copy from example file if needed)
   - POSTGRES_PASSWORD is the password for the database (pick any you want for your database)
   - SECRET_KEY_BASE is the secret key (pick any you want)
   - RAILS_ENV should be picked in [development, production]
