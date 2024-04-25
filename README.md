@@ -69,10 +69,13 @@ Once it's done, a message will tell you "PostgreSQL init process complete; ready
 
 Then the database will restart, and the website will be fully available at `yourhost.com:3000` from a web browser.
 
-4 (TODO). **Create services**: There are several services that we **create** and **enable** for running at the server start.
+5. **Create services**:
+We have two main app running in DGRPool, the main Dockerized web server, and a daemon running outside of the Docker for user-submitted GWAS analysis.
+
+We will **create** and **enable** two services for running at the server start, and restarting them if they reach an abnormal state.
    You can find them in [./services](./services)
    
-   On a linux system, they should be put in `/etc/systemd/system/`
+   On a linux system, you should copy these two files in `/etc/systemd/system/`
    Then, you can reboot the service daemon:
    ```bash
    systemctl daemon-reload
@@ -80,26 +83,20 @@ Then the database will restart, and the website will be fully available at `your
 
    After that, you can start all services with the commands:
    ```bash
-   systemctl start solr
-   systemctl start rails
-   systemctl start jobdemon
-   systemctl start postgresql
+   systemctl start docker_compose
+   systemctl start run_user_gwas
    ```
 
    And check if they are running properly using:
    ```bash
-   systemctl status solr
-   systemctl status rails
-   systemctl status jobdemon
-   systemctl status postgresql
+   systemctl status docker_compose
+   systemctl status run_user_gwas
    ```
 
    The service will automatically restart the programs if they fail. We will also **enable** them so that they automatically start when the server boots:
    ```bash
-   systemctl enable solr
-   systemctl enable rails
-   systemctl enable jobdemon
-   systemctl enable postgresql
+   systemctl enable docker_compose
+   systemctl enable run_user_gwas
    ```
 
 ## Contributing
