@@ -1,5 +1,3 @@
 web: bin/rails server -b 0.0.0.0 -p 3000
-#web: bin/rails server -p 3000 #bundle exec puma -C config/puma.rb #bin/rails server -p 3000
-#web: rails s -p 8443 -b 'ssl://127.0.0.1?key=/home/fdavid/dgrpool.epfl.ch.key&cert=/home/fdavid/dgrpool.epfl.ch.pem'
 js: yarn build --watch
 css: yarn build:css --watch
