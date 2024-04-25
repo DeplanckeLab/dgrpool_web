@@ -74,6 +74,8 @@ We have two main app running in DGRPool, the main Dockerized web server, and a d
 
 We will **create** and **enable** two services for running at the server start, and restarting them if they reach an abnormal state.
    You can find them in [./services](./services)
+
+First, start by editing these two files, with the correct path location: `WorkingDirectory=$srv` on l.9. You can also change the path to podman-compose or docker-compose depending on the containerization method you use.
    
    On a linux system, you should copy these two files in `/etc/systemd/system/`
    Then, you can reboot the service daemon:
