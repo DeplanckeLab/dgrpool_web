@@ -33,9 +33,16 @@ DGRPool provides proof-of-concept studies to showcase its potential in facilitat
 To set up the development server for DGRPool, follow these steps:
 
 1. **Copy Files**:
-- Copy all files present in `/data/dgrpool` on the DGRPool server to the local `/data` folder. You can use tools like `rsync` for this purpose.
-- `git clone` the current repo
-- Get the dump file from the database (`pg_dump dgrpool >dgrpool.dump`) and place it in the `startdb` folder (can be gzipped). If the folder doesn't exist, create one.
+DGRPool requires two folders:
+- **$data**: a data folder, containing GWAS results, GWAS scripts, and other data files. You can put this data folder anywhere on the system (e.g. `/data/dgrpool`)
+- **$srv**: a website folder, containing the code on this github page, which will be the anchor point of the Ruby-on-Rails app (e.g. `/srv/dgrpool`)
+
+Then, you need to:
+- Copy the data files, whether from a cloud storage, or from the current DGRPool server (for DGRPool team) to the `$data` folder. Then create a symlink `data` in the `$srv` folder pointing to it: `ln -s $data $srv/data`
+- `git clone` the current repo in the `$srv` folder
+- Get the dump file from a cloud storage, or from the existing database (`pg_dump dgrpool >dgrpool.dump`, for DGRPool team) and place it in the `$srv/startdb` folder (can be gzipped). If the folder doesn't exist, create one.
+- Edit the `$srv/src/config/environments/development.rb` file to add the host server URL at l.20: `config.hosts << "yourhost:3000"`
+- Same at l.43 of `$srv/src/config/environments/development.rb`, add the host server URL: `config.action_mailer.default_url_options = { :host => "yourhost" }`
 - Create and edit the `docker-compose.yaml` file (symlink or copy from example files if needed)
 - Create the `.env` file and edit it with your information (symlink or copy from example file if needed)
   - POSTGRES_PASSWORD is the password for the database (pick any you want for your database)
@@ -49,7 +56,6 @@ To set up the development server for DGRPool, follow these steps:
 Run the following command
 ```bash
    docker-compose build
-   #npm run build & npm run build:css
 ```
 
 3. **Run the container**:
@@ -57,6 +63,7 @@ Run the following command
 ```bash
    docker-compose up
 ```
+**Note:** You need to wait for the database to load completely before you can use the website. I can take a while. Once it's done, a message will tell you "PostgreSQL init process complete; ready for start up".
 
 4 (TODO). **Create services**: There are several services that we **create** and **enable** for running at the server start.
    You can find them in [./services](./services)
