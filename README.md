@@ -38,8 +38,8 @@ DGRPool requires two folders:
 - **$srv**: a website folder, containing the code on this github page, which will be the anchor point of the Ruby-on-Rails app (e.g. `/srv/dgrpool`)
 
 Then, you need to:
-- Copy the data files, whether from a cloud storage, or from the current DGRPool server (for DGRPool team) to the `$data` folder. Then create a symlink `data` in the `$srv` folder pointing to it: `ln -s $data $srv/data`
 - `git clone` the current repo in the `$srv` folder
+- Copy the data files, whether from a cloud storage, or from the current DGRPool server (for DGRPool team) to the `$data` folder. Then create a symlink `data` in the `$srv` folder pointing to it: `ln -s $data $srv/data`
 - Get the dump file from a cloud storage, or from the existing database (`pg_dump dgrpool >dgrpool.dump`, for DGRPool team) and place it in the `$srv/startdb` folder (can be gzipped). If the folder doesn't exist, create one.
 - Edit the `$srv/src/config/environments/development.rb` file to add the host server URL at l.20: `config.hosts << "yourhost:3000"`
 - Same at l.43 of `$srv/src/config/environments/development.rb`, add the host server URL: `config.action_mailer.default_url_options = { :host => "yourhost" }`
