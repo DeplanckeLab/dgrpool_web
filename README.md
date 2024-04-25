@@ -62,7 +62,12 @@ Run the following command
 ```bash
    docker-compose up
 ```
-**Note:** You need to wait for the database to load completely before you can use the website. I can take a while. Once it's done, a message will tell you "PostgreSQL init process complete; ready for start up". Then the database will restart, and the website will be fully available at `yourhost.com:3000` from a browser.
+
+4. **Test the app**:
+You need to wait for the database to load completely before you can use the website. I can take a while.
+Once it's done, a message will tell you "PostgreSQL init process complete; ready for start up".
+
+Then the database will restart, and the website will be fully available at `yourhost.com:3000` from a web browser.
 
 4 (TODO). **Create services**: There are several services that we **create** and **enable** for running at the server start.
    You can find them in [./services](./services)
