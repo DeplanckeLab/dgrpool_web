@@ -21,6 +21,7 @@ src/nohup.out
 
 */node_modules
 .env.prod
+.env.dev
 src/Gemfile.lock
 src/package-lock.json
 

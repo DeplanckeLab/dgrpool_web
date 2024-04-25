@@ -1,3 +1,6 @@
+# Use the Docker image format
+# syntax=docker/dockerfile:1
+
 FROM ruby:3.1.2-alpine
 
 RUN apk add postgresql-dev git build-base nodejs bash npm yarn busybox-extras curl wget openjdk11-jre less gzip
