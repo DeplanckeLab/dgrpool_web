@@ -41,15 +41,15 @@ Then, you need to:
 - `git clone` the current repo in the `$srv` folder
 - Copy the data files, whether from a cloud storage, or from the current DGRPool server (for DGRPool team) to the `$data` folder. Then create a symlink `data` in the `$srv` folder pointing to it: `ln -s $data $srv/data`
 - Get the dump file from a cloud storage, or from the existing database (`pg_dump dgrpool >dgrpool.dump`, for DGRPool team) and place it in the `$srv/startdb` folder (can be gzipped). If the folder doesn't exist, create one.
-- Edit the `$srv/src/config/environments/development.rb` file to add the host server URL at l.20: `config.hosts << "yourhost:3000"`
-- Same at l.43 of `$srv/src/config/environments/development.rb`, add the host server URL: `config.action_mailer.default_url_options = { :host => "yourhost" }`
+- Edit the `$srv/src/config/environments/development.rb` file to add the host server URL at l.20: `config.hosts << "yourhost.com:3000"`
+- Same at l.43 of `$srv/src/config/environments/development.rb`, add the host server URL: `config.action_mailer.default_url_options = { :host => "yourhost.com" }`
 - Edit the `.env` file with your information (symlink or copy from example file if needed)
   - POSTGRES_PASSWORD is the password for the database (pick any you want for your database)
   - SECRET_KEY_BASE is the secret key (pick any you want)
   - RAILS_ENV should be picked in [development, production]
-  - DATA_DIR should be the /data/dgrpool directory (see points 2 & 3)
+  - DATA_DIR should be the `$data` directory
   - ACTION_MAILER_HOST is the url of the host website (e.g. dgrpool.epfl.ch)
-  - ACTION_MAILER_PORT is the port of the host website (e.g. 80)
+  - ACTION_MAILER_PORT is the port of the host website (e.g. 3000)
 
 2. **Build Files**:
 Run the following command
@@ -108,7 +108,3 @@ For inquiries or support, please contact the DGRPool team at [bioinfo.epfl@gmail
 ## License
 
 See LICENSE file
-
----
-
-By leveraging the power of community-driven curation and interactive data analysis, DGRPool aims to accelerate research in Drosophila genetics and provide a valuable resource for the scientific community.
