@@ -8,7 +8,7 @@ if [ ! -d "node_modules" ]; then
 fi
 
 #bundle install
-rm -rf ./solr/pids
+rm -rf ./solr/pids/development/sunspot-solr-development.pid
 bundle exec rake sunspot:solr:start &
 
 npm run build & npm run build:css & ./bin/rails server -b "0.0.0.0" && fg 
