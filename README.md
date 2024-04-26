@@ -41,9 +41,8 @@ Then, you need to:
 - `git clone` the current repo in the `$srv` folder
 - Copy the data files, whether from a cloud storage, or from the current DGRPool server (for DGRPool team) to the `$data` folder. Then create a symlink `data` in the `$srv` folder pointing to it: `ln -s $data $srv/data`
 - Get the dump file from a cloud storage, or from the existing database (`pg_dump dgrpool >dgrpool.dump`, for DGRPool team) and place it in the `$srv/startdb` folder (can be gzipped). If the folder doesn't exist, create one.
-- Edit the `$srv/src/config/environments/development.rb` file to add the host server URL at l.20: `config.hosts << "yourhost.com:3000"`
-- Same at l.43 of `$srv/src/config/environments/development.rb`, add the host server URL: `config.action_mailer.default_url_options = { :host => "yourhost.com" }`
-- Edit the `.env` file with your information (symlink or copy from example file if needed)
+- Create the `docker-compose.yaml` file with your information (symlink or copy from example file if needed)
+- Create the `.env` file with your information (symlink or copy from example file if needed)
   - POSTGRES_PASSWORD is the password for the database (pick any you want for your database)
   - SECRET_KEY_BASE is the secret key (pick any you want)
   - RAILS_ENV should be picked in [development, production]
@@ -69,39 +68,44 @@ Once it's done, a message will tell you "PostgreSQL init process complete; ready
 
 Then the database will restart, and the website will be fully available at `yourhost.com:3000` from a web browser.
 
+Check that everything is working out. Then you can stop the Docker, and re-run it in the background.
+
+```bash
+   docker-compose down
+   docker-compose up -d
+```
+This runs the Dockerized website in "detached" mode, so everything is handled by the Docker daemon (e.g. restarting in case of abnormal behaviour).
+
 5. **Create services**:
 We have two main app running in DGRPool, the main Dockerized web server, and a daemon running outside of the Docker for user-submitted GWAS analysis.
 
-We will **create** and **enable** two services for running at the server start, and restarting them if they reach an abnormal state.
-   You can find them in [./services](./services)
+The web server "service" is automatically handled by the Docker daemon. 
+We will **create** and **enable** a service for running the gwas job daemon, and restarting it if it reaches an abnormal state.
+   You can find it in [./services](./services)
 
-First, start by editing these two files, with the correct path location: `WorkingDirectory=$srv` on l.9. You can also change the path to podman-compose or docker-compose depending on the containerization method you use.
+First, start by editing this file, with the correct path location: `WorkingDirectory=$srv`. You can also change the path to podman-compose or docker-compose depending on the containerization method you use.
    
-   On a linux system, you should copy these two files in `/etc/systemd/system/`
-   Then, you can reboot the service daemon:
-   ```bash
-   systemctl daemon-reload
-   ```
+ On a linux system, you should copy this file in `/etc/systemd/system/`
+ Then, you can reboot the service daemon:
+ ```bash
+ systemctl daemon-reload
+ ```
 
-   After that, you can start all services with the commands:
-   ```bash
-   systemctl start docker_compose
-   systemctl start run_user_gwas
-   ```
+ After that, you can start the service with the commands:
+ ```bash
+ systemctl start run_user_gwas
+ ```
 
-   And check if they are running properly using:
-   ```bash
-   systemctl status docker_compose
-   systemctl status run_user_gwas
-   ```
+ And check if they are running properly using:
+ ```bash
+ systemctl status run_user_gwas
+ ```
 
-   The service will automatically restart the programs if they fail. We will also **enable** them so that they automatically start when the server boots:
-   ```bash
-   systemctl enable docker_compose
-   systemctl enable run_user_gwas
-   ```
+ The service will automatically restart the programs if they fail. We will also **enable** them so that they automatically start when the server boots:
+ ```bash
+ systemctl enable run_user_gwas
+ ```
 **Note**: In case of this error: `ERROR: Couldn’t connect to Docker daemon at http+docker://localhost - is it running?`, you can try adding root into the "docker" group
-
 
 ## Contributing
 
