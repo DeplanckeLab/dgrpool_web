@@ -277,15 +277,6 @@ class HomeController < ApplicationController
       #  f.write(@content)
       #end
       
-      #@cmd = "java -jar /srv/dgrpool/lib/DGRPool-1.0.jar AllCorrelations --pheno #{tmp_file} --phenodb #{export_mean_file} -o #{output_dir}"
-      #res = `#{@cmd}`
-      #   @res = []
-      #@header = []
-      #if File.exist? output_dir + 'output.tsv'
-      #  @res = File.read(output_dir + 'output.tsv').split("\n").map{|e| e.split("\t")}
-      #  @header = @res.shift
-      #end
-      #logger.debug("BLAAAAAAAAAAAA")
       gwas_output_file = @h_correlation_res[:output_dir] + "gwas_output.json"
       gwas_output = {}
       if File.exist? gwas_output_file
