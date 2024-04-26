@@ -1,3 +1,9 @@
+<% @h_res[:warnings].each do |warning| %>
+<div class='alert bg-warning mt-2'>
+  <%= raw warning %>
+</div>
+<% end %>
+
 <% if @h_res[:errors].size > 0 %>
 <% @h_res[:errors].each do |error| %>
 <div class='alert bg-danger mt-2'>
@@ -9,12 +15,6 @@
 <% if @h_res[:discarded_phenotypes].size > 0 %>
 <div class='alert bg-warning mt-2'>
   Non numerical phenotypes (<%= @h_res[:discarded_phenotypes].join(", ") %>) were excluded.
-</div>
-<% end %>
-
-<% @h_res[:warnings].each do |warning| %>
-<div class='alert bg-warning mt-2'>
-  <%= raw warning %>
 </div>
 <% end %>
 

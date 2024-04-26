@@ -8,6 +8,7 @@ module Parse
       h_discarded_phenotypes = {} #{"sex" => 1}
       h_duplicated_dgrp_lines = {}
       errors = []
+      warnings = []
       lines =  data.split(/[\r\n]+/)
       #  logger.debug(lines)
       header = lines.shift
@@ -29,6 +30,7 @@ module Parse
         add_sex = true
         t_header.insert(1, "sex")
       end
+      not_enough_cols = []
       not_same_col_nber = []
       invalid_sex = []
       invalid_dgrp = []
@@ -43,7 +45,11 @@ module Parse
         t.insert(1, "NA") if add_sex == true
         h_sex[t[1]] = 1
         nber = t[0].gsub(/[^\d]|-/, '')
-        if nber != '' and 3-nber.size >= 0
+        if t.size < 3
+          not_enough_cols.push j+2
+        elsif !['M', 'F', 'NA'].include? t[1]
+          invalid_sex.push j+2 #errors.push "sex column should contains only "                                                                                           
+        elsif nber != '' and 3-nber.size >= 0
           dgrp_line_name = "DGRP_" + ("0" * (3-nber.size)) + nber
           t[0] = dgrp_line_name
           if h_data[dgrp_line_name] and h_data[dgrp_line_name]['sex'].include? t[1]
@@ -84,22 +90,28 @@ module Parse
           if t_header.size != t.size
             not_same_col_nber.push t[0] + " (#{t.size})"
           end
-          if !['M', 'F', 'NA'].include? t[1]
-            invalid_sex.push j+2 #errors.push "sex column should contains only "
-          end
 
         else
           invalid_dgrp.push j+2
         end
+        if t_header.size != t.size
+          not_same_col_nber.push t[0] + " (#{t.size})"
+        end
+      end
+      if add_sex == true
+        warnings.push("Column 'sex' not found in second position, thus it has been added setting all values to NA.")
       end
       if h_duplicated_dgrp_lines.keys.size > 0
         errors.push("Some DGRP lines are not unique by sex (#{h_duplicated_dgrp_lines.keys.join(", ")}).<br/><b>Please summarize your dataset by DGRP line and sex prior upload.</b>")
       end
       if invalid_sex.size > 0
-        errors.push "Sex column should contain only one of ['M', 'F', 'NA'] values which is not the case on line(s) #{invalid_sex.join(", ")}"
+        errors.push "Lines with invalid sex were ignored. Sex column should contain only one of ['M', 'F', 'NA'] values which is not the case on line(s) #{invalid_sex.join(", ")}"
       end
       if invalid_dgrp.size > 0
-        errors.push "DGRP line column contains a wrong value on lines #{invalid_dgrp.join(", ")}"
+        errors.push "Lines with invalid DGRP line were ignored. DGRP line column contains a wrong value on lines #{invalid_dgrp.join(", ")}"
+      end
+      if not_enough_cols.size > 0
+        errors.push "Lines with less than 3 columns were ignored: lines #{not_enough_cols.join(", ")}"
       end
       
       if not_same_col_nber.size > 0
@@ -108,6 +120,7 @@ module Parse
 
       h_data = {
         :errors => errors,
+        :warnings => warnings,
         :discarded_phenotypes => h_discarded_phenotypes.keys,
         :phenotypes => phenotypes - h_discarded_phenotypes.keys - ['sex'],
         :dgrp_lines => dgrp_lines,

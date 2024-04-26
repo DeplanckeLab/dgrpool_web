@@ -212,7 +212,7 @@ class HomeController < ApplicationController
         
         
         
-        @h_res[:warnings] = []
+        @h_res[:warnings] ||= []
       #  missing_dgrp_lines = []
       #  tmp_dgrp_lines = [] 
       #  @h_res[:dgrp_lines].each do |e|
