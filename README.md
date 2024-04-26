@@ -67,7 +67,8 @@ You need to wait for the database to load completely before you can use the webs
 Once it's done, a message will tell you "PostgreSQL init process complete; ready for start up".
 
 Then the database will restart, and the website will be fully available at `yourhost.com:3000` from a web browser.
-When you can see that everything is working out. You can stop the Docker, and run it in the background.
+
+Check that everything is working out. Then you can stop the Docker, and re-run it in the background.
 
 ```bash
    docker-compose down
@@ -79,7 +80,7 @@ This runs the Dockerized website in "detached" mode, so everything is handled by
 We have two main app running in DGRPool, the main Dockerized web server, and a daemon running outside of the Docker for user-submitted GWAS analysis.
 
 The web server "service" is automatically handled by the Docker daemon. 
-We will **create** and **enable** a service for running the gwas job daemon, and restarting them if they reach an abnormal state.
+We will **create** and **enable** a service for running the gwas job daemon, and restarting it if it reaches an abnormal state.
    You can find it in [./services](./services)
 
 First, start by editing this file, with the correct path location: `WorkingDirectory=$srv`. You can also change the path to podman-compose or docker-compose depending on the containerization method you use.
@@ -105,7 +106,6 @@ First, start by editing this file, with the correct path location: `WorkingDirec
  systemctl enable run_user_gwas
  ```
 **Note**: In case of this error: `ERROR: Couldn’t connect to Docker daemon at http+docker://localhost - is it running?`, you can try adding root into the "docker" group
-
 
 ## Contributing
 
