@@ -1,0 +1,30 @@
+<h4>Alleles from Flybase</h4>
+
+<table id='flybase_alleles' class="gwas_res_table table-striped" width='100%'>
+  <thead>
+    <tr>
+      <th>Allele ID</th>
+      <th>Allele symbol</th>
+      <th>Phenotype</th>
+      <th>Qualifiers</th>
+      <th>Reference</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% @flybase_alleles.each do |fa| %>
+    <tr>
+      <td><%= fa[:identifier] %></td>
+      <td><%= fa[:symbol] %></td>
+      <td><%= s = fa[:phenotype_id].gsub(/\:\d+/, "").downcase; raw link_to(fa[:phenotype_name], "http://www.ebi.ac.uk/ols4/ontologies/#{s}/classes/http%253A%252F%252Fpurl.obolibrary.org%252Fobo%252F#{fa[:phenotype_id].gsub(/\:/, "_")}", :target => '_blank') %></td>
+      <td><%= raw fa[:qualifiers].map{|e| s = e[0].gsub(/\:\d+/, "").downcase; link_to(e[1], "http://www.ebi.ac.uk/ols4/ontologies/#{s}/classes/http%253A%252F%252Fpurl.obolibrary.org%252Fobo%252F#{e[0].gsub(/\:/, "_")}", :target => '_blank', :class => 'badge bg-secondary nodec', :style => 'color:white')}.join(" ") %></td>
+      <td><%= link_to fa[:reference], "http://flybase.org/reports/#{fa[:reference]}.htm" %></td>
+    </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<%= javascript_tag do %>
+
+$("#flybase_alleles").DataTable()
+
+<% end %>

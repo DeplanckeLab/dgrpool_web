@@ -120,9 +120,13 @@ primary key (id)
 create table genes( --ensembl_genes
 id serial,
 name text,
+identifier text,
+in_vcf bool default false,
 -- copy table from asap for Flybase genes
 primary key (id)
 );
+
+create index genes_name_idx on  genes(name);
 
 create table dgrp_lines(
 id serial,
@@ -268,6 +272,9 @@ id serial,
 chr text,
 pos int,
 identifier text,
+chr_dm6 text,
+pos_dm6 int,
+identifier_dm6 text,
 ref text,
 alt text,
 geno_string text,
@@ -310,6 +317,8 @@ affects_tf_binding_site bool,
 primary key (id)
 );
 
+create index snp_genes_gene_id on  gwas_results(gene_id);
+
 create table gwas_results(
 id serial,
 snp_id int references snps,
@@ -321,3 +330,15 @@ primary key (id)
 );
 
  create index gwas_results_phenotype_id_sex on gwas_results(phenotype_id, sex);
+
+create table flybase_alleles(
+id serial,
+identifier text,
+symbol text,
+gene_id int references genes,
+phenotypes_json text,
+primary key (id)
+);
+
+create index flybase_alleles_gene_id_idx on flybase_alleles(gene_id);
+create index flybase_alleles_identifier_idx on flybase_alleles(identifier);

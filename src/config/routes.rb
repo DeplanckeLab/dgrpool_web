@@ -1,6 +1,8 @@
 Rails.application.routes.draw do
+  resources :flybase_alleles
   resources :genes do
     collection do
+      get :autocomplete
       get :search
       post :do_search
       post :set_search_session
@@ -11,7 +13,14 @@ Rails.application.routes.draw do
   resources :snp_impacts
   resources :snp_types
   resources :var_types
-  resources :gwas_results
+  resources :gwas_results do
+    collection do
+      get :search
+      get :get_search
+      post :do_search
+      post :set_search_session
+    end
+  end
   resources :snps do
     get :get_phewas
   end

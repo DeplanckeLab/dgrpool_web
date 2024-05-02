@@ -64,7 +64,7 @@ console.log(repeat_refresh_gwas)
 console.log("test2")
 clearInterval(repeat_refresh_gwas);
 <% end %>
-<%= render :partial => 'phenotypes/gwas_analysis_js', :locals => {} %>
+<%= render :partial => 'phenotypes/gwas_analysis_js', :locals => {:h_snps => @h_snps, :phenotype => @phenotype} %>
 <% if @phenotype %>
 //})
 }

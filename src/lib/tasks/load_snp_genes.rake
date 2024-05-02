@@ -53,8 +53,7 @@ task load_snp_genes: :environment do
               gene = h_genes[gene_name[0]]
               if !gene
                 gene = Gene.new({:name => gene_name[0]})
-                gene.save
-                
+                gene.save                
                 h_genes[gene_name[0]] = gene
               end
 

@@ -1,0 +1,74 @@
+<div class='legend_annotations'>
+  <b>Variant impact</b> <%= raw @h_impact.keys.map{|k| "<span class='badge bg-#{@h_impact[k]}'>#{k}</span>"}.join(" ") %>
+</div>
+
+<% if gwas_results.size > 0 %>
+<%# h_phenotypes.to_json %>
+<%# h_snp_info.to_json %>
+<%# @tmp_str %>
+<table id='gwas_results' class="gwas_res_table table-striped" width='100%'>
+  <thead>
+    <tr>
+      <th>Gene name</th>
+      <th>SNP ID</th>
+      <th>Snp type</th>
+      <th>Phenotype</th>
+      <th>Sex</th>
+      <th>p-value</th>
+      <th>Transcript annotation</th>
+      <th>Binding site annotation</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+     <% gwas_results.sort{|a, b| a.p_val <=> b.p_val}.first(1000).each do |gr| %>
+     <tr>
+       <td><%= h_genes[h_snp_genes[gr.snp_id].gene_id].name %></td>
+       <td><%= h_snps[gr.snp_id].identifier %> [dm3]<br/>
+	 <% if h_snps[gr.snp_id].identifier_dm6 %>
+	 <% t = h_snps[gr.snp_id].identifier_dm6.split("_") %>
+	 <%= link_to h_snps[gr.snp_id].identifier_dm6, "http://flybase.org/jbrowse/?data=data%2Fjson%2Fdmel&loc=#{t[0]}%3A#{t[1].to_i-50}..#{t[1].to_i+50}&tracks=Gene_span%2CGene%2Cdgrp_r6%2Csequence_variant&highlight=", :target => '_blank' %> [dm6]
+	 <% end %>
+       </td>
+       <td><%= vt = h_var_types[h_snp_genes[gr.snp_id].var_type_id]; raw display_var_type(gr.snp_id, vt, []) %></td><%# @h_snp_info[gr.snp_id]['transcript_annot'][k] %>
+       <td>
+	 <%= (gr.phenotype_id) ? link_to(h_phenotypes[gr.phenotype_id].name, raw(phenotype_path(gr.phenotype_id)), {:target => '_blank'}) : gr.phenotype_id %>
+	 <br/>
+	 <%= raw (h_phenotypes[gr.phenotype_id]) ? display_reference_short3(h_studies[h_phenotypes[gr.phenotype_id].study_id]) : '' %>
+       </td>
+       <td><%= gr.sex %></td>
+       <td><%= gr.p_val %></td>
+       <td><% if h_snp_info[h_snps[gr.snp_id].identifier] %>
+	  <%# raw h_snp_info[h_snps[gr.snp_id].identifier]['transcript_annot'].to_json %>
+         <%= raw h_snp_info[h_snps[gr.snp_id].identifier]['transcript_annot'].keys.map{|k| display_var_type(h_snps[gr.snp_id].identifier, h_var_types[k], h_snp_info[h_snps[gr.snp_id].identifier]['transcript_annot'][k])}.join("<br/>") %>
+         <% end %>
+       </td>
+       <td><% if h_snp_info[h_snps[gr.snp_id].identifier] %>
+         <% h_snp_info[h_snps[gr.snp_id].identifier]['binding_site_annot'].each_key do |k| %>
+         <b><%= k.gsub("_", " ") %></b>
+         <small><%= raw h_snp_info[h_snps[gr.snp_id].identifier]['binding_site_annot'][k].map{|e| "<span id='binding_site_annot_btn-" + h_snps[gr.snp_id].identifier + "-" + k + "-" + e[0] + "' class='pointer badge bg-success binding_site_annot_btn'>#{e[0]}</span>"}.join(" ") %></small>
+         <br/><% end %>
+         <% end %>
+       </td>
+       <td>
+	 <span class='nowrap'>
+           <button type='button' id='boxplot-link-<%= h_snps[gr.snp_id].identifier %>-<%= gr.sex %>-<%= gr.phenotype_id %>' class='boxplot-link btn btn-sm btn-primary'>Boxplot</button>
+           <button type='button' id='phewas-link-<%= h_snps[gr.snp_id].identifier %>-<%= gr.sex %>' class='phewas-link btn btn-sm btn-primary'>PheWAS</button>
+         </span>
+       </td>
+     </tr>
+     <% end %>
+  </tbody>
+</table>
+
+<%= javascript_tag do %>
+
+window.initTooltips()
+
+$("#gwas_results").DataTable({order : [[5, 'asc']]})
+
+<%= render :partial => 'phenotypes/gwas_analysis_js', :locals => {:h_snps => @h_snp_info, :phenotype => nil} %>
+
+<% end %>
+
+<% end %>

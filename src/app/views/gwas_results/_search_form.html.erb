@@ -1,0 +1,136 @@
+<div class="container">
+  <div class='row justify-content-md-center'>
+    <div class='col-md-7  mb-2'>
+      <div class="input-group btn-group" role="group" aria-label="Search">
+        <%= text_field_tag 'gene_free_text', session[:gs_settings][:free_text] || '', {:size => 30, :class => "form-control", :placeholder => "Search"} %>
+	<div id='gene_name_container'></div>
+        <button id='gene_search-btn' type="button" class="btn btn-primary"><i class="fas fa-search"></i> Search</button>
+      </div>
+    </div>
+  </div>
+  <%= hidden_field_tag 'gene_search_view_type', session[:gs_settings][:search_view_type] %>
+</div>
+
+<div id='gwas_search_results' class="m-4"></div>
+
+<%= javascript_tag do  %>
+
+//  document.addEventListener('DOMContentLoaded', function () {
+
+ $("#gene_free_text").autocomplete({
+  minLength: 0,
+  appendTo: '#gene_name_container',
+  classes: {
+   "ui-autocomplete": "test_ui",
+  },
+  html: true,
+  position: {
+   offset: '0 0' // Shift 0px left, 4px down.
+  },
+  source: function(request, response) {
+    $.ajax({
+          url: "<%= autocomplete_genes_path() %>",
+          dataType: "json",
+          beforeSend: function(){
+         },
+          data: {
+             q: request.term
+          },
+          success: function( data ) {
+            response( data );
+          }
+        });
+  },
+  select: function( event, ui ) {
+   console.log(ui.item.id)
+   if (ui.item){
+    var list_names = $("#gene_free_text").val().split(" ")
+    list_names[list_names.length - 1] = ui.item.label
+    $("#gene_free_text").val(list_names.join(" "))
+    return false
+   }
+  }
+ }).focus(function () {
+    $(this).autocomplete("search");
+ }).click(function(){
+    $(this).autocomplete("search");
+ });
+
+
+
+$(".gene_search_view_btn").click(function(){
+ var v = this.id.split("_")[0]
+ var l = ['card', 'list']
+ if (v != $("#gene_search_view_type").val()){
+  // console.log("v")
+   $("#gene_search_view_type").val(v)
+   for (var i=0; i< l.length; i++){
+    // console.log("remove " + l[i])
+     $("#gene_" + l[i] + "_view_btn").removeClass("btn-success")
+     $("#gene_" + l[i] + "_view_btn").addClass("btn-outline-success")
+   }
+   $("#gene_" + v + "_view_btn").addClass("btn-success")
+   $("#gene_" + v + "_view_btn").removeClass("btn-outline-success")
+   var p = [{name : 'free_text', value : $("#gene_free_text").val()}]
+   var h = {loading:'fa-2x'}
+   gene_search(p, h)
+ }
+})
+
+<% if params[:q] %>
+ $("#gene_free_text").val('<%= params[:q] %>')
+<% end %>
+
+function gene_search(p, h) {
+ if (p.length > 0 && p[0].name == 'auto'){ // refresh without input if auto
+  h.not_upd_if_empty = 1
+ }
+ if ($("#gene_search_results").html() != ''){
+  var fields = ['per_page', 'page', 'gene_ids', 'search_view_type']
+  for (var i=0; i< fields.length; i++){
+   p.push({name : fields[i], value : $("#gene_" + fields[i]).val()})
+  }
+ }
+ <% if workspace_key = params[:workspace_key] %>
+   p.push({name : "workspace_key", value : "<%= workspace_key %>"})
+ <% end %>
+
+ console.log("do_search")
+ if ($("#gene_free_text").val() != ''){
+ refresh_post("gwas_search_results", "<%= do_search_gwas_results_path() %>", p, 'post', h);
+ }else{
+ 
+ }
+}
+
+function gene_init_search(){
+  $("#gene_page").val(1)
+}
+
+$("#gene_search-btn").click(function(){
+  gene_init_search()
+  console.log("bla")
+  var p = [{name : 'free_text', value : $("#gene_free_text").val()}]
+  var h = {loading:'fa-2x'}
+  gene_search(p, h)
+})
+
+$("#gene_free_text").keyup(function(e){
+ // console.log("KEY:" + e.key)
+ if (e.key == 'Enter'){
+  gene_init_search()
+  var p = [{name : 'free_text', value : $("#gene_free_text").val()}]
+  var h = {loading:'fa-2'}
+  gene_search(p, h)
+ }
+})
+
+ $(document).ready(function(){
+var p = [{name : 'free_text', value : $("#gene_free_text").val()}]
+var h = {loading:'fa-2x'}
+gene_search(p, h)
+})
+
+//})
+
+<% end %>

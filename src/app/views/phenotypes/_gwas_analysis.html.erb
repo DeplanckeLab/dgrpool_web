@@ -7,7 +7,7 @@
 <% end %>
 
 <% if h_files[:annot] %>
-<% s = Study.find(17) %>
+  <% s = Study.find(17) %>
 
     <% if File.exist?(output_dir + h_files[:annot]) %>
     <%# sex %>
@@ -137,6 +137,20 @@
 	<div class='legend_annotations'>
 	  <b>Variant impact</b> <%= raw @h_impact.keys.map{|k| "<span class='badge bg-#{@h_impact[k]}'>#{k}</span>"}.join(" ") %>
 	</div>
+
+	<div class='card'>
+	  <div class='card-body'>
+	    <b>Filter</b>
+	    <table><tbody>
+	      <tr><td>
+		  By genomic position
+		</td><td>
+		  <%= text_field_tag 'filter_by_pos', '', {:style => 'width:400px', :placeholder => '3L:4000-80000; 4L:5000-100000', :class => 'form-control'} %>
+	      </td></tr></tbody>
+	    </table>
+	  </div>
+	</div>
+
 	
 	<table id='gwas_res_<%= sex %>' width="100%" class='gwas_res_table table-striped mt-3'>
 	  <thead>
@@ -198,7 +212,7 @@
 	   <% if @h_nber_res[sex] > 0 %>
   document.addEventListener('DOMContentLoaded', function () {
 
-           $('#gwas_res_<%= sex %>').DataTable({
+         var gwas_table = $('#gwas_res_<%= sex %>').DataTable({
         pageLength:100,
         order : [[6, 'asc']]
                                    })

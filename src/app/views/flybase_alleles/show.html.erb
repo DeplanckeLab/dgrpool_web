@@ -1,0 +1,10 @@
+<p style="color: green"><%= notice %></p>
+
+<%= render @flybase_allele %>
+
+<div>
+  <%= link_to "Edit this flybase allele", edit_flybase_allele_path(@flybase_allele) %> |
+  <%= link_to "Back to flybase alleles", flybase_alleles_path %>
+
+  <%= button_to "Destroy this flybase allele", @flybase_allele, method: :delete %>
+</div>

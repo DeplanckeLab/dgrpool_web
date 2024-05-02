@@ -52,7 +52,9 @@ let table = new DataTable('#dgrp_lines', {pageLength:100})
 */
 
 $('#dgrp_lines').DataTable({pageLength:100})
-
+document.addEventListener('DOMContentLoaded', function () {
+initTooltips()
+})
 
 <% end %>
 

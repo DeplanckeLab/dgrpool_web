@@ -30,6 +30,6 @@
 
 <%= javascript_tag do %>
   document.addEventListener('DOMContentLoaded', function () {
-<%= render :partial => 'gwas_analysis_js', :locals => {} %>
+<%= render :partial => 'gwas_analysis_js', :locals => {:h_snps => @h_snps, :phenotype => @phenotype} %>
 })
 <% end %>

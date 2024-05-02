@@ -1,0 +1,2 @@
+module FlybaseAllelesHelper
+end

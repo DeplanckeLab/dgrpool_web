@@ -1,0 +1,14 @@
+<p style="color: green"><%= notice %></p>
+
+<h1>Flybase alleles</h1>
+
+<div id="flybase_alleles">
+  <% @flybase_alleles.each do |flybase_allele| %>
+    <%= render flybase_allele %>
+    <p>
+      <%= link_to "Show this flybase allele", flybase_allele %>
+    </p>
+  <% end %>
+</div>
+
+<%= link_to "New flybase allele", new_flybase_allele_path %>
