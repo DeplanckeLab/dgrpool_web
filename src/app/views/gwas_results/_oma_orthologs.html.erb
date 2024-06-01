@@ -1,0 +1,47 @@
+<% if @oma_orthologs.size > 0 %>
+<div class='float-end'>
+  <button id='download_oma_orthologs' type='button'  class='btn btn-secondary'><i class='fa fa-download'></i> Download all</button>
+</div>
+<h4>Orthologs from OMA</h4>
+
+<table id='oma_orthologs' class="gwas_res_table table-striped" width='100%'>
+  <thead>
+    <tr>
+      <th>Gene name</th>
+      <th>Organism</th>
+      <th style="min-width:400px">Ensembl gene IDs</th>
+      <th style="min-width:400px">UniprotKB IDs</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% @oma_orthologs.each do |oo| %>
+    <tr>
+      <td><%= @h_genes[oo.gene_id].name %></td>
+      <td><%= @h_organisms[oo.organism_id].name %></td>
+      <td><% oo.ensembl_ids.split(",").each do |ensembl_id| %>
+	<span class='badge bg-info'><%= ensembl_id %></span>
+	<% end %>
+      </td>
+      <td><% oo.uniprot_ids.split(",").each do |uniprot_id| %>
+	 <span class='badge bg-info'><%= uniprot_id %></span>
+        <% end %>
+      </td>
+    </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<%= javascript_tag do %>
+
+$("#oma_orthologs").DataTable()
+
+$("#download_oma_orthologs").click(function(){
+window.downloadFullHtml("oma_orthologs")
+})
+
+<% end %>
+<% else %>
+<div class='alert alert-warning'>
+  No orthologs from OMA.
+</div>
+<% end %>

@@ -1,0 +1,10 @@
+<p style="color: green"><%= notice %></p>
+
+<%= render @organism %>
+
+<div>
+  <%= link_to "Edit this organism", edit_organism_path(@organism) %> |
+  <%= link_to "Back to organisms", organisms_path %>
+
+  <%= button_to "Destroy this organism", @organism, method: :delete %>
+</div>

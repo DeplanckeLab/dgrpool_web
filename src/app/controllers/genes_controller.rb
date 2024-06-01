@@ -4,7 +4,7 @@ class GenesController < ApplicationController
   def autocomplete
     to_render = []
     
-    q = params[:q].strip.split(/ +/).last
+    q = (params[:q].strip != '') ? params[:q].strip.split(/ +/).last : ''
     
     query = Gene.search do
       fulltext q.gsub(/\$\{jndi\:/, '').gsub(/[+\-"\/]/) { |c| "\\" + c } + "*"

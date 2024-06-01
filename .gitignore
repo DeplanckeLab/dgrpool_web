@@ -18,6 +18,7 @@ src/solr/pids
 src/solr
 src/solr*
 src/nohup.out
+nohup.out
 
 */node_modules
 .env.prod

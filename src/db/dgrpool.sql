@@ -120,8 +120,11 @@ primary key (id)
 create table genes( --ensembl_genes
 id serial,
 name text,
+full_name text,
 identifier text,
 in_vcf bool default false,
+synonyms text,
+summary_json text,
 -- copy table from asap for Flybase genes
 primary key (id)
 );
@@ -285,12 +288,14 @@ primary key (id)
 
 create index identifier_snps on snps(identifier);
 
-create table genes(
-id serial,
-name text,
-ensembl_id text,
-primary key (id)
-);
+--create table genes(
+--id serial,
+--name text,
+--full_name text,
+--ensembl_id text,
+--summary_json text
+--primary key (id)
+--);
 
 --create table snp_types(
 --id serial,
@@ -342,3 +347,39 @@ primary key (id)
 
 create index flybase_alleles_gene_id_idx on flybase_alleles(gene_id);
 create index flybase_alleles_identifier_idx on flybase_alleles(identifier);
+
+create table human_orthologs(
+id serial,
+-- Dmel_gene_ID  Dmel_gene_symbol        Human_gene_HGNC_ID      Human_gene_OMIM_ID      Human_gene_symbol       DIOPT_score     OMIM_Phenotype_IDs      OMIM_Phenotype_IDs[name]
+gene_id int references genes,
+hgnc_gene_id int,
+omim_gene_id int,
+human_gene_name text,
+diopt_score int,
+omim_phenotypes text,
+primary key (id)
+);
+
+create index human_orthologs_gene_id_idx on human_orthologs(gene_id);
+
+create table organisms(
+id serial,
+name text,
+oma_identifier text,
+tax_id int,
+genome_source text,
+version text,
+primary key (id)
+);
+
+create table oma_orthologs(
+id serial,
+gene_id int references genes,
+oma_group_id text,
+organism_id int references organisms,
+ensembl_ids text,
+uniprot_ids text,
+primary key (id)
+);
+
+create index oma_orthologs_gene_id_idx on oma_orthologs(gene_id);

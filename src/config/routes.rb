@@ -1,4 +1,7 @@
 Rails.application.routes.draw do
+  resources :oma_orthologs
+  resources :human_orthologs
+  resources :organisms
   resources :flybase_alleles
   resources :genes do
     collection do

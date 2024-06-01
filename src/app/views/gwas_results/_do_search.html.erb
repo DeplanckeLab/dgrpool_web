@@ -1,5 +1,11 @@
 <!--<h4 class=''> GWAS results (<%= @gwas_results.size %>)</h4>-->
 
+<%= render :partial => 'gene_details' %>
+
+<%= render :partial => 'oma_orthologs' %>
+
+<%= render :partial => 'flybase_orthologs' %>
+
 <%= render :partial => 'list_flybase_alleles' %>
 
 <h4 class='mt-3'>GWAS results</h4>

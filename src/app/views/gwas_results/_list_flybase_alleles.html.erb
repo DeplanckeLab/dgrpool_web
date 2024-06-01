@@ -1,8 +1,12 @@
+<div class='float-end'>
+  <button id='download_flybase_alleles' type='button'  class='btn btn-secondary'><i class='fa fa-download'></i> Download all</button>
+</div>
 <h4>Alleles from Flybase</h4>
 
 <table id='flybase_alleles' class="gwas_res_table table-striped" width='100%'>
   <thead>
     <tr>
+      <th>Gene</th>
       <th>Allele ID</th>
       <th>Allele symbol</th>
       <th>Phenotype</th>
@@ -13,7 +17,8 @@
   <tbody>
     <% @flybase_alleles.each do |fa| %>
     <tr>
-      <td><%= fa[:identifier] %></td>
+      <td><%= @h_genes[fa[:gene_id]].name %></td>
+      <td><%= link_to fa[:identifier], "https://flybase.org/reports/#{fa[:identifier]}", :target => '_blank' %></td>
       <td><%= fa[:symbol] %></td>
       <td><%= s = fa[:phenotype_id].gsub(/\:\d+/, "").downcase; raw link_to(fa[:phenotype_name], "http://www.ebi.ac.uk/ols4/ontologies/#{s}/classes/http%253A%252F%252Fpurl.obolibrary.org%252Fobo%252F#{fa[:phenotype_id].gsub(/\:/, "_")}", :target => '_blank') %></td>
       <td><%= raw fa[:qualifiers].map{|e| s = e[0].gsub(/\:\d+/, "").downcase; link_to(e[1], "http://www.ebi.ac.uk/ols4/ontologies/#{s}/classes/http%253A%252F%252Fpurl.obolibrary.org%252Fobo%252F#{e[0].gsub(/\:/, "_")}", :target => '_blank', :class => 'badge bg-secondary nodec', :style => 'color:white')}.join(" ") %></td>
@@ -26,5 +31,9 @@
 <%= javascript_tag do %>
 
 $("#flybase_alleles").DataTable()
+
+$("#download_flybase_alleles").click(function(){
+window.downloadFullHtml("flybase_alleles")
+})
 
 <% end %>

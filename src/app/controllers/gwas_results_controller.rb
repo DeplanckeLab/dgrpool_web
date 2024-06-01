@@ -57,6 +57,7 @@ class GwasResultsController < ApplicationController
           pheno = phenos[pheno_key]
           el = {
             :identifier => fa.identifier,
+            :gene_id => fa.gene_id,
             :symbol => fa.symbol,
             :phenotype_name => pheno['phenotype_name'],
             :phenotype_id => pheno_key,
@@ -66,6 +67,11 @@ class GwasResultsController < ApplicationController
           @flybase_alleles.push el
         end
       end
+    
+      @oma_orthologs = OmaOrtholog.where(:gene_id => @h_genes.keys).all
+      @h_organisms = {}
+      Organism.where(:id => @oma_orthologs.map{|oo| oo.organism_id}).all.map{|e| @h_organisms[e.id] = e}
+      @flybase_orthologs = HumanOrtholog.where(:gene_id => @h_genes.keys).all
     end
     
     def get_search

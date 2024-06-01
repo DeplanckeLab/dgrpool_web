@@ -1,0 +1,14 @@
+<p style="color: green"><%= notice %></p>
+
+<h1>Human orthologs</h1>
+
+<div id="human_orthologs">
+  <% @human_orthologs.each do |human_ortholog| %>
+    <%= render human_ortholog %>
+    <p>
+      <%= link_to "Show this human ortholog", human_ortholog %>
+    </p>
+  <% end %>
+</div>
+
+<%= link_to "New human ortholog", new_human_ortholog_path %>

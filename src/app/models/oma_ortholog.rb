@@ -1,0 +1,2 @@
+class OmaOrtholog < ApplicationRecord
+end

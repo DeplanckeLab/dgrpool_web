@@ -1,0 +1,10 @@
+<p style="color: green"><%= notice %></p>
+
+<%= render @oma_ortholog %>
+
+<div>
+  <%= link_to "Edit this oma ortholog", edit_oma_ortholog_path(@oma_ortholog) %> |
+  <%= link_to "Back to oma orthologs", oma_orthologs_path %>
+
+  <%= button_to "Destroy this oma ortholog", @oma_ortholog, method: :delete %>
+</div>

@@ -1,0 +1,46 @@
+<% if @flybase_orthologs.size > 0 %>
+<div class='float-end'>
+  <button id='download_flybase_orthologs' type='button'  class='btn btn-secondary'><i class='fa fa-download'></i> Download all</button>
+</div>
+<h4>Orthologs from Flybase</h4>
+
+<table id='flybase_orthologs' class="gwas_res_table table-striped" width='100%'>
+  <thead>
+    <tr>
+      <th>Gene ID</th>
+      <th>HGNC gene ID</th>
+      <th>OMIM gene ID</th>
+      <th>Human gene name</th>
+      <th>DIOPT score</th>
+      <th>OMIM phenotypes</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% @flybase_orthologs.each do |fo| %>
+    <tr>
+      <td><%= @h_genes[fo.gene_id].name %></td>
+      <td><%= fo.hgnc_gene_id %></td>
+      <td><%= fo.omim_gene_id %></td>
+      <td><%= fo.human_gene_name %></td>
+      <td><%= fo.diopt_score %></td>
+      <td><%= fo.omim_phenotypes %></td>
+    </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<%= javascript_tag do %>
+
+$("#flybase_orthologs").DataTable()
+
+$("#download_flybase_orthologs").click(function(){
+window.downloadFullHtml("flybase_orthologs")
+})
+
+<% end %>
+
+<% else %>
+<div class='alert alert-warning'>
+  No orthologs from Flybase.
+</div>
+<% end %>

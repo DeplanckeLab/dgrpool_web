@@ -3,7 +3,7 @@ module ApplicationHelper
   def display_var_type(snp_id, var_type, genes)
     html = ''
     if var_type
-      html = "<span id='transcript_annot_btn-#{snp_id}-#{var_type.name}' data-bs-toggle='tooltip' data-bs-placement='bottom' data-bs-html='true' class='transcript_annot_btn badge bg-#{var_type.impact_class} pointer' title='#{var_type.description}'>#{var_type.name}
+      html = "<span id='transcript_annot_btn-#{snp_id}-#{var_type.name}' data-bs-toggle='tooltip' data-bs-placement='bottom' data-bs-html='true' class='transcript_annot_btn badge bg-#{var_type.impact_class}' title='#{var_type.description}'>#{var_type.name}
            <br/>"
       if genes.size > 0
         html += "<small>#{genes.first[0]}" +
