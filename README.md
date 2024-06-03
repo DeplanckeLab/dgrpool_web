@@ -18,7 +18,7 @@ Users can explore the repository by searching for keywords or browsing through c
 
 ### Community Curated
 
-DGRPool encourages community participation by allowing users to become curators (please e-mail us at [bioinfo.epfl@gmail.com](mailto:bioinfo.epfl@gmail.com?subject="Volunteering as a curator")). Curators help maintain the platform by formatting and validating submitted datasets, ensuring the quality of the data.
+DGRPool encourages community participation by allowing users to become curators (please e-mail us at [bioinfo.epfl@gmail.com](mailto:bioinfo.epfl@gmail.com?subject="Volunteering as a curator") ). Curators help maintain the platform by formatting and validating submitted datasets, ensuring the quality of the data.
 
 ### Interactive Data Analysis
 
