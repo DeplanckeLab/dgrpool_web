@@ -1,5 +1,32 @@
 class HomeController < ApplicationController
 
+  def get_history
+    render :partial => 'get_history'
+  end
+  
+  def api
+
+    @fields = [[:id, :integer, "The phenotype ID"],
+               [:study_id, :integer, "The study ID"],
+               [:name, :string, "The phenotype name"],
+               [:is_summary, :boolean, "True if the original data is of a summary type (only one value per DGRP line and sex), or False in the opposite case (many samples per DGRP line and sex)"],
+               [:is_continuous, :boolean, "True if the data are numerical and continuous"],
+               [:is_numeric, :boolean, "True if the data are numeric"],
+               [:created_at, :timestamp, "Date of creation"],
+               [:updated_at, :timestamp, "Date of modification"],
+               [:summary_type, :string, "Type of the summary if is_summary is true"],
+               [:unit, :string, "The unit in which the data are expressed"],
+               [:original_data, :hash, "Original data by DGRP line and sex"],
+               [:summary_data, :hash, "Summary data by type of summary data, DGRP line and sex"],  
+               [:url, :string, "The URL where to download this resource"]
+              ]
+
+  end
+  
+  def get_upload_form
+    render :partial => 'dataset_file_upload'
+  end
+
   def upd_export
     `rails create_export`
   end
@@ -20,7 +47,19 @@ class HomeController < ApplicationController
 
   def get_gwas_results
 
-    phenoname = params[:phenoname]#.gsub(/[^a-zA-Z0-9]+/, '_')
+    @nber_filters = 0
+    [:filter_gene_name, :filter_by_pos, :filter_binding_site, :filter_involved_binding_site, :filter_variant_impact].each do |e|
+      session[e] = params[e] if params[e]
+      if session[e] != '' and session[e] != '0'
+        @nber_filters+=1
+      end
+    end
+
+   
+    
+#    session[:filter_gene_id] = (session[:filter_gene_name]) ? Gene.where(:name => session[:filter_gene_name]) :  ''
+    filter_gene_id = (g = Gene.where(:name => session[:filter_gene_name]).first) ? g.id : ''
+    phenoname = params[:phenotype_name]#.gsub(/[^a-zA-Z0-9]+/, '_')
    # s = params[:sex]
     @md5 = params[:md5]
     
@@ -30,7 +69,9 @@ class HomeController < ApplicationController
       'LOW' => 'secondary',
       'MODIFIER' => 'info'
     }
-
+    @h_var_types = {}
+    VarType.all.map{|vt| @h_var_types[vt.id] = vt; @h_var_types[vt.name] = vt}
+    
     @study = Study.find(20) ## random_study to use get_file method from Study object
 
     @gwas_dir = Pathname.new(APP_CONFIG[:data_dir]) + 'gwas'
@@ -42,16 +83,14 @@ class HomeController < ApplicationController
       @h_output = Basic.safe_parse_json(File.read(output_file), {})
     end
 
+    @h_units = {}
+    Unit.all.map{|u| @h_units[u.id] = u}
+    
     #s    h_sum = Basic.safe_parse_json(@study.pheno_sum_json, {})
 #    first_dgrp_line = h_sum.keys.first
 #    @list_sex = h_sum[first_dgrp_line]["sex"]
     @list_sex = params[:list_sex].split(",")
     @cur_sex = params[:sex] || @list_sex.first
-
-    @h_var_types = {}
-    VarType.all.each do |vt|
-      @h_var_types[vt.name] = vt
-    end
 
     @h_covariate_mapping = {
       "wolba" => 2347,
@@ -66,12 +105,15 @@ class HomeController < ApplicationController
     @anova = {}
     @annot = {}
     @h_snps = {}
+    h_all_snps = {}
     @h_gwas_results={}
     @all_snps = []
     @h_snps = {}
     @h_nber_res = {}
  #   @h_md5s={}
-    
+    @genes = []
+    @binding_sites = []
+    @filter_nber = {}
     @list_sex.each do |s|
       prefix = "#{@md5}/#{phenoname}_#{s}"
       @h_files[s] = {
@@ -89,27 +131,75 @@ class HomeController < ApplicationController
       #      @gwas_results = GwasResult.where().all                                                                                                                                                                                     
       @h_gwas_results[s] = []
       @h_nber_res[s] = -1
+     # @genes = []
+      #  @binding_sites = []
+      @times = []
+      @times.push [Time.now, 0]
       if File.exist? @tmp_dir + @h_files[s][:annot]
         @h_nber_res[s] = `zless #{@tmp_dir + @h_files[s][:annot]} | wc -l`.to_i - 1
         Zlib::GzipReader.open(@tmp_dir + @h_files[s][:annot]) {|gz|
           i=0
           gz.each_line do |l|
             if i > 0
-              @h_gwas_results[s].push l.split("\t")
+              t = l.split("\t")
+#              if (session[:filter_gene_name] == '' or t[8].match(session[:filter_gene_name]))
+                @h_gwas_results[s].push t 
+#              end
             end
             i+=1
-            break if i> 1000
+#            break if i> 1000
           end
         }
       end
-        
-      tmp_str = "{" + Snp.where(:identifier => @h_gwas_results[s].map{|e| e[2]}).all.map{|snp|
-        #  @h_snps[s][snp.identifier] = snp.                                                                                                                                                                                      
+      @times.push([tmp = Time.now, tmp-@times.last[0]])
+
+#      logger.debug("gwas_res:" + @h_gwas_results[s].first.to_json)
+      all_snps = Snp.where(:identifier => @h_gwas_results[s].map{|e| e[2]}).all
+      all_snps.map{|s| h_all_snps[s.identifier] = s.id}
+            @times.push([tmp = Time.now, tmp-@times.last[0]])
+
+#      logger.debug("all_snps" + all_snps.size.to_s)
+      h_snp_genes = {}
+      snp_genes =  SnpGene.where(:snp_id => all_snps.map{|e| e.id}).all
+      snp_genes.map{|sg| h_snp_genes[sg.snp_id] ||= [];  h_snp_genes[sg.snp_id].push sg}
+      @genes |= Gene.where(:id => snp_genes.map{|e| e.gene_id}).all
+            @times.push([tmp = Time.now, tmp-@times.last[0]])
+
+      #h_genes={}
+      #@genes[s].map{|g| h_genes[g.id] = g}
+ #     logger.debug(@genes[s].first.to_json)
+      tmp_str = "{" + all_snps.map{|snp|
         '"' + ((snp.identifier) ? snp.identifier : 'NA') + '":' + ((snp.annots_json) ? snp.annots_json : "null")
       }.join(",") + "}"
-      @h_snps.merge!(Basic.safe_parse_json(tmp_str, {}))
+      h_tmp_snps = Basic.safe_parse_json(tmp_str, {})
+      @h_snps.merge!(h_tmp_snps)
+
+      # {"transcript_annot":{"INTERGENIC":{"":[""]}},"binding_site_annot":{"TF_binding_site":{"BDTNP1_TFBS_dl":["FBsf0000295671"],"BDTNP1_TFBS_hb":["FBsf0000290429"],"BDTNP1_TFBS_Med":["FBsf0000276997"],"BDTNP1_TFBS_twi":["FBsf0000200439"],"mE1_TFBS_cad":["FBsf0000240997"],"mE1_TFBS_HSA":["FBsf0000343845"]}}}
+      @binding_sites |= ["TF_binding_site", "regulatory_region"].map{|k| h_tmp_snps.values.map{|v| (v and v['binding_site_annot'] and v['binding_site_annot'][k]) ? v['binding_site_annot'][k].keys : []}}.flatten.uniq
+
+      ### filter results
+      @times.push([tmp = Time.now, tmp-@times.last[0]])
+
+     @h_gwas_results[s].select!{|e|
+       snp_genes = h_snp_genes[h_all_snps[e[2]]]
+       
+        (session[:filter_gene_name] == '' or (snp_genes and snp_genes.map{|e| e.gene_id}.include? filter_gene_id)) and
+          (session[:filter_binding_site] == '' or (@h_snps[e[2]] and @h_snps[e[2]]['binding_site_annot'] and ["TF_binding_site", "regulatory_region"].map{|k| (@h_snps[e[2]]['binding_site_annot'][k]) ? @h_snps[e[2]]['binding_site_annot'][k].keys : []}.flatten.uniq.include? session[:filter_binding_site])) and
+          (session[:filter_involved_binding_site] == '0' or (@h_snps[e[2]] and @h_snps[e[2]]['binding_site_annot'] and ["TF_binding_site", "regulatory_region"].map{|k| (@h_snps[e[2]]['binding_site_annot'][k]) ? @h_snps[e[2]]['binding_site_annot'][k].keys : []}.flatten.uniq.size > 0)) and
+          (session[:filter_by_pos] == '' or (e2 = session[:filter_by_pos].split(":") and e3 = e2[1].split("-") and e2[0] == e[0] and e[1].to_i >= e3[0].to_i and e[1].to_i <= e3[1].to_i)) and
+          (session[:filter_variant_impact] == '' or (snp_genes and snp_genes.map{|e2| @h_var_types[e2.var_type_id].impact}.include? session[:filter_variant_impact]))
+      }
+      @times.push([tmp = Time.now, tmp-@times.last[0]])
+
+      @filter_nber[s] = @h_gwas_results[s].size
+
+ @times.push([tmp = Time.now, tmp-@times.last[0]])
       
-      @anova[s]= []
+      @h_gwas_results[s] = @h_gwas_results[s].first(1000)
+        
+ @times.push([tmp = Time.now, tmp-@times.last[0]])
+
+ @anova[s]= []
       nber_lines = 0
       #      @anova_content = File.read(@gwas_dir + @h_files[s][:anova])                                                                                                                                                                
       if File.exist?(@tmp_dir + @h_files[s][:anova])
@@ -149,8 +239,12 @@ class HomeController < ApplicationController
       
     end
     @annot = []
-    
-    
+
+     @times.push([tmp = Time.now, tmp-@times.last[0]])
+
+     @h_genes = {}
+     @genes.map{|g| @h_genes[g.id] = g}
+     
     render :partial => 'phenotypes/all_gwas_analysis', :locals => {:phenotype => nil, :h_output => @h_output, :h_files => @h_files, :anova => @anova, :h_gwas_results => @h_gwas_results, :output_dir => @tmp_dir, :download_namespace => 'tmp', :md5 => @md5}
     
   end
@@ -159,102 +253,139 @@ class HomeController < ApplicationController
 
   end
 
+  def clean_history
+
+    to_keep = []
+    session[:history].each_with_index do |h, i|
+      to_keep.push i if File.exist?(Pathname.new(APP_CONFIG[:data_dir]) + "tmp" + h[:md5])
+    end
+    session[:history] =  session[:history].values_at(*to_keep)
+  end
+  
   def compute_my_pheno_correlation
 
 
-    @h_res = {}
+    clean_history()
 
-    if params[:file]
-
-      file_max_size = 2000000
-
-      if params[:file].size >= file_max_size
-        @h_res[:errors] = ["This file is too big (#{params[:file].size.to_f/1000000}Mb). Only files smaller than 2Mb are accepted"]
-      else
-        #      tmp_dir = Pathname.new(APP_CONFIG[:data_dir]) + 'tmp'
-        #      @md5s =  Dir.entries(tmp_dir).map{|e| m = e.match(/(\w+)\.tmp/); ((m and m[1]) ? m[1] : nil)}.compact.select{|e| File.exist?(tmp_dir + e + 'output.json')  and (!File.exist?(tmp_dir + e + 'gwas_output.json'))}
-        
-        dgrp_lines = DgrpLine.all
-        @h_dgrp_lines = {}
-        dgrp_lines.map{|d| @h_dgrp_lines[d.name] = 1}
-        
-        #logger.debug("File size: #{params[:file].size}")
-        @data = ""
-        @data = params[:file].read()
-        @h_res = Parse.parse_user_tsv(@data, logger, false)
-        logger.debug(@h_res.to_json)
-        missing_dgrp_lines = []
-        tmp_dgrp_lines = []
-         tmp_dgrp_lines_by_sex = {}
-        @h_sex_color.each_key do |sex|
-          tmp_dgrp_lines_by_sex[sex] = []
+    @h_correlation_res = {}
+    
+    if params[:md5] 
+      h_res_file = Pathname.new(APP_CONFIG[:data_dir]) + "tmp" + params[:md5] + 'h_correlation_res.json'
+      if File.exist? h_res_file
+        tmp_correlation_res = Basic.safe_parse_json(File.read(h_res_file), {})
+        tmp_correlation_res.each_key do |k|
+           @h_correlation_res[k.to_sym] = tmp_correlation_res[k]
         end
-        # logger.debug("MATRIX:" + @h_res[:matrix].to_json)
-        logger.debug( @h_res[:sex_list])
-        h_sums = Basic.upd_dataset_sums(nil, nil, @h_res[:h_pheno], {}, @h_res[:sex_list], logger)
-        @h_sex_color.each_key do |sex|
-          if @h_res[:dgrp_lines_by_sex][sex]
-            @h_res[:dgrp_lines_by_sex][sex].each do |e|
-              if (m = e.match(/^\s*\w*?_?0*(\d+)\s*$/))            
-                tmp_dgrp_lines_by_sex[sex].push ("DGRP_" + ("0" * (3-m[1].size)) + m[1])
-              else
-                tmp_dgrp_lines_by_sex[sex].push e
+#        logger.debug(@h_correlation_res.to_json)
+      end
+        
+    else
+      if params[:file]
+
+        @h_res = {}
+        
+        file_max_size = 2000000
+        
+        if params[:file].size >= file_max_size
+          @h_res[:errors] = ["This file is too big (#{params[:file].size.to_f/1000000}Mb). Only files smaller than 2Mb are accepted"]
+        else
+          @data = params[:file].read()
+          if plain_text_file?(@data) == false
+            @h_res[:errors] = ["Wrong format! This file is not in plain/text format."]
+          else
+            
+            #      tmp_dir = Pathname.new(APP_CONFIG[:data_dir]) + 'tmp'
+            #      @md5s =  Dir.entries(tmp_dir).map{|e| m = e.match(/(\w+)\.tmp/); ((m and m[1]) ? m[1] : nil)}.compact.select{|e| File.exist?(tmp_dir + e + 'output.json')  and (!File.exist?(tmp_dir + e + 'gwas_output.json'))}
+            
+            dgrp_lines = DgrpLine.all
+            @h_dgrp_lines = {}
+            dgrp_lines.map{|d| @h_dgrp_lines[d.name] = 1}
+            
+            #logger.debug("File size: #{params[:file].size}")
+            @h_res = Parse.parse_user_tsv(@data, logger, false)
+            #   logger.debug(@h_res.to_json)
+            missing_dgrp_lines = []
+            tmp_dgrp_lines = []
+            tmp_dgrp_lines_by_sex = {}
+            @h_sex_color.each_key do |sex|
+              tmp_dgrp_lines_by_sex[sex] = []
+            end
+            # logger.debug("MATRIX:" + @h_res[:matrix].to_json)
+            #logger.debug( @h_res[:sex_list])
+            #  h_sums = Basic.upd_dataset_sums(nil, nil, @h_res[:h_pheno], {}, [params[:sex]], logger)
+            h_sums = Basic.upd_dataset_sums(nil, nil, @h_res[:h_pheno], {}, @h_res[:sex_list], logger)
+            @h_sex_color.each_key do |sex|
+              if @h_res[:dgrp_lines_by_sex] and @h_res[:dgrp_lines_by_sex][sex]
+                @h_res[:dgrp_lines_by_sex][sex].each do |e|
+                if (m = e.match(/^\s*\w*?_?0*(\d+)\s*$/))            
+                  tmp_dgrp_lines_by_sex[sex].push ("DGRP_" + ("0" * (3-m[1].size)) + m[1])
+                else
+                  tmp_dgrp_lines_by_sex[sex].push e
+                end
+                end
               end
+            end
+            if @h_res[:dgrp_lines]
+              @h_res[:dgrp_lines].each do |e|
+                if (m = e.match(/^\s*\w*?_?0*(\d+)\s*$/))
+                  tmp_dgrp_lines.push ("DGRP_" + ("0" * (3-m[1].size)) + m[1])
+                else
+                  tmp_dgrp_lines.push e
+                end
+              end
+            end
+            
+            
+            @h_res[:warnings] ||= []
+            #  missing_dgrp_lines = []
+            #  tmp_dgrp_lines = [] 
+            #  @h_res[:dgrp_lines].each do |e|
+            #    if (m = e.match(/^\s*\w*?_?0*(\d+)\s*$/))
+            #      tmp_dgrp_lines.push ("DGRP_" + ("0" * (3-m[1].size)) + m[1])
+            #    else
+            #      tmp_dgrp_lines.push e
+            #    end
+            #  end
+            @found_dgrp_lines = tmp_dgrp_lines_by_sex#.select{|d| @h_dgrp_lines[d]}
+            
+            missing_dgrp_lines = tmp_dgrp_lines.select{|d| !@h_dgrp_lines[d]}
+            if missing_dgrp_lines.size > 0
+              @h_res[:warnings].push "DGRP lines are not found in DGRPool and will be ignored: #{missing_dgrp_lines.join(", ")}."
             end
           end
         end
-        @h_res[:dgrp_lines].each do |e|
-          if (m = e.match(/^\s*\w*?_?0*(\d+)\s*$/))
-            tmp_dgrp_lines.push ("DGRP_" + ("0" * (3-m[1].size)) + m[1])
-          else
-            tmp_dgrp_lines.push e
-          end
-        end
-        
-        
-        
-        @h_res[:warnings] ||= []
-      #  missing_dgrp_lines = []
-      #  tmp_dgrp_lines = [] 
-      #  @h_res[:dgrp_lines].each do |e|
-      #    if (m = e.match(/^\s*\w*?_?0*(\d+)\s*$/))
-      #      tmp_dgrp_lines.push ("DGRP_" + ("0" * (3-m[1].size)) + m[1])
-      #    else
-      #      tmp_dgrp_lines.push e
-      #    end
-      #  end
-        @found_dgrp_lines = tmp_dgrp_lines_by_sex#.select{|d| @h_dgrp_lines[d]}
-        
-        missing_dgrp_lines = tmp_dgrp_lines.select{|d| !@h_dgrp_lines[d]}
-        if missing_dgrp_lines.size > 0
-          @h_res[:warnings].push "DGRP lines are not found in DGRPool and will be ignored: #{missing_dgrp_lines.join(", ")}."
-        end
-      end
-    else
+      else
       @h_res[:errors].push "File is missing"
+      end
     end
-
+    
     @h_sex = {'F' => 'female', 'M' => 'male', 'NA' => 'unclassified'}
     @cur_sex = nil
     @list_sex = []
     @ordered_list_sex = []
-    
-    if @h_res[:errors].size == 0 and params[:compare] == '1' and params[:phenotype_name]
 
+     @h_units = {}
+     Unit.all.map{|u| @h_units[u.id] = u}
+    
+    if @h_res and @h_res[:errors].size == 0 and params[:compare] == '1' and params[:phenotype_name]
+      
       @h_phenotypes = {}
       Phenotype.all.map{|p| @h_phenotypes[p.id] = p}
       col_i = [0, 1, @h_res[:header].index(params[:phenotype_name])]
       @content = []
       if col_i
-        @content = @h_res[:matrix].map{|e| col_i.#reject{|i| !e or e[i] == '' or e[i] == 'NA'}.
+        @content = @h_res[:matrix]#.select{|e| e[1] == params[:sex]}
+                     .map{|e| col_i.#reject{|i| !e or e[i] == '' or e[i] == 'NA'}.
                                          map{|i| (e and e[i] and (i < 2 or e[i] != 'NA')) ? e[i].gsub(/^\s*(-?\d+),(\d+)\s*$/, '\1.\2') : ''}.join("\t")}.join("\n")
-#        @content = @h_res[:matrix].map{|e| col_i.map{|i| (e) ? ((e[i].match(/^\s*(-?\d+),(\d+)\s*$/)) ? e[i].gsub(/,/, '.') : e[i]) : ''}.join("\t")}.join("\n") 
+      #        @content = @h_res[:matrix].map{|e| col_i.map{|i| (e) ? ((e[i].match(/^\s*(-?\d+),(\d+)\s*$/)) ? e[i].gsub(/,/, '.') : e[i]) : ''}.join("\t")}.join("\n") 
       else
         @h_res[:errors].push("column not found for \"#{params[:phenotype_name]}\"")
       end
       t_header =  col_i.map{|i| @h_res[:header][i]} #.join("\t") + "\n"
       @h_correlation_res = Basic.compute_correlation(t_header, @content)
-     # logger.debug "CMD:" + @h_correlation_res[:cmd]
+      h = {:md5 => @h_correlation_res[:md5], :filename => params[:file].original_filename, :phenotype_name => params[:phenotype_name]}
+      session[:history].push(h) if !session[:history].map{|e| e[:md5]}.include? h[:md5]
+      # logger.debug "CMD:" + @h_correlation_res[:cmd]
      # logger.debug "OUTPUT_JSON:" + @h_correlation_res[:output_json].to_s
       if @h_correlation_res[:h_output]['which_sex']
         @list_sex = @h_correlation_res[:h_output]['which_sex']
@@ -265,6 +396,11 @@ class HomeController < ApplicationController
       sum_file = @h_correlation_res[:output_dir] + 'dataset_sum.json'
       File.open(sum_file, 'w') do |fw|
         fw.write(h_sums[:all].to_json)
+      end
+
+      h_res_file = @h_correlation_res[:output_dir] + 'h_correlation_res.json'
+      File.open(h_res_file, 'w') do |fw|
+         fw.write(@h_correlation_res.to_json)
       end
       
       #md5 = Digest::SHA256.hexdigest @content
@@ -285,6 +421,22 @@ class HomeController < ApplicationController
       end
 
       render :partial => "all_correlation_results", :locals => {:h_correlation_res => @h_correlation_res, :gwas_output => gwas_output}
+    elsif params[:md5]
+      @h_phenotypes = {}
+      Phenotype.all.map{|p| @h_phenotypes[p.id] = p}
+      
+      gwas_output_file = @h_correlation_res[:output_dir] + "gwas_output.json"
+      gwas_output = {}
+      if File.exist? gwas_output_file
+        gwas_output = Basic.safe_parse_json(File.read(gwas_output_file), {})
+      end
+      if @h_correlation_res[:h_output]['which_sex']
+        @list_sex = @h_correlation_res[:h_output]['which_sex']
+        @ordered_list_sex = (0 .. @list_sex.size-1).sort{|a, b| @h_correlation_res[:res][@list_sex[b]].size <=> @h_correlation_res[:res][@list_sex[a]].size}.map{|i| @list_sex[i]}
+        @cur_sex = @ordered_list_sex.first
+      end
+
+      render :partial => "all_correlation_results", :locals => {:h_correlation_res => @h_correlation_res, :gwas_output => gwas_output}
     else
       render :partial => "preparse_dataset"
     end
@@ -295,6 +447,33 @@ class HomeController < ApplicationController
     params[:only_integrated_studies] ||= '1'
     params[:data_source2] ||= 'mean'
     params[:data_source1] ||= 'mean'
+    sex_by_dgrp = []
+    @distinct_sex = [[], []]
+    if params[:phenotype_id1]
+      p1= Phenotype.where(:id => params[:phenotype_id1]).first
+      params[:phenotype_name1] = p1.name
+      sex_by_dgrp[0] = Basic.safe_parse_json((p1.sex_by_dgrp || "null"), {})
+    end
+    if params[:phenotype_id2]
+      p2= Phenotype.where(:id => params[:phenotype_id2]).first
+      params[:phenotype_name2] = p2.name
+       sex_by_dgrp[1] = Basic.safe_parse_json((p2.sex_by_dgrp || "null"), {})
+    end
+    sex_by_dgrp.each_index do |psi|
+      if sex_by_dgrp[psi]
+        sex_by_dgrp[psi].each_key do |dgrp|
+          @distinct_sex[psi] |= sex_by_dgrp[psi][dgrp]
+        end
+      end
+    end
+    
+    
+    
+    if params[:nolayout] == '1'
+      render :partial => 'pheno_correlation'
+    else
+      render
+    end
   end
 
   def compute_correlation
@@ -309,6 +488,11 @@ class HomeController < ApplicationController
       tmp = params[:data_source2]
       params[:data_source2] =  params[:data_source1]
       params[:data_source1] = tmp
+    #  params[:phenotype_name1] = @phenotypes[0].name
+    #  params[:phenotype_name2] = @phenotypes[1].name
+    else
+    #  params[:phenotype_name1] = phenotypes[0].name
+    #  params[:phenotype_name2] = phenotypes[1].name
     end
 
     phenotypes_sex = []

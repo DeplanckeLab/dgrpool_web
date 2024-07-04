@@ -1,0 +1,32 @@
+<h5>History</h5>
+
+<% session[:history].each_with_index do |h, i| %>
+<div id='history_<%= h[:md5] %>'>
+  <%= h[:filename] %> / <%= h[:phenotype_name] %> <button id='history_<%= i %>' class='btn btn-sm btn-primary view-btn' type='button'>View</button>
+</div>
+<% end %>
+
+
+<%= javascript_tag do %>
+
+var list_history = <%= raw session[:history].to_json %>
+console.log(list_history)
+$(".view-btn").click(function(){
+ var i = this.id.split("_")[1]
+ //refresh_post()
+ var h = list_history[parseInt(i)]
+var data =[
+{name : 'md5', value : h.md5},
+{name : 'filename', value : h.filename},
+{name : 'phenotype_name', value : h.phenotype_name},
+{name : 'compare', value : '1'}]
+
+ refresh_post("comparison_results", "<%= raw compute_my_pheno_correlation_path() %>", data, "post", {loading:'fa-2x'})
+
+ $("#parsing_info").addClass("hidden")
+ $("#ontop_popup_window2").hide()
+ $("#input_card").addClass("hidden")
+ $("#restart-btn").removeClass("hidden")
+})
+
+<% end %>

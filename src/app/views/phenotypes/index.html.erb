@@ -9,7 +9,8 @@
   <%= check_box_tag 'only_integrated_studies', 1, ((params[:only_curated_studies]=='1') ? true : false) %> Only curated studies
 </div
 
-<h1>Phenotypes</h1>
+<h2>Phenotypes</h2>
 
-<%= render :partial => "index", :cached => true %>
+<%= render :partial => "index" %>
+<%#, :cached => true %>
 

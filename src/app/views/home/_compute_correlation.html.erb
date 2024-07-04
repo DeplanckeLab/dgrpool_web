@@ -29,7 +29,7 @@
   <div class='card-body'>
      <h3>Correlation plots</h3>
      <% @all_data.each_index do |i| %>  
-     <div class='card float-begin col-md-6'>
+     <div class='card float-begin col-md-9'>
        <div class='card-header'>
 	 <div class='float-end'>
            <%= raw download_buttons(i) %>
@@ -122,6 +122,14 @@ var h_sex_color = <%= raw @h_sex_color.to_json %>
 var sex_comparisons = <%= raw @sex_comparisons.to_json %>
 var all_data = <%= raw @all_data.to_json %>
 
+  
+
+function draw_plots(){
+
+
+  var ww = $(window).width()
+  var wh = $(window).height()
+  
 for (var j=0; j < all_data.length; j++){
 var traces = all_data[j]
 //		  var sex = Object.keys(h_data)
@@ -192,13 +200,15 @@ var updatemenus=[
 				      }
 				      ]
 				      
+				      var w = (wh < ww) ? wh -100 : ww-100;
+					w = (w < 200) ? 200 : w	    
 				      var layout = {
 				      updatemenus: updatemenus,
    xaxis : {title : (($("#data_source1_container").hasClass("hidden")) ? '<%= raw @phenotypes[0].name %>' : ($("#data_source1").val()) + "(<%= raw @phenotypes[0].name %>)") + " [" + sex_comparisons[j][0] + "]" + "<br>(<%= raw display_reference_short(@phenotypes[0].study) %>)"},
    yaxis : {title : (($("#data_source2_container").hasClass("hidden")) ? '<%= raw @phenotypes[1].name %>' : ($("#data_source2").val()) + "(<%= raw @phenotypes[1].name %>)") + " [" + sex_comparisons[j][1] + "]" + "<br>(<%= raw display_reference_short(@phenotypes[1].study) %>)"},
 			  //  title:'Correlation plot',
-			    width:600,
-	      height:600,
+			    width:w,
+	      height:w,
 				      showlegend: true,
 				      margin:{},
 	legend: {"orientation": "h", "y" : 1.15}
@@ -230,7 +240,12 @@ Plotly.newPlot('plot_' + j, traces, layout, opt);
 				      }
 				      
 				      
-				      
+}				      
 
+				      draw_plots()
+
+  window.addEventListener('resize', function(){draw_plots()});
+				      
+				      
 <% end %>
 <% end %>

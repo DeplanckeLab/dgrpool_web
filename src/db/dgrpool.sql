@@ -238,7 +238,7 @@ is_summary bool,
 is_numeric bool,
 is_continuous bool,
 summary_type_id int references summary_types,
-dataset_idx int,
+dataset_id int,
 unit_id int references units,
 created_at timestamp,
 updated_at timestamp,
@@ -323,6 +323,7 @@ primary key (id)
 );
 
 create index snp_genes_gene_id on  gwas_results(gene_id);
+create index snp_genes_snp_id on gwas_results(snp_id);
 
 create table gwas_results(
 id serial,

@@ -1,7 +1,9 @@
+var w = $(document).width()
 <% if ordered_index[params[:dgrp_order]] %>
 
 if ($("#ordered_plot").length > 0){
 var traces = []
+
 <% sex_list.each do |sex| %>
 var trace = {
 x: <%= raw ordered_index[params[:dgrp_order]].map{|i| dgrp_lines[i]}.to_json %>,
@@ -13,9 +15,43 @@ type: 'bar'
 traces.push(trace)
 <% end %>
 
-var layout = {
+var dgrp_lines = <%= raw ordered_index[params[:dgrp_order]].to_json %>
+
+var font_size = (w / dgrp_lines.length) -2;
+if (font_size < 6)
+ font_size = 6
+if (font_size > 12)
+  font_size = 12
+
+  var width = (font_size+1) * dgrp_lines.length
+
+  
+  var layout = {
+  width: width,
 title : 'Ordered values by DGRP line',
-yaxis : {title : "<%= raw phenotype.description.gsub(/(.{30,50}) /, '\1<br>').gsub(/\n/, '<br>').gsub(/\"/, "\\\"") %> <%= (u = phenotype.unit) ? "[#{u.label_html}]" : "[No unit]" %>"}
+yaxis : {title : "<%= raw phenotype.description.gsub(/(.{30,50}) /, '\1<br>').gsub(/\n/, '<br>').gsub(/\"/, "\\\"") %> <%= (u = phenotype.unit) ? "[#{u.label_html}]" : "[No unit]" %>"},
+xaxis : {
+ showticklabels: true, tickfont: { size: font_size}, dtick: 1
+}
+}
+
+      var opt = {
+  modeBarButtonsToRemove: ['toImage', 'sendDataToCloud'],
+  modeBarButtonsToAdd: [
+  {
+    name: 'Save PNG',
+    icon: Plotly.Icons.camera,
+    click: function(gd) {
+      Plotly.downloadImage(gd, {format: 'png', width:width*2})
+    }
+  },
+ {
+    name: 'Save SVG',
+    icon: Plotly.Icons.camera,
+    click: function(gd) {
+      Plotly.downloadImage(gd, {format: 'svg', width:width})
+    }
+  }]
 }
 
 

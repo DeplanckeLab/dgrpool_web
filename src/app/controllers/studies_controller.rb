@@ -455,6 +455,8 @@ class StudiesController < ApplicationController
   # GET /studies/1 or /studies/1.json
   def show
 
+    @h_units = {}
+    Unit.all.map{|u| @h_units[u.id] = u}
     @h_statuses = {}
     Status.all.map{|s| @h_statuses[s.id] = s}
     @h_dgrp_statuses ={}

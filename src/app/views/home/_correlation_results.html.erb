@@ -5,8 +5,8 @@
 <% end %>
   -->
 <%# @content.to_json %>
-<%= h_correlation_res[:cmd] if admin? %>
-<%= sex if admin? %>
+<%# h_correlation_res[:cmd] if admin? %>
+<%# sex if admin? %>
 <%# h_correlation_res.to_json %>
 
   <% if @phenotype %>
@@ -69,6 +69,9 @@
       <% (1 .. h_correlation_res[:header].size-1).to_a.map{|i| h_correlation_res[:header][i]}.each do |e| %>
       <th><%= (h_header[e]) ? h_header[e] : e %></th>
       <% end %>
+      <% if @phenotype %>
+      <th>Correlation plot</th>
+      <% end %>
     </tr>
   </thead>
   <tbody>
@@ -93,6 +96,9 @@
 	<%= raw display_corr_num(i, e2) %> <%# e2 %> 
       </td>
       <% end %>
+      <% if @phenotype %>
+      <td><button class='btn btn-primary corr_plot_btn btn-sm' id='corr_plot_btn_<%= p.id %>_<%= t[1] %>'>Plot</button></td>
+      <% end %>
     </tr>
     <% end %>
     <% end %>
@@ -100,6 +106,47 @@
 </table>
 
 <%= javascript_tag do %>
+
+//console.log("#results<%= "_#{sex}" %>")
+$("#results<%= "_#{sex}" %>").DataTable({pageLength:100, order:[[4, 'asc'], [3, 'desc'], [6, 'desc']]})
+
+<% if @phenotype %>
+var p1 = <%= raw @phenotype.id %>
+
+function toQueryString(data) {
+  return data.map(item => {
+    return encodeURIComponent(item.name) + '=' + encodeURIComponent(item.value);
+  }).join('&');
+}
+
+
+$(".corr_plot_btn").click(function(){
+var p2 = this.id.split("_")[3]
+var data = [
+{name : 'phenotype_id1', value : p1},
+{name : 'phenotype_id2', value : p2},
+{name : 'sex1', value : '<%= sex %>'},
+{name : 'sex2', value : this.id.split("_")[4]},
+{name : 'data_source1', value : 'mean'},
+{name : 'data_source2', value : 'mean'}, //,
+{name : 'nolayout', value : 1}
+]
+var ww = 1000
+var w = $(window).width()
+var h = $(window).height()
+//refresh_post("ontop_popup_container3", "<%= raw compute_correlation_path() %>?" + toQueryString(data), post, {loading:'fa-2x'})
+refresh_post("ontop_popup_container3", "<%= raw compute_correlation_path() %>", data, "post", {loading:'fa-2x'})
+$("#ontop_popup_window3").css({
+left: 240,
+width:ww,
+height:h-110,
+top: 100
+}).show(0)
+$("#ontop_popup_container3").css({height:h-160, width:ww-50})
+//window.location="<%= raw pheno_correlation_path() %>?" +  toQueryString(data)
+})
+<% end %>
+
 <% end %>
 
 <% if !@phenotype %>

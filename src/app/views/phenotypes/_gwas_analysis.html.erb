@@ -1,3 +1,6 @@
+<% filter_text = (@filter_nber and @filter_nber[sex] and @filter_nber[sex] != @h_nber_res[sex]) ? "Computed on all results" : "" %>
+
+<%# @h_snps.to_json %>
 <%# h_files.to_json %>
 <%# output_dir + h_files[:annot] %>
 <% if h_output and sex and h_output['results'] and h_output['results'][sex] and  h_output['results'][sex]['error_message'] %>
@@ -25,7 +28,11 @@
 
     <div class='card'>
       <div class='card-body'>
-	<h3>Covariates</h3>
+	<h3>Covariates
+	  <% if filter_text != '' %>
+	  <small><span class='badge bg-warning'><%= filter_text %></span></small>
+	  <% end %>
+	</h3>
 	
 	<div class='alert alert-success'>
 	  We tested for association of this phenotypes with known covariates <%= display_reference_short2(s) %>.
@@ -93,7 +100,11 @@
 	             <%= link_to raw("<i class='fa fa-download'></i> PNG"), get_file_study_path(@study, :namespace => download_namespace, :name => h_files[:qqplot]), {:target => '_blank', :class => 'btn btn-sm btn-secondary'} %>
 	    <%= link_to raw("<i class='fa fa-download'></i> PDF"), get_file_study_path(@study, :namespace => download_namespace, :name => h_files[:qqplot].gsub(/png$/, "pdf")), {:target => '_blank', :class => 'btn btn-sm btn-secondary'} %>
 	  </div>
-	  <h3>QQplot</h3>
+	  <h3>QQplot
+	    <% if filter_text != '' %>
+            <small><span class='badge bg-warning'><%= filter_text %></span></small>
+            <% end %>
+	  </h3>
           <%= image_tag image_path(get_file_study_path(@study, :namespace => download_namespace, :name => h_files[:qqplot])) if File.exist?(output_dir + h_files[:qqplot]) %>
 	</div>
       </div>
@@ -103,7 +114,11 @@
 	    <%= link_to raw("<i class='fa fa-download'></i> PNG"), get_file_study_path(@study, :namespace => download_namespace, :name => h_files[:manhattan]), {:target => '_blank', :class => 'btn btn-sm btn-secondary'} %>
             <%= link_to raw("<i class='fa fa-download'></i> PDF"), get_file_study_path(@study, :namespace => download_namespace, :name => h_files[:manhattan].gsub(/png$/, "pdf")), {:target => '_blank', :class => 'btn btn-sm btn-secondary'} %>
           </div>
-	  <h3>Manhattan plot</h3>
+	  <h3>Manhattan plot
+	    <% if filter_text != '' %>
+            <small><span class='badge bg-warning'><%= filter_text %></span></small>
+            <% end %>
+	  </h3>
 	  <%= image_tag image_path(get_file_study_path(@study, :namespace => download_namespace, :name => h_files[:manhattan])) if File.exist?(output_dir + h_files[:manhattan]) %>
 	</div>
       </div>
@@ -126,31 +141,24 @@
         </div>
 	<% end %>
 	
-	<h3>GWAS results <small><b><%= @h_nber_res[sex] %></b> significant hits at p-value < 0.01.
-	 <% if @h_nber_res[sex] > 1000 %>
-	      The 1000 top results are displayed in this table.
-	 <% end %>
-	<!--      First 1000 results over <%# nber_res %> are displayed.-->
-	</small></h3>
+	<h3>GWAS results</h3>
 	<% if @h_nber_res[sex] > 0 %>
 
 	<div class='legend_annotations'>
 	  <b>Variant impact</b> <%= raw @h_impact.keys.map{|k| "<span class='badge bg-#{@h_impact[k]}'>#{k}</span>"}.join(" ") %>
 	</div>
 
-	<div class='card'>
-	  <div class='card-body'>
-	    <b>Filter</b>
-	    <table><tbody>
-	      <tr><td>
-		  By genomic position
-		</td><td>
-		  <%= text_field_tag 'filter_by_pos', '', {:style => 'width:400px', :placeholder => '3L:4000-80000; 4L:5000-100000', :class => 'form-control'} %>
-	      </td></tr></tbody>
-	    </table>
-	  </div>
-	</div>
-
+	<div class='alert alert-success'>
+	  <% if @filter_nber and @filter_nber[sex] and @filter_nber[sex] != @h_nber_res[sex] %>
+	  <b><%= @filter_nber[sex] %></b> filtered from
+	  <% end %>
+	  <%= @h_nber_res[sex] %>
+	  significant hits at p-value < 0.01.
+					<% if @h_nber_res[sex] > 1000 %>
+            The 1000 top results are displayed in this table.
+            <% end %>
+            <!--      First 1000 results over <%# nber_res %> are displayed.-->
+        </div>
 	
 	<table id='gwas_res_<%= sex %>' width="100%" class='gwas_res_table table-striped mt-3'>
 	  <thead>
@@ -184,7 +192,6 @@
               <td><%= raw display_corr_num(2, t[7]) %></td>
 	      <%# raw (0 .. 6).to_a.map{|i| "<td>#{t[i]}</td>"}.join("") %>
 	      <td><% if @h_snps[t[2]] %>
-
 		<%= raw @h_snps[t[2]]['transcript_annot'].keys.map{|k| display_var_type(t[2], @h_var_types[k], @h_snps[t[2]]['transcript_annot'][k])}.join("<br/>") %>
 	      <% end %></td>
 	      <td><% if @h_snps[t[2]] %>
@@ -209,14 +216,15 @@
 	</table>
 	<% end %>
 	<%= javascript_tag do %>
+//	console.log("test2")
 	   <% if @h_nber_res[sex] > 0 %>
-  document.addEventListener('DOMContentLoaded', function () {
+//  document.addEventListener('DOMContentLoaded', function () {
 
          var gwas_table = $('#gwas_res_<%= sex %>').DataTable({
         pageLength:100,
         order : [[6, 'asc']]
                                    })
-	   })
+//	   })
 
                                    <% end %>
 
@@ -227,13 +235,18 @@
     </div>
 
     <% elsif md5 %>
-    <div class='alert alert-danger mt-3'>No results available yet for this dataset. Computing time takes usually approx. 2mn. Please wait. (If it takes more than 10mn without a change in the queue report below, please contact us, as it may have failed unexpectedly)
+    <%# md5 %>
+    <div class='alert alert-danger mt-3'>No results available yet for this dataset. Computing time takes usually approx. 1min 30s. Please wait. (If it takes more than 10mn without a change in the queue report below, please contact us, as it may have failed unexpectedly)
       <% data_dir = Pathname.new(APP_CONFIG[:data_dir])
 	 tmp_dir = data_dir + 'tmp'
 	 md5s =  Dir.entries(tmp_dir).map{|e| m = e.match(/(\w+)\.tmp/); ((m and m[1]) ? m[1] : nil)}.compact.select{|e| File.exist?(tmp_dir + e + 'output.json') and !File.exist?(tmp_dir + e + 'done')}.sort{|a, b| File.ctime(tmp_dir + (a + '.tmp')) <=> File.ctime(tmp_dir + (b + '.tmp'))} %>
-      <% pos = (md5s.size >0) ? md5s.index(md5) + 1 : nil %>
+      <% pos = (md5s.size >0 and md5s.index(md5)) ? md5s.index(md5) + 1 : nil %>
       <br/>
-      <b>Position in queue: <%= pos %> over <%= md5s.size %></b>
+      <% if pos %>
+      <b>Position in queue: <%= pos %> over <%= md5s.size %>. Estimated wait: <%= raw display_duration(90 * pos) %></b>
+      <% else %>
+      Not found in the queue
+      <% end %>
       <% if admin? %>
       <%# md5s.to_json %>
       <%# md5s.map{|e|  File.ctime(tmp_dir + e + 'output.json')}.to_json %>

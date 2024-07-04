@@ -51,6 +51,9 @@ Rails.application.routes.draw do
   end
   resources :home do
     collection do
+      get :get_history
+      get :api
+      get :get_upload_form
       get :upd_export
       post :parse_dataset
       get :check_pheno
@@ -70,6 +73,7 @@ Rails.application.routes.draw do
       get :compute_correlation
       get :gwas_analysis
       get :get_phewas
+      get :download
     end
     collection do
       get :autocomplete

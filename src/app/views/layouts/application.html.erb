@@ -65,6 +65,11 @@
         <div id='ontop_popup_window_close2'><span onclick="$('#ontop_popup_container2').html(''); $('#ontop_popup_window2').css({display : 'none'}); $('#ontop_autocomplete_window2').css({display : 'none'});"><i class='fa fa-times-circle'></i></span></div>
         <div id='ontop_popup_container2'></div>
       </div>
+      <div id='ontop_popup_window3'>
+        <div id='ontop_popup_window_close3'><span onclick="$('#ontop_popup_container3').html(''); $('#ontop_popup_window3').css({display : 'none'}); $('#ontop_autocomplete_window3').css({display : 'none'});"><i class='fa fa-times-circle'></i></span></div>
+        <div id='ontop_popup_container3'></div>
+      </div>
+
     </div>
 
     <% h_error_classes = {'alert' => 'danger'} %>
@@ -83,6 +88,8 @@
 
     document.addEventListener('DOMContentLoaded', function () {
 
+    $("#ontop_popup_window3").draggable()
+    
 /*    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
     var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
         return new bootstrap.Tooltip(tooltipTriggerEl)

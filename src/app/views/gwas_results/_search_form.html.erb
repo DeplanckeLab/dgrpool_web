@@ -5,6 +5,7 @@
         <%= text_field_tag 'gene_free_text', session[:gs_settings][:free_text] || '', {:size => 30, :class => "form-control", :placeholder => "Search"} %>
 	<div id='gene_name_container'></div>
         <button id='gene_search-btn' type="button" class="btn btn-primary"><i class="fas fa-search"></i> Search</button>
+	<div id='gene_search-message'></div>
       </div>
     </div>
   </div>
@@ -45,7 +46,7 @@
    console.log(ui.item.id)
    if (ui.item){
     var list_names = $("#gene_free_text").val().split(" ")
-    list_names[list_names.length - 1] = ui.item.label
+    list_names[list_names.length - 1] = ui.item.label.replace(/\[.+\]$/, '')
     $("#gene_free_text").val(list_names.join(" "))
     return false
    }
@@ -99,7 +100,9 @@ function gene_search(p, h) {
  if ($("#gene_free_text").val() != ''){
  refresh_post("gwas_search_results", "<%= do_search_gwas_results_path() %>", p, 'post', h);
  }else{
- 
+ $("#gwas_search_results").html("<div class='alert alert-danger'>\
+  Please enter one or several gene names separated by commas in the field above (e.g. ntc or ntc, sima).\
+</div>") 
  }
 }
 
@@ -120,7 +123,7 @@ $("#gene_free_text").keyup(function(e){
  if (e.key == 'Enter'){
   gene_init_search()
   var p = [{name : 'free_text', value : $("#gene_free_text").val()}]
-  var h = {loading:'fa-2'}
+  var h = {loading:'fa-2x'}
   gene_search(p, h)
  }
 })

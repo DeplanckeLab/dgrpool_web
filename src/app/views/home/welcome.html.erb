@@ -14,7 +14,7 @@
   <div class="col-md-6 mb-2">
     <div class="card h-100">
       <div class='card-body'>
-	<h3>DGRPool-</h3>
+	<h3>DGRPool</h3>
 	A database on studies about DGRP lines and phenotypes
       </div>
     </div>
@@ -76,7 +76,7 @@
 	     <ul>
               <li><%= @h_stats["integrated_studies"]["nber_phenotypes_with_data"] %> phenotypes with associated data</li>
               <ul>
-                <li><%=  @h_stats["integrated_studies"]["nber_phenotypes_male"] %> phenotypes with male data</li>
+                <li><%= @h_stats["integrated_studies"]["nber_phenotypes_male"] %> phenotypes with male data</li>
                 <li><%= @h_stats["integrated_studies"]["nber_phenotypes_female"] %> phenotypes with female data</li>
                 <li><%= @h_stats["integrated_studies"]["nber_phenotypes_na"] %> phenotypes with undefined sex data</li>
               </ul>
@@ -171,7 +171,7 @@
       <div class='card-body'>
 	<div class='row'>
 	  <% study_dataset_types.each do |k| %>
-	  <div id='sex_plot_<%= k %>_container' class='col'>
+	  <div id='sex_plot_<%= k %>_container' class='col-12 col-md-12 col-sm-12'>
 	    <div id='sex_plot_<%= k %>'></div>
 	  </div>
 	  <% end %>
@@ -189,6 +189,8 @@
 <%= javascript_tag do %>
 
 document.addEventListener('DOMContentLoaded', function () {
+
+function draw_plots(){
 
   var opt = {
   modeBarButtonsToRemove: ['toImage', 'sendDataToCloud'],
@@ -226,12 +228,25 @@ var trace = {
 data.push(trace)
 <% end %>
 
+var h =  $(window).height() -150
+var w = $("#category_plot").width() -50
 var layout = {
 title: 'Number of studies by category',
-barmode: 'stack'
+barmode: 'stack',
+showlegend: true,
+margin: {b:150},
+width: w,
+height: h,
+legend: {
+    x: 1,
+    xanchor: 'right',
+    y: 1
+  }
 }
 
 Plotly.newPlot('category_plot', data, layout, opt);
+
+$(document).ready(function() {
 
 
 <% study_dataset_types.each do |k| %>
@@ -244,8 +259,8 @@ var data = [{
   textinfo: "label+percent"
 }];
 
-var dim = $("#sex_plot_<%= k %>_container").width()
-
+//var dim = $("#sex_plot_<%= k %>_container").height()/2 || 400
+var dim =  $(window).height()/2.5 || 300
 var layout = {
  title:{
   text:"DGRP lines across <%= (@h_statuses[k]) ? @h_statuses[k].label.downcase : k %> studies",
@@ -256,13 +271,25 @@ var layout = {
   width: dim,
 //  scale: 1,
 autosize:true,
-  showlegend: false
+showlegend: false
 };
 
 
 Plotly.newPlot('sex_plot_<%= k %>', data, layout, opt);
 
+console.log("bla")
+
 <% end %>
 })
+
+}
+
+
+draw_plots();
+
+    window.addEventListener('resize', function(){draw_plots()});
+
+})
+
 
 <% end %>

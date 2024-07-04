@@ -1,0 +1,48 @@
+<% @sex_list.each do |sex| %>
+ <% if @mean_vector[sex].size > 0 and @bin_size %>
+
+var data = [
+  {
+    x: <%= raw @mean_vector[sex] %>,
+    type: 'histogram',
+        marker: {
+    color: '<%= @h_sex_color[sex] %>',
+},
+autobinx: false,
+xbins: {
+//    end: 2.8,
+size: <%= raw @bin_size %>,
+ //   start: .5
+
+  }
+  }
+];
+
+var layout = {
+title : 'Distribution of <%= (phenotype.is_summary) ? '' : 'mean ' %>values for <%= @h_sex[sex] %>',
+xaxis : {range : [<%= raw @global_min-@bin_size/2 %>, <%= raw @global_max+@bin_size/2 %>]}
+}
+
+  var opt = {
+  modeBarButtonsToRemove: ['toImage', 'sendDataToCloud'],
+  modeBarButtonsToAdd: [
+  {
+    name: 'Save PNG',
+    icon: Plotly.Icons.camera,
+    click: function(gd) {
+      Plotly.downloadImage(gd, {format: 'png', height:1200,width:1200})
+    }
+  },
+ {
+    name: 'Save SVG',
+    icon: Plotly.Icons.camera,
+    click: function(gd) {
+      Plotly.downloadImage(gd, {format: 'svg', height:600,width:600})
+    }
+  }]
+}
+
+ //h_plots['distri_plot_<%= sex %>'] =
+ Plotly.newPlot('distri_plot_<%= sex %>', data, layout, opt);
+ <% end %>
+ <% end %>

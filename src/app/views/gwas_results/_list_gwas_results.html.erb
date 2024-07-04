@@ -1,3 +1,10 @@
+<!--<div class='float-end'>
+  <button id='open_filter_panel-btn' type='button' class='btn btn-primary'><i class="fa-solid fa-filter"></i> Filters <div class='badge bg-danger'><%= @nber_filters %></div></button>
+</div>
+
+<%= render :partial => 'phenotypes/filter_gwas' %>
+-->
+
 <div class='legend_annotations'>
   <b>Variant impact</b> <%= raw @h_impact.keys.map{|k| "<span class='badge bg-#{@h_impact[k]}'>#{k}</span>"}.join(" ") %>
 </div>
@@ -10,8 +17,8 @@
   <thead>
     <tr>
       <th>Gene name</th>
-      <th>SNP ID</th>
-      <th>Snp type</th>
+      <th>Variant ID</th>
+      <th>Variant type</th>
       <th>Phenotype</th>
       <th>Sex</th>
       <th>p-value</th>
@@ -32,9 +39,10 @@
        </td>
        <td><%= vt = h_var_types[h_snp_genes[gr.snp_id].var_type_id]; raw display_var_type(gr.snp_id, vt, []) %></td><%# @h_snp_info[gr.snp_id]['transcript_annot'][k] %>
        <td>
-	 <%= (gr.phenotype_id) ? link_to(h_phenotypes[gr.phenotype_id].name, raw(phenotype_path(gr.phenotype_id)), {:target => '_blank'}) : gr.phenotype_id %>
+	 <%= raw display_phenotype h_phenotypes[gr.phenotype_id] %>
+	 <%# (gr.phenotype_id) ? link_to(h_phenotypes[gr.phenotype_id].name, raw(phenotype_path(gr.phenotype_id)), {:target => '_blank'}) : gr.phenotype_id %>
 	 <br/>
-	 <%= raw (h_phenotypes[gr.phenotype_id]) ? display_reference_short3(h_studies[h_phenotypes[gr.phenotype_id].study_id]) : '' %>
+	 <%= raw (h_phenotypes[gr.phenotype_id]) ? display_reference_short2(h_studies[h_phenotypes[gr.phenotype_id].study_id]) : '' %>
        </td>
        <td><%= gr.sex %></td>
        <td><%= gr.p_val %></td>
@@ -62,6 +70,11 @@
 </table>
 
 <%= javascript_tag do %>
+
+/*$("#open_filter_panel-btn").click(function(){
+$("#filter_container").toggleClass("hidden")
+})
+*/
 
 window.initTooltips()
 

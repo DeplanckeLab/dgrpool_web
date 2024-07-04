@@ -144,7 +144,7 @@ var phenotype_id = null
 <% if phenotype %>
 refresh('ontop_popup_container2', "<%= raw get_gwas_boxplot_phenotypes_path() %>?phenotype_id=<%= phenotype.id %>&sex=" + sex + "&snp_id=" + snp_id, {loading:'fa-2x'})
 <% elsif @md5 %>
-refresh('ontop_popup_container2', "<%= raw get_gwas_boxplot_phenotypes_path() %>?md5=<%= @md5 %>&phenoname=<%= params[:phenoname] %>&sex=" + sex + "&snp_id=" + snp_id, {loading:'fa-2x'})
+refresh('ontop_popup_container2', "<%= raw get_gwas_boxplot_phenotypes_path() %>?md5=<%= @md5 %>&phenotype_name=<%= params[:phenotype_name] %>&sex=" + sex + "&snp_id=" + snp_id, {loading:'fa-2x'})
 <% end %>
 }
 	var w = $(window).width()

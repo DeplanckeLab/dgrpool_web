@@ -39,7 +39,7 @@
 <%= javascript_tag do %>
 document.addEventListener('DOMContentLoaded', function () {
 <% @list_sex.each_index do |i| %>
-  $("#results_<%= @list_sex[i] %>").DataTable({pageLength:100, order:[[4, 'asc'], [3, 'desc']]})
+//  $("#results_<%= @list_sex[i] %>").DataTable({pageLength:100, order:[[4, 'asc'], [3, 'desc']]})
 <% end %>
 
 $("#only_integrated_studies").click(function(){

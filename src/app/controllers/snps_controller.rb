@@ -10,6 +10,8 @@ class SnpsController < ApplicationController
     Study.all.map{|s| @h_studies[s.id] = s}
     @h_phenotypes = {}
     @h_statuses = {}
+    @h_units = {}
+    Unit.all.map{|u| @h_units[u.id] = u}
     Status.all.map{|s| @h_statuses[s.id] =s }
     phenotypes = Phenotype.where(:id => @gwas_results.map{|e| e.phenotype_id}.uniq).all
     phenotypes.map{|e| @h_phenotypes[e.id] = e}

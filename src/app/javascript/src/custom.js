@@ -29,6 +29,7 @@ window.download_from_link = function(link, filename){
     document.body.removeChild(downloadLink);
 }
 
+
 window.downloadFullHtml = function(el_to_download) {
     // Create a new HTML document
     var newHtmlDocument = document.implementation.createHTMLDocument();
@@ -131,3 +132,19 @@ h.multipart = false
     $.ajax(h2);
 
 }
+
+window.resizePlots = function() {
+    console.log("resize2")
+        var plots = document.getElementsByClassName('js-plotly-plot');
+        for (var i = 0; i < plots.length; i++) {
+	    //       Plotly.Plots.resize(plots[i].id);
+	    //	    Plotly.redraw(plots[i])
+	    var plotElement = plots[i];
+            var plotData = plotElement.data;
+            var plotLayout = plotElement.layout;
+  console.log("resize3" + plotElement.id)
+	    console.log(plotData)
+	    Plotly.purge(plotElement)
+	    Plotly.newPlot(plotElement, plotData, plotLayout);
+        }
+    }

@@ -20,8 +20,12 @@
       <td><%= @h_genes[fa[:gene_id]].name %></td>
       <td><%= link_to fa[:identifier], "https://flybase.org/reports/#{fa[:identifier]}", :target => '_blank' %></td>
       <td><%= fa[:symbol] %></td>
-      <td><%= s = fa[:phenotype_id].gsub(/\:\d+/, "").downcase; raw link_to(fa[:phenotype_name], "http://www.ebi.ac.uk/ols4/ontologies/#{s}/classes/http%253A%252F%252Fpurl.obolibrary.org%252Fobo%252F#{fa[:phenotype_id].gsub(/\:/, "_")}", :target => '_blank') %></td>
-      <td><%= raw fa[:qualifiers].map{|e| s = e[0].gsub(/\:\d+/, "").downcase; link_to(e[1], "http://www.ebi.ac.uk/ols4/ontologies/#{s}/classes/http%253A%252F%252Fpurl.obolibrary.org%252Fobo%252F#{e[0].gsub(/\:/, "_")}", :target => '_blank', :class => 'badge bg-secondary nodec', :style => 'color:white')}.join(" ") %></td>
+      <td><%# s = fa[:phenotype_id].gsub(/\:\d+/, "").downcase; raw link_to(fa[:phenotype_name], "http://www.ebi.ac.uk/ols4/ontologies/#{s}/classes/http%253A%252F%252Fpurl.obolibrary.org%252Fobo%252F#{fa[:phenotype_id].gsub(/\:/, "_")}", :target => '_blank') %>
+	<%= s = fa[:phenotype_id].gsub(/\:\d+/, "").downcase; raw link_to(fa[:phenotype_name], "http://flybase.org/cgi-bin/cvreport.pl?id=#{fa[:phenotype_id]}", :target => '_blank') %>
+      </td>
+      <td><%# raw fa[:qualifiers].map{|e| s = e[0].gsub(/\:\d+/, "").downcase; link_to(e[1], "http://www.ebi.ac.uk/ols4/ontologies/#{s}/classes/http%253A%252F%252Fpurl.obolibrary.org%252Fobo%252F#{e[0].gsub(/\:/, "_")}", :target => '_blank', :class => 'badge bg-secondary nodec', :style => 'color:white')}.join(" ") %>
+	<%= raw fa[:qualifiers].map{|e| s = e[0].gsub(/\:\d+/, "").downcase; link_to(e[1], "http://flybase.org/cgi-bin/cvreport.pl?id=#{e[0]}", :target => '_blank', :class => 'badge bg-secondary nodec', :style => 'color:white')}.join(" ") %>
+      </td>
       <td><%= link_to fa[:reference], "http://flybase.org/reports/#{fa[:reference]}.htm" %></td>
     </tr>
     <% end %>

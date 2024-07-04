@@ -1,5 +1,13 @@
-<!--<h4 class=''> GWAS results (<%= @gwas_results.size %>)</h4>-->
+<% if @not_found.size > 0 %>
 
+<div class= 'alert alert-danger'>
+  The following gene names or identifiers were not found: <%= @not_found.join(", ") %>
+</div>
+
+<% end %>
+
+<% if @h_genes.keys.size > 0 %>
+<!--<h4 class=''> GWAS results (<%= @gwas_results.size %>)</h4>-->
 <%= render :partial => 'gene_details' %>
 
 <%= render :partial => 'oma_orthologs' %>
@@ -15,14 +23,14 @@
   <div class='float-end'>
     <button id='download_all_btn' type='button' class='btn btn-secondary'><i class='fa fa-download'></i> Download all</button>
   </div>
-  Only 1000 first results (out of <%= @gwas_results.size %>) having the smallest p-value to allow the page to load faster.
+  Showing top 1000 results (out of <%= @gwas_results.size %> across all studies at raw p-value < 0.01 cutoff). <br/><b>Note: </b>p-value is not adjusted.
 </div>
 <% else %>
 <div class='alert alert-success'>
   <div class='float-end'>
     <button id='download_all_btn' type='button' class='btn btn-secondary'><i class='fa fa-download'></i> Download all</button>
-  </div>
-  <%= @gwas_results.size %> results.
+  </div>  
+  <%= @gwas_results.size %> results across all studies at raw p-value < 0.01 cutoff. <br/><b>Note:</b> p-value is not adjusted.
 </div>
 
 <% end %>
@@ -94,3 +102,5 @@ $(".gene_page").keyup(function(e){
 
 <% end %>
 
+
+<% end %>

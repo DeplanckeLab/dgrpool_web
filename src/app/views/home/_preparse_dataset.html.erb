@@ -1,7 +1,9 @@
+<% if @h_res[:warnings] %>
 <% @h_res[:warnings].each do |warning| %>
 <div class='alert bg-warning mt-2'>
   <%= raw warning %>
 </div>
+<% end %>
 <% end %>
 
 <% if @h_res[:errors].size > 0 %>
@@ -23,6 +25,11 @@
 <p>Please select the phenotype for which you want to have correlation and GWAS results</p>
 <%= select_tag 'phenotype_name', options_for_select(l), {:class => 'form-select'} %>
 
+<%#  @h_res[:sex_list].to_json %>
+
+<%# l = @h_res[:sex_list] %>
+<%# select_tag 'sex', options_for_select(l), {:class => 'form-select'} %>
+
 <button id='compare_phenotype_btn' class='mt-3 btn btn-success' <%= (@h_res[:errors].size > 0) ? "disabled='disabled'" : '' %>>Compare this phenotype</button>
 
 <!--
@@ -39,9 +46,6 @@ Currently <%# @md5s.size %> jobs in the queue (max autorized = 5).
 
 <% end %>
 
-<div id='comparison_results' class='mt-3'>
-</div>
-
 
 <%= javascript_tag do %>
 
@@ -57,7 +61,8 @@ $(this).prop("disabled", true)
   $.each($('#dataset_file')[0].files, function(i, file) {
     data.append('file', file);
   });
- data.append('phenotype_name', $("#phenotype_name").val())
+data.append('phenotype_name', $("#phenotype_name").val())
+//data.append('sex', $("#sex").val())
  data.append('compare', '1')
   console.log(data)
   $.ajax({
@@ -71,11 +76,12 @@ $(this).prop("disabled", true)
     processData: false,
     method: 'POST',
     type: 'POST', // For jQuery < 1.9
-    success: function(res){
+				  success: function(res){
+				  $("#comparison_results").empty()
 				  $("#comparison_results").html(res)
 				  <% @h_sex.each_key do |sex| %>
 				  if ($("#results_<%= sex %>").length > 0){
-				  $('#results_<%= sex %>').DataTable({pageLength:100, order:[[4, 'asc'], [3, 'desc'], [6, 'desc']]})
+	//			  $('#results_<%= sex %>').DataTable({pageLength:100, order:[[4, 'asc'], [3, 'desc'], [6, 'desc']]})
 				  }
                                   <% end %>
     }
@@ -83,7 +89,12 @@ $(this).prop("disabled", true)
 
 })
 
-$("#preparse_btn").prop("disabled", false)
-
-				  
+//$("#preparse_btn").prop("disabled", false)
+/*$("#restart_container").html("<div class='float-end'><button id='restart-btn' class='btn btn-primary' type='button'>Restart</button></div><div class='clearfix'></div>")
+				  $("#restart-btn").click(function(){
+refresh("input_card", "<%= raw(get_upload_form_home_index_path()) %>", {})
+				  })
+*/				  
+				  $("#restart-btn").removeClass("hidden")
+$("#input_card").addClass("hidden")				  
 <% end %>

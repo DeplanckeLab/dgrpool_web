@@ -4,18 +4,47 @@ class GenesController < ApplicationController
   def autocomplete
     to_render = []
     
-    q = (params[:q].strip != '') ? params[:q].strip.split(/ +/).last : ''
+    q = (params[:q].rstrip != '') ? params[:q].rstrip.split(/[\, ]+/).last : ''
+    
+    query = Gene.search do
+      fulltext q.gsub(/\$\{jndi\:/, '').gsub(/[+\-"\/]/) { |c| "\\" + c }
+      field_list [:name, :full_name, :identifier, :synonyms]
+      order_by :name_order, :asc
+      paginate :page => 1, :per_page => 15
+      adjust_solr_params do |params|
+        params[:debugQuery] = 'true'
+      end
+    end
+
+# Execute the search to get the raw Solr response
+#    raw_response = search.raw
+
+    # Extract debug information if available
+ #   debug_info = raw_response['debug']
+
+    # Logging the debug information
+#    logger.info("Solr Debug Info: #{debug_info.inspect}")
+    
+    genes = query.results
     
     query = Gene.search do
       fulltext q.gsub(/\$\{jndi\:/, '').gsub(/[+\-"\/]/) { |c| "\\" + c } + "*"
-      field_list [:name]
+      field_list [:name, :full_name, :identifier, :synonyms]
       order_by :name_order, :asc
       paginate :page => 1, :per_page => 15
+      adjust_solr_params do |params|
+        params[:debugQuery] = 'true'
+      end
     end
-
-    genes = query.results
+    
+    genes |= query.results
+    
     genes.each do |g|
-      to_render.push({:id => g.id, :label => g.name})
+      #      to_render.push({:id => g.id, :label => g.name})
+      label = g.name
+      label += "[#{g.full_name}]" if g.full_name and g.full_name != ''
+      label += "[#{g.identifier}]" if g.identifier and g.identifier != ''
+      to_render.push({:id => g.id, :label => label })
     end
     
     render :plain => to_render.to_json

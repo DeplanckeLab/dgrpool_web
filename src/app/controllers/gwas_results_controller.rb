@@ -26,13 +26,40 @@ class GwasResultsController < ApplicationController
     end
   end
     
-    def core_search genes
+    def core_search gene_names
 
+      @nber_filters = 0
+      [:filter_gene_name, :filter_by_pos, :filter_binding_site, :filter_involved_binding_site, :filter_variant_impact].each do |e|
+        session[e] = params[e] if params[e]
+        if session[e] != '' and session[e] != '0'
+          @nber_filters+=1
+        end
+      end
+      
+      
       @h_var_types = {}
       VarType.all.map{|vt| @h_var_types[vt.id] = vt; @h_var_types[vt.name] = vt}
       
       @h_genes = {}
-      Gene.where(:name => genes).all.map{|e| @h_genes[e.id] = e}
+      #      Gene.where(["name in (?) or identifier in (?)", genes, genes).all.map{|e| @h_genes[e.id] = e}
+#      q = genes.join(" OR ")
+#      gene_query = Gene.search do
+#        fulltext q #.gsub(/\$\{jndi\:/, '').gsub(/[+\-\/]/) { |c| "\\" + c }, :match => :phrase
+#        field_list [:name] #, :identifier, :full_name]
+#        order_by :name_order, :asc
+#        paginate :page => 1, :per_page => 15
+#      end
+#
+#      genes = gene_query.results
+      #      logger.debug(genes.to_json)
+      genes = Gene.where(["identifier IN (?) or name IN (?) or full_name IN (?)", gene_names, gene_names, gene_names]).all
+      h_terms = {}
+      genes.map{|e| @h_genes[e.id] = e
+        h_terms[e.identifier] = 1; h_terms[e.name] =1; h_terms[e.full_name] = 1
+      }
+      @not_found = gene_names - h_terms.keys
+
+      
       @h_snp_genes = {}
       SnpGene.where(:gene_id => @h_genes.keys).all.map{|e| @h_snp_genes[e.snp_id] = e}
       @h_snps = {}
@@ -76,7 +103,8 @@ class GwasResultsController < ApplicationController
     
     def get_search
 
-      genes = params[:q].split(/\s*[; ]\s*/)
+      genes = params[:q].gsub(/\[.+?\]/, "").split(/\s*[\, ]\s*/)
+      logger.debug(genes.to_json)
       core_search(genes)
       data = []
       header = ["gene_name", "snp_id", "snp_type", "impact", "phenotype_id", "phenotype_name", "sex", "p_value", "transcript_annotation", "binding_side_annotation"]
@@ -122,6 +150,9 @@ class GwasResultsController < ApplicationController
     free_text = session[:gs_settings][:free_text]
 
     free_text.strip!
+
+    @h_units = {}
+    Unit.all.map{|u| @h_units[u.id] = u}
     
     @h_impact = {
       'HIGH' => 'danger',
@@ -130,7 +161,7 @@ class GwasResultsController < ApplicationController
       'MODIFIER' => 'info'
     }
         
-    genes = free_text.split(/\s*[; ]\s*/)
+    genes = free_text.gsub(/\[.+?\]/, "").split(/\s*[\, ]\s*/)
 
     @snp_genes = []
     

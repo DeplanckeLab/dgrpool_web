@@ -1,9 +1,13 @@
+var w = $(document).width()
+console.log("test!!!")
 var traces = []
+<% h_dgrp_lines = {} %>
 <% ordered_index.each_key do |s| %>
  <% x = [] %>
  <% y = [] %>
  <% ordered_index[params[:dgrp_order]].each do |i| %>
   <% d = dgrp_lines[i] %>
+  <% h_dgrp_lines[d] = 1 %> 
   <% x += (0 .. h_pheno[d][phenotype.name].size-1).select{|i| h_pheno[d]['sex'][i] == s}.map{|j| d} %>
   <% y += (0 .. h_pheno[d]['sex'].size-1).select{|i| h_pheno[d]['sex'][i] == s}.map{|i| h_pheno[d][phenotype.name][i]} %>
  <% end %>
@@ -19,10 +23,48 @@ y: <%= raw y.to_json %><%# raw (h_pheno[d]) ? h_pheno[d][phenotype.name].to_json
 traces.push(trace)
 <% end %>
 
-var layout = {
+var dgrp_lines = <%= raw h_dgrp_lines.keys.to_json %>;
+
+var font_size = (w / dgrp_lines.length) -2;
+if (font_size < 6)
+ font_size = 6
+if (font_size > 12)
+ font_size = 12
+
+  var width = (font_size+1) * dgrp_lines.length
+
+  var layout = {
+  width : width,
 title : 'Ordered boxplot of raw values',
 yaxis : {title : "<%= raw phenotype.description.gsub(/(.{30,50}) /, '\1<br>').gsub(/\n/, '<br>').gsub(/"/, "\\\"") %>"},
+  xaxis : {
+  //showticklabels: (dgrp_lines.length > w * 60 / 1470) ? false : true
+ showticklabels: true, tickfont: { size: font_size}, dtick: 1
+  },
 boxmode: 'group'
 }
+console.log("blou" + w)
+console.log(dgrp_lines.length)
+console.log( w * 60 / 1470)
 
-Plotly.newPlot('ordered_boxplot', traces, layout, opt);
+      var opt = {
+  modeBarButtonsToRemove: ['toImage', 'sendDataToCloud'],
+  modeBarButtonsToAdd: [
+  {
+    name: 'Save PNG',
+    icon: Plotly.Icons.camera,
+    click: function(gd) {
+      Plotly.downloadImage(gd, {format: 'png', width:width*2})
+    }
+  },
+ {
+    name: 'Save SVG',
+    icon: Plotly.Icons.camera,
+    click: function(gd) {
+      Plotly.downloadImage(gd, {format: 'svg', width:width})
+    }
+  }]
+}
+
+
+  Plotly.newPlot('ordered_boxplot', traces, layout, opt);

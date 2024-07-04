@@ -231,12 +231,12 @@ module Basic
       end
       #  puts h_phenotypes.to_json
 
-      logger.debug(h_pheno.to_json)
+     # logger.debug(h_pheno.to_json)
       
       h_pheno.each_key do |dgrp_line|
         phenos = h_pheno[dgrp_line].keys - ["sex"]
         sex =  h_pheno[dgrp_line]["sex"]
-        logger.debug dgrp_line +  " -> " + sex.to_json
+      #  logger.debug dgrp_line +  " -> " + sex.to_json
         h_sex_idx = {}
         sex.each_index do |i|
           h_sex_idx[sex[i]]||=[]
@@ -261,14 +261,14 @@ module Basic
           phenotype_id = (study_id and phenotype) ? phenotype.id : pheno
           # is_numeric = Basic.is_numeric_vector(h_pheno[dgrp_line][pheno])
           if phenotype
-            logger.debug phenotype if logger
+         #   logger.debug phenotype if logger
             #  puts phenotype.name
             if (study_id) ? phenotype.is_numeric : true
-              logger.debug "numeric" if logger
+             # logger.debug "numeric" if logger
              # list_sums = (phenotype.is_summary == true) ? [:mean] : [:mean, :median, :variance, :std_dev, :std_err, :cv]
               tmp_v = {}
-              logger.debug sex_list if logger
-              logger.debug h_sex_idx.to_json if logger
+             # logger.debug sex_list if logger
+             # logger.debug h_sex_idx.to_json if logger
               sex_list.each do |sex_item|
                 #    puts sex_item
                 list_val = (h_sex_idx[sex_item]) ? h_sex_idx[sex_item].map{|i| (h_pheno[dgrp_line][pheno]) ? h_pheno[dgrp_line][pheno][i] : nil} : []
@@ -276,8 +276,8 @@ module Basic
                 #                  puts "#{dgrp_line} #{sex_item} => #{list_val.to_json}"
                 #                end
                 if logger
-                  logger.debug sex_item
-                  logger.debug list_val
+              #    logger.debug sex_item
+              #    logger.debug list_val
                 end
                 [:mean, :median, :all].each do |k|
                   val = nil
@@ -356,7 +356,7 @@ module Basic
               end
                 
             else
-              logger.debug "else" if logger
+            #  logger.debug "else" if logger
               sex_list.each_index do |sex_i|
                 sex_item = sex_list[sex_i]
                 list_val = (h_sex_idx[sex_item]) ? h_sex_idx[sex_item].map{|i| (h_pheno[dgrp_line][pheno]) ? h_pheno[dgrp_line][pheno][i] : nil} : []               

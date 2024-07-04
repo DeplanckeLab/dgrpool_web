@@ -1,9 +1,12 @@
 <div id="<%= dom_id phenotype %>">
 
   <div class='float-end'>
-    <%= link_to "GWAS analysis", gwas_analysis_phenotype_path(@phenotype), {:data => {:turbo => 'false', :method => 'get'}, :target => "_blank", :class => 'btn btn-primary'} %>
-    <%= link_to "Compute correlation", compute_correlation_phenotype_path(@phenotype), {:data => {:turbo => 'false', :method => 'get'}, :target => "_blank", :class => 'btn btn-primary'} %>
+    <%# link_to "GWAS analysis", gwas_analysis_phenotype_path(@phenotype), {:data => {:turbo => 'false', :method => 'get'}, :target => "_blank", :class => 'btn btn-primary'} %>
+    <%# link_to "Compute correlation", compute_correlation_phenotype_path(@phenotype), {:data => {:turbo => 'false', :method => 'get'}, :target => "_blank", :class => 'btn btn-primary'} %>
+
+    <% if curator? %>
     <%= link_to "Edit", edit_phenotype_path(@phenotype), {:data => {:turbo => 'false', :method => 'get'}, :class => 'btn btn-success'} %>
+    <% end %>
     <%= link_to "All phenotypes", phenotypes_path, {:data => {:turbo => false}, :class => 'btn btn-secondary'} %>
   </div>
   
@@ -12,40 +15,65 @@
   <% if phenotype.obsolete == true %>
   <div class='alert alert-warning'>WARNING: This phenotype was deactivated and thus is considered as obsolete.</div>
   <% end %>
-  
-  <div class='card mb-2'>
-    <div class='card-body'>
-      <div class='float-end'>
-	<span class='badge bg-info'><%= (phenotype.is_summary == true) ? 'Summary' : 'By sample' %></span>
-	<span class='badge bg-info'><%= (phenotype.is_continuous == true) ? 'Continuous' : 'Discrete' %></span>
-	<span class='badge bg-info'><%= (phenotype.is_numeric == true) ? 'Numeric' : 'Text' %></span>
-      </div>
-      <h5>Description</h5>
-      <p style="margin-bottom:30px; margin-top:20px;"><%= raw phenotype.description %> <%= (u = phenotype.unit) ? "[#{u.label_html}]" : "[No unit]" %></p>
-    </div>
-  </div>
 
-  <div class='card mb-2'>
-    <div class='card-body'>
-      <div class='float-end'>
-	 <%= link_to "Go to study", study_path(phenotype.study), {:data => {:turbo => false}, :class => 'btn btn-secondary'} %>
+  <div class='row'>
+    <div class='col-md-8'>
+
+      <div id='phenotype_description_card' class='card mb-2'>
+	<div class='card-body'>
+	  <div class='float-end'>
+	    <span class='badge bg-info'><%= (phenotype.is_summary == true) ? 'Summary' : 'By sample' %></span>
+	    <span class='badge bg-info'><%= (phenotype.is_continuous == true) ? 'Continuous' : 'Discrete' %></span>
+	    <span class='badge bg-info'><%= (phenotype.is_numeric == true) ? 'Numeric' : 'Text' %></span>
+	  </div>
+	  <h5>Description</h5>
+	  <p style="margin-bottom:30px; margin-top:20px;"><%= raw phenotype.description %> <%= (u = phenotype.unit) ? "[#{u.label_html}]" : "[No unit]" %></p>
+	</div>
       </div>
-      <h5>Defined in study</h5>
-      <% study = phenotype.study %>
-      <%= raw display_reference(study) %>
-    </div>
-  </div>
-  
-  <div class='card mb-2'>
-    <div class='card-body'>
-      <h5>Analyses</h5>
-            <div class='float-begin'>
-        <%= link_to "GWAS analysis", gwas_analysis_phenotype_path(@phenotype), {:data => {:turbo => 'false', :method => 'get'}, :target => "_blank", :class => 'btn btn-primary'} %>
-        <%= link_to "Compute correlation", compute_correlation_phenotype_path(@phenotype), {:data => {:turbo => 'false', :method => 'get'}, :target => "_blank", :class => 'btn btn-primary'} %>
+      <div id='study_card' class='card mb-2'>
+        <div class='card-body'>
+          <div class='float-end'>
+            <%= link_to "Go to study", study_path(phenotype.study), {:data => {:turbo => false}, :class => 'btn btn-secondary'} %>
+          </div>
+          <h5>Defined in study</h5>
+          <% study = phenotype.study %>
+          <%= raw display_reference(study) %>
+        </div>
       </div>
 
     </div>
-  </div>
+    
+    <div id='right_panel' class='col-md-4'>
+      
+      <div class='card mb-2'>
+	<div class='card-body'>
+	  <h5>Downloads</h5>	  
+	  <div class='float-begin'>
+	     <%= link_to raw("<i class='fa fa-download'></i> All data [JSON]"), phenotype_path(@phenotype, :format => 'json'), {:data => {:turbo => 'false', :method => 'get'}, :target => "_blank", :class => ''} %><br/>
+	    <% type = (phenotype.is_summary) ? ((st= phenotype.summary_type) ? st.name : 'NA') : 'by sample' %>
+	    <%= link_to raw("<i class='fa fa-download'></i> Original data (#{type}) [TSV]"), download_phenotype_path(@phenotype), {:data => {:turbo => 'false', :method => 'get'}, :target => "_blank", :class => ''} %><br/>
+	    <% @list_sum_types.each_with_index do |e, i| %>
+            <%= link_to raw("<i class='fa fa-download'></i> #{e.capitalize} data [TSV]"), download_phenotype_path(@phenotype, {:s_i => i}), {:data => {:turbo => 'false', :method => 'get'}, :target => "_blank", :class => ''} %><br/>
+            <% end %>
+	  </div>
+	  
+	</div>
+      </div>
+            
+      <div class='card mb-2'>
+	<div class='card-body'>
+	  <h5>Analyses</h5>
+          <div class='float-begin'>
+            <%= link_to raw("<i class='fa fa-tools'></i> GWAS analysis"), gwas_analysis_phenotype_path(@phenotype), {:data => {:turbo => 'false', :method => 'get'}, :target => "_blank", :class => ''} %><br/>
+            <%= link_to raw("<i class='fa fa-tools'></i> Correlation with other phenotypes"), compute_correlation_phenotype_path(@phenotype), {:data => {:turbo => 'false', :method => 'get'}, :target => "_blank", :class => ''} %>
+	  </div>
+	  
+	</div>
+      </div>
+            
+    </div>
+</div>
+  
 
   
   <%# render :partial => 'values' %>
@@ -72,7 +100,7 @@
       <% end %>
       <% @sex_list.each_index do |i| %>
      
-      <% vals = @mean_vector[@sex_list[i]] %> <%# @h_pheno_mean.keys.map{|k| (@h_pheno_mean[k][phenotype.id.to_s]) ? @h_pheno_mean[k][phenotype.id.to_s][i] : nil}.flatten.compact %>
+      <% vals = @mean_vector[@sex_list[i]] %> <%# @h_pheno_sum.keys.map{|k| (@h_pheno_sum[k][phenotype.id.to_s]) ? @h_pheno_sum[k][phenotype.id.to_s][i] : nil}.flatten.compact %>
       <%# vals.uniq.to_json if admin? %>
       <%# vals.to_json %>
       <%# nas = vals.size - vals.compact.size %>
@@ -98,14 +126,14 @@
 	 end
 	 end %>
       <%# @h_pheno.keys %>
-      <%# @h_pheno_mean["DGRP_802"]['sex'].to_json %>
-      <%# @h_pheno_mean["DGRP_802"][phenotype.name].to_json %>
+      <%# @h_pheno_sum["DGRP_802"]['sex'].to_json %>
+      <%# @h_pheno_sum["DGRP_802"][phenotype.name].to_json %>
       
       <%# @mean_vector %>
       <%# @sex_list.to_json %>
       <%# @sex_list.each_index do |i| %>
       <%# i %>  <%# @sex_list[i] %>  
-      <%# @h_pheno_mean.to_json %> <%# .keys.map{|k| (@h_pheno[k][phenotype.id.to_s]) ? @h_pheno[k][phenotype.id.to_s][i] : nil}.to_json %>
+      <%# @h_pheno_sum.to_json %> <%# .keys.map{|k| (@h_pheno[k][phenotype.id.to_s]) ? @h_pheno[k][phenotype.id.to_s][i] : nil}.to_json %>
       
       <%# end %>
 
@@ -116,8 +144,8 @@
       <%# @global_ordered_index['M'].size %>
       <%# @errors.to_json %>
       <%# @h_pheno.keys.map{|k| @h_pheno[k][phenotype.name]}.to_json %>
-      <%# @h_pheno_mean["DGRP_021"].to_json %>
-      <%# @h_pheno_mean.keys.map{|k| @h_pheno_mean[k][phenotype.id.to_s]}.to_json %>
+      <%# @h_pheno_sum["DGRP_021"].to_json %>
+      <%# @h_pheno.sum.keys.map{|k| @h_pheno_sum[k][phenotype.id.to_s]}.to_json %>
       <%# @h_pheno.to_json %>
       <%# @mean_vector.to_json %>
       <% if phenotype.is_numeric == true and  phenotype.is_continuous %>
@@ -176,7 +204,7 @@
 	 </div>
        </div>
        
-       Display <%= select_tag "displayed_sum_type", options_for_select((0 .. @list_sum_types.size-1).to_a.map{|i| [@list_sum_types[i], i]}, params[:displayed_sum_type]), {:class => 'plot_param form-inline'} %> and sort by <%= select_tag "dgrp_order_barplot", options_for_select(@sex_list, params[:dgrp_order_barplot]), {:class => 'plot_param form-inline'} %> samples
+       Display <%= select_tag "displayed_sum_type", options_for_select((0 .. @list_sum_types.size-1).to_a.map{|i| [@list_sum_types[i], i]}, params[:displayed_sum_type]), {:class => 'barplot_param form-inline'} %> and sort by <%= select_tag "dgrp_order_barplot", options_for_select(@sex_list, params[:dgrp_order_barplot]), {:class => 'barplot_param form-inline'} %> samples
        <div class='card col-md-12'>
          <div class='card-header'>
 	   <div class='float-end'>
@@ -217,6 +245,10 @@
 
   document.addEventListener('DOMContentLoaded', function () {
 
+ var w = $(window).width()
+
+  $("#study_card").height($("#right_panel").height() - $("#phenotype_description_card").height()-20) 
+
   var opt = {
   modeBarButtonsToRemove: ['toImage', 'sendDataToCloud'],
   modeBarButtonsToAdd: [
@@ -224,7 +256,7 @@
     name: 'Save PNG',
     icon: Plotly.Icons.camera,
     click: function(gd) {
-      Plotly.downloadImage(gd, {format: 'png', height:600,width:600})
+      Plotly.downloadImage(gd, {format: 'png', height:1200,width:1200})
     }
   },
  {
@@ -324,44 +356,32 @@ value : <%= params[:nber_bins] %>,
 $("#nber_bins").html(ui.value)       
 },
 change: function(e,ui){
-window.location="<%= phenotype_path(phenotype) %>?nber_bins=" + ui.value + "&dgrp_order=<%= params[:dgrp_order] %>"
+//window.location="<%= phenotype_path(phenotype) %>?nber_bins=" + ui.value + "&dgrp_order=<%= params[:dgrp_order] %>"
+refresh(null, "<%= raw phenotype_path(phenotype) %>?nber_bins=" + ui.value + "&partial=distri_plots_js&dgrp_order=<%= params[:dgrp_order] %>", {loading:'fa-2x'})
 }
 });
 //  });
 
 $(".plot_param").change(function(){
-window.location="<%= phenotype_path(phenotype) %>?nber_bins=<%= params[:nber_bins] %>&dgrp_order=" + $("#dgrp_order").val() + "&dgrp_order_barplot=" + $("#dgrp_order_barplot").val() + "&displayed_sum_type=" + $("#displayed_sum_type").val()
+ <% if phenotype.is_summary == true %>
+ refresh(null, "<%= raw phenotype_path(phenotype) %>?nber_bins=<%= params[:nber_bins] %>&dgrp_order=" + $("#dgrp_order").val() + "&dgrp_order_barplot=" + $("#dgrp_order_barplot").val() + "&displayed_sum_type=" + $("#displayed_sum_type").val() + "&partial=ordered_plot_js", {loading:'fa-2x'})
+ <% else %>
+  refresh(null, "<%= raw phenotype_path(phenotype) %>?nber_bins=<%= params[:nber_bins] %>&dgrp_order=" + $("#dgrp_order").val() + "&dgrp_order_barplot=" + $("#dgrp_order_barplot").val() + "&displayed_sum_type=" + $("#displayed_sum_type").val() + "&partial=ordered_boxplot_js", {loading:'fa-2x'})
+ <% end %>
+})
+$(".barplot_param").change(function(){
+refresh(null, "<%= raw phenotype_path(phenotype) %>?nber_bins=<%= params[:nber_bins] %>&dgrp_order=" + $("#dgrp_order").val() + "&dgrp_order_barplot=" + $("#dgrp_order_barplot").val() + "&displayed_sum_type=" + $("#displayed_sum_type").val() + "&partial=ordered_barplot_js", {loading:'fa-2x'})
+//window.location="<%= phenotype_path(phenotype) %>?nber_bins=<%= params[:nber_bins] %>&dgrp_order=" + $("#dgrp_order").val() + "&dgrp_order_barplot=" + $("#dgrp_order_barplot").val() + "&displayed_sum_type=" + $("#displayed_sum_type").val()
 })
 
-<% @sex_list.each do |sex| %>
- <% if @mean_vector[sex].size > 0 and @bin_size %>
+ <% end %>
 
-var data = [
-  {
-    x: <%= raw @mean_vector[sex] %>,
-    type: 'histogram',
-	marker: {
-    color: '<%= @h_sex_color[sex] %>',
-},
-autobinx: false,
-xbins: {
-//    end: 2.8, 
-size: <%= raw @bin_size %>,
- //   start: .5
+function draw_plots(){
+ 
+ <% if phenotype.is_continuous == true and phenotype.is_numeric == true %>
+ 
+<%= render :partial => 'distri_plots_js', :locals => {:phenotype => phenotype} %>
 
-  }
-  }
-];
-
-var layout = {
-title : 'Distribution of <%= (phenotype.is_summary) ? '' : 'mean ' %>values for <%= @h_sex[sex] %>',
-xaxis : {range : [<%= raw @global_min-@bin_size/2 %>, <%= raw @global_max+@bin_size/2 %>]}
-}
-
- //h_plots['distri_plot_<%= sex %>'] =
- Plotly.newPlot('distri_plot_<%= sex %>', data, layout, opt);
-<% end %>
-<% end %>
 <% end %>
 
 <% if phenotype.is_continuous == true %>
@@ -395,13 +415,22 @@ y: <%= raw uniq_vals.map{|e| h_uniq_vals[e]} %>,
 
 var layout = {
 title : 'Barplot for unique <%= (phenotype.is_summary) ? '' : 'mean ' %>values for <%= @h_sex[sex] %>',
-xaxis : {type : 'category'}
+xaxis : {type : 'category', showticklabels: (<%= uniq_vals.size %> > w * 60 / 1470) ? false : true}
 }
-
+console.log("toto:" + w * 60 / 1470)
 Plotly.newPlot('bar_plot_<%= sex %>', data, layout, opt);
 <% end %>
 <% end %>
 <% end %>
+
+}
+
+draw_plots();
+
+ window.addEventListener('resize', function(){draw_plots()});
+
+
+
 })
 
 

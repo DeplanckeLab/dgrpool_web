@@ -8,7 +8,7 @@
 <% end %>
 -->
 <% if !@phenotype %>
-<h3>Results for <%= params[:file].original_filename %> > <%= params[:phenotype_name] %> <%# @h_legend[:sex][sex] if sex %></h3>
+<h3>Results for <%= (params[:filename]) ? params[:filename] : params[:file].original_filename %> > <%= params[:phenotype_name] %> <%# @h_legend[:sex][sex] if sex %></h3>
 <% end %>
 
 <div class="nav nav-tabs" id="nav-tab_res_type" role="tablist">                                                                                                                                                                 
@@ -37,7 +37,7 @@
     
     <nav>
       <div class="nav nav-tabs" id="nav-tab-Correlation" role="tablist">
-	<% @ordered_list_sex.select{|s| h_correlation_res[:res][s]}.each do |sex| %>
+	<% @ordered_list_sex.select{|s| h_correlation_res[:res][s] and h_correlation_res[:res][s].size > 0}.each do |sex| %>
 	<button class="nav-link <%= (@cur_sex == sex) ? "active" : "" %>" id="nav-<%= sex %>-tab" data-bs-toggle="tab" data-bs-target="#nav-Correlation-<%= sex %>" type="button" role="tab" aria-controls="nav-Correlation-<%= sex %>" aria-selected="true"><%= @h_legend[:sex][sex] %> <span class='badge rounded-pill bg-<%= (h_correlation_res[:res][sex].size > 0) ? 'success' : 'danger' %>'><%= h_correlation_res[:res][sex].size %></span></button>
 	
 	<% end %>
@@ -73,19 +73,42 @@
   </div>
   <% if !@phenotype %>
   <div class="tab-pane fade" id="nav-GWAS" role="tabpanel" aria-labelledby="nav-GWAS-tab">
-    <%= h_correlation_res[:md5] %>
+    <%# h_correlation_res[:md5] %>
   </div>
   <% end %>
 </div>
 <%= javascript_tag do %>
 
 function refresh_gwas() {
-refresh("nav-GWAS", "<%= raw get_gwas_results_home_index_path(:phenoname => params[:phenotype_name], :list_sex =>  h_correlation_res[:res].keys.join(","), :md5 => h_correlation_res[:md5]) %>", {loading:'fa-2x'})
+refresh("nav-GWAS", "<%= raw get_gwas_results_home_index_path(:phenotype_name => params[:phenotype_name], :list_sex =>  h_correlation_res[:res].keys.join(","), :md5 => h_correlation_res[:md5]) %>", {loading:'fa-2x'})
 }
 
 refresh_gwas()
-repeat_refresh_gwas = setInterval(refresh_gwas, 10000);
+repeat_refresh_gwas = setInterval(refresh_gwas, 30000);
 
 $("#compare_phenotype_btn").prop("disabled", false)
+
+$("#history_size").html(<%= session[:history].size %>)
+
+<% if params[:md5] %>
+$("#preparsing_result").addClass("hidden")
+<% else %>
+$("#preparsing_result").removeClass("hidden")
+<% end %>
+
+function refresh_gwas2(){
+console.log("gene_id:" + $("#filter_gene_id").val())
+console.log("binding_site:" + $("#filter_binding_site").val())
+refresh("nav-GWAS", "<%= raw get_gwas_results_home_index_path(:phenotype_name => params[:phenotype_name], :list_sex => @ordered_list_sex.join(','), :md5 => h_correlation_res[:md5]) %>&filter_gene_name=" + $("#filter_gene_name").val() + "&filter_by_pos=" + $("#filter_by_pos").val() + "&filter_variant_impact=" + $("#filter_variant_impact").val() + "&filter_binding_site=" + $("#filter_binding_site").val() + "&filter_involved_binding_site=" + (($("#filter_involved_binding_site").prop('checked')) ? '1' : '0'), {loading:'fa-2x'})
+}
+
+$("#nav-GWAS").on("change", ".filter_widget", function(){
+refresh_gwas2()
+})
+
+$("#nav-GWAS").on("click", "#upd_filter_btn", function(){
+refresh_gwas2()
+})
+
 
 <% end %>

@@ -1,5 +1,11 @@
 module ApplicationHelper
 
+  def display_duration(total_seconds)
+    minutes = total_seconds / 60
+    seconds = total_seconds % 60
+    return "#{minutes} min #{seconds} sec"
+  end
+  
   def display_var_type(snp_id, var_type, genes)
     html = ''
     if var_type
@@ -120,7 +126,11 @@ module ApplicationHelper
   end
 
   def display_reference_short2 s
-    return (s) ? link_to("#{s.authors}, #{s.year}", study_path(s), {:target => "_blank", :class => 'badge bg-info nodec'}) : ''
+    h_class = {1 => 'info', 2 => 'primary', 3 => 'danger', 4 => 'success'}
+    h_status = {1 => 'Submitted', 2 => 'Under curation', 3 => 'Rejected', 4 => 'Curated'}
+
+    return (s) ? link_to("#{s.authors}, #{s.year}", study_path(s), {:target => "_blank", :class => "badge bg-#{h_class[s.status_id]} nodec", "data-bs-toggle" => 'tooltip', "data-bs-placement" => 'bottom', "data-bs-html"=>'true', :title => h_status[s.status_id]}) : ''
+    #    return (s) ? link_to("#{s.authors}, #{s.year}", study_path(s), {:target => "_blank", :class => "badge bg-info nodec"}) : '' 
   end
 
   def display_reference_short3 s
@@ -135,12 +145,13 @@ module ApplicationHelper
   def display_phenotype p
     html = ''
     #link = ((curator?) ? edit_phenotype_path(p) : phenotype_path(p))
-    link = phenotype_path(p) 
+    link = phenotype_path(p)
+    title = p.description + " " + ((p.unit_id) ? "[#{@h_units[p.unit_id].label_html}]" : '')
     if curator?
-      html = link_to(raw(p.name), link, { "data-bs-toggle" => 'tooltip', "data-bs-placement" => 'bottom', "data-bs-html"=>'true', :title => p.description, #.gsub(/<\/?su[bp]>/, ''),
+      html = link_to(raw(p.name), link, { "data-bs-toggle" => 'tooltip', "data-bs-placement" => 'bottom', "data-bs-html"=>'true', :title => title, #.gsub(/<\/?su[bp]>/, ''),
                                           :target => '_blank', :class => "pheno_link badge #{(p.obsolete == true) ? 'bg-secondary' : 'bg-info'} nodec"})
     elsif p.obsolete == false
-      html = link_to(raw(p.name), link, { "data-bs-toggle" => 'tooltip', "data-bs-placement" => 'bottom', "data-bs-html"=>'true', :title => p.description, #.gsub(/<\/?su[bp]>/, ''),
+      html = link_to(raw(p.name), link, { "data-bs-toggle" => 'tooltip', "data-bs-placement" => 'bottom', "data-bs-html"=>'true', :title => title, #.gsub(/<\/?su[bp]>/, ''),
                                           :target => '_blank', :class => 'pheno_link badge bg-info nodec'})
     end
     return html 

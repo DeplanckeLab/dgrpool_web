@@ -1,0 +1,47 @@
+<h4>API</h4>
+
+<div class='card'>
+  <div class='card-body'>
+    <h5>Phenotype data</h5>
+    
+    Phenotype data are downloadable throught the following GET path:
+
+    <code>
+      /phenotypes/#ID.json      
+    </code>
+
+    For example:
+
+    <code>
+      <%= link_to "/phenotypes/2797.json", phenotype_path(2797, :format => :json, :target => "_blank") %>
+    </code>
+
+    The available fields:
+      <table class='desc_table table-striped'>
+	<thead>
+	<!--  <th>Index</th>-->
+	  <th>Field name</th>
+	  <th>Type</th>
+	  <th>Description</th>
+	</thead>
+      <tbody>
+	<% @fields.each_with_index do |f, i| %>
+	<tr>
+<!--	  <td><%= i+1 %></td> -->
+	  <td><%= f[0] %></td>
+	  <td><%= f[1] %></td>
+	  <td><%= f[2] %></td>
+	</tr>
+	<% end %>
+      </tbody>
+      </table>
+    
+  </div>
+</div>
+	 
+
+<%= javascript_tag do %>
+
+$(".desc_table").DataTable({dom:'t', pageLength:100, ordering:false})
+
+<% end %>

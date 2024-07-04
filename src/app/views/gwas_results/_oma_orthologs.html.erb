@@ -19,11 +19,15 @@
       <td><%= @h_genes[oo.gene_id].name %></td>
       <td><%= @h_organisms[oo.organism_id].name %></td>
       <td><% oo.ensembl_ids.split(",").each do |ensembl_id| %>
-	<span class='badge bg-info'><%= ensembl_id %></span>
+	<!--<span class='badge bg-info'>-->
+	  <%= link_to ensembl_id, "https://flybase.org/reports/#{ensembl_id}", :target => '_blank', :class=>'badge bg-info' %>
+	<!--</span>-->
 	<% end %>
       </td>
       <td><% oo.uniprot_ids.split(",").each do |uniprot_id| %>
-	 <span class='badge bg-info'><%= uniprot_id %></span>
+	<!--<span class='badge bg-info'>-->
+	  <%= link_to uniprot_id, "https://www.uniprot.org/uniprotkb/#{uniprot_id}", :target => '_blank', :class=>'badge bg-info' %>
+	<!--</span>-->
         <% end %>
       </td>
     </tr>

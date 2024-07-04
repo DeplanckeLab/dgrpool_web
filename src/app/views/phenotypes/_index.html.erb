@@ -27,7 +27,7 @@
 	<!--<span class='badge bg-info'><%= (@h_studies[p.study_id]) ? display_reference_short(@h_studies[p.study_id]) : 'NA' %></span></td>-->
       <%= display_reference_short2(@h_studies[p.study_id]) %>
       </td>
-      <td><small><%= raw p.description %></small></td>
+      <td><small><%= raw p.description %> <%= (p.unit_id) ? "[#{@h_units[p.unit_id].label_html}]" : '' %></small></td>
       <td><%= raw display_source_type(p, @h_summary_types) %></td>
       <td><%= raw display_value_type(p) %></td>
       <td><%= p.nber_dgrp_lines %></td>
@@ -38,7 +38,9 @@
         <div style='white-space:nowrap'>
 	  <%= link_to "Show", phenotype_path(p), :data => {:turbo => 'false', :method => 'get'}, :class => 'btn btn-sm btn-primary' %>
           <%= link_to "GWAS", gwas_analysis_phenotype_path(p), :data => {:turbo => 'false', :method => 'get'}, :class => 'btn btn-sm btn-primary' %>
-        <% if curator? %>
+	  <%= link_to "Correlation", compute_correlation_phenotype_path(p), {:data => {:turbo => 'false', :method => 'get'}, :class => 'btn btn-sm btn-primary'} %>
+
+          <% if curator? %>
         <%= link_to "Edit", edit_phenotype_path(p), :data => {:turbo => 'false', :method => 'get'}, :class => 'btn btn-sm btn-success' %>
         <% end %>
         </div>
@@ -58,11 +60,14 @@
 $("#only_integrated_studies").click(function(){
 //console.log($(this).prop("checked"))
 if ($(this).prop("checked") == true){
-location.href='https://dgrpool.epfl.ch/phenotypes?only_curated_studies=1'
+location.href='<%= raw phenotypes_path(:only_curated_studies=>1) %>' 
 }else{
-location.href='https://dgrpool.epfl.ch/phenotypes?only_curated_studies=0'
+location.href='<%= raw phenotypes_path(:only_curated_studies=>0) %>'
 }
-  })
+})
+
+initTooltips()
 });
+
 
 <% end %>

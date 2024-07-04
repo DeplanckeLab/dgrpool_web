@@ -7,126 +7,180 @@ module Parse
       h_sex = {}
       h_discarded_phenotypes = {} #{"sex" => 1}
       h_duplicated_dgrp_lines = {}
+      phenotypes = []
       errors = []
       warnings = []
       lines =  data.split(/[\r\n]+/)
       #  logger.debug(lines)
+      
       header = lines.shift
       #  logger.debug(header)                                                                                                                                                                                
-      t_header = header.split("\t")
-      if t_header.uniq.size != t_header.size
-        errors.push "Header contains duplicated columns"
-      elsif t_header.size < 2 #or t_header[0] != 'dgrp_line' or t_header[1] != 'sex'      
-        errors.push "Header doesn't contain enough columns (minimum 2) current_number=#{t_header.size}, header=#{t_header.to_json}"
-      elsif t_header[0] != 'DGRP' #or t_header[1] != 'sex'
-        errors.push "Header is invalid, first column should be 'DGRP'"
+      t_header = header.split("\t") if header
+      if !header
+        errors.push "Cannot find a header in this file #{data}"
+      else
+        if t_header.uniq.size != t_header.size
+          errors.push "Header contains duplicated columns"
+        elsif t_header.size < 2 #or t_header[0] != 'dgrp_line' or t_header[1] != 'sex'      
+          errors.push "Header doesn't contain enough columns (minimum 2) current_number=#{t_header.size}, header=#{t_header.to_json}"
+        elsif t_header[0] != 'DGRP' #or t_header[1] != 'sex'
+          errors.push "Header is invalid, first column should be 'DGRP'"
+        end
+        not_accepted_names = (1 .. t_header.size-1).to_a.select{|i| !t_header[i].match(/^\s*[\w\d_]{1..20}\s*$/)}.map{|i| t_header[i]}
+        if not_accepted_names.size > 0 and integrate == true
+          errors.push "Header names are not following the naming rules (max 20 characters [alphanumerical and '_'): #{not_accepted_names.join(", ")}"
+        end
       end
-      not_accepted_names = (1 .. t_header.size-1).to_a.select{|i| !t_header[i].match(/^\s*[\w\d_]{1..20}\s*$/)}.map{|i| t_header[i]}
-      if not_accepted_names.size > 0 and integrate == true
-        errors.push "Header names are not following the naming rules (max 20 characters [alphanumerical and '_'): #{not_accepted_names.join(", ")}"
-      end
-      add_sex = false
-      if t_header[1] != 'sex'
-        add_sex = true
-        t_header.insert(1, "sex")
-      end
-      not_enough_cols = []
-      not_same_col_nber = []
-      invalid_sex = []
-      invalid_dgrp = []
-      dgrp_lines = []
-      dgrp_lines_by_sex = {} 
-      (2 .. t_header.size-1).to_a.map{|i| t_header[i] = t_header[i].gsub(/[^a-zA-Z0-9]+/, '_')}
-      phenotypes = (1 .. t_header.size-1).to_a.map{|i| t_header[i]}
-      new_lines = []
-      lines.each_index do |j|
-        l = lines[j]
-        t = l.split("\t", -1).map{|e| e.strip}
-        t.insert(1, "NA") if add_sex == true
-        h_sex[t[1]] = 1
-        nber = t[0].gsub(/[^\d]|-/, '')
-        if t.size < 3
-          not_enough_cols.push j+2
-        elsif !['M', 'F', 'NA'].include? t[1]
-          invalid_sex.push j+2 #errors.push "sex column should contains only "                                                                                           
-        elsif nber != '' and 3-nber.size >= 0
-          dgrp_line_name = "DGRP_" + ("0" * (3-nber.size)) + nber
-          t[0] = dgrp_line_name
-          if h_data[dgrp_line_name] and h_data[dgrp_line_name]['sex'].include? t[1]
-            h_duplicated_dgrp_lines[dgrp_line_name + "/" + t[1]] = 1
-          else
-            h_data[dgrp_line_name] ||= {'sex' => []}
-          end
-        
-          
-          new_lines.push t
-          
-          (2 .. t.size-1).to_a.each do |i|
-            numerical = true
-            if ['', 'na', 'NA'].include? t[i]
-              val = nil
-            elsif t[i].match(/^\-?\d+$/)
-              val = t[i].to_i
-            elsif t[i].match(/^\-?\d*?\.?\d*?$/) or t[i].match(/^-?\d+\.?\d*?[eE][\-+]?\d+$/)
-              val = t[i].to_f
+      if errors.size == 0
+
+        add_sex = false
+        if t_header[1] != 'sex'
+          add_sex = true
+          t_header.insert(1, "sex")
+        end
+        not_enough_cols = []
+        not_same_col_nber = []
+        invalid_sex = []
+        invalid_dgrp = []
+        dgrp_lines = []
+        dgrp_lines_by_sex = {} 
+        (2 .. t_header.size-1).to_a.map{|i| t_header[i] = t_header[i].gsub(/[^a-zA-Z0-9]+/, '_')}
+        phenotypes = (1 .. t_header.size-1).to_a.map{|i| t_header[i]}
+        new_lines = []
+        lines.each_index do |j|
+          l = lines[j]
+          t = l.split("\t", -1).map{|e| e.strip}
+          t.insert(1, "NA") if add_sex == true
+          h_sex[t[1]] = 1
+          nber = t[0].gsub(/[^\d]|-/, '')
+          if t.size < 3
+            not_enough_cols.push j+2
+          elsif !['M', 'F', 'NA'].include? t[1]
+            invalid_sex.push j+2 #errors.push "sex column should contains only "                                                                                           
+          elsif nber != '' and 3-nber.size >= 0
+            dgrp_line_name = "DGRP_" + ("0" * (3-nber.size)) + nber
+            t[0] = dgrp_line_name
+            if h_data[dgrp_line_name] and h_data[dgrp_line_name]['sex'].include? t[1]
+              h_duplicated_dgrp_lines[dgrp_line_name + "/" + t[1]] = 1
             else
-              val = t[i]
-              numerical = false
+              h_data[dgrp_line_name] ||= {'sex' => []}
             end
-            # logger.debug("NUMERICAL: " + numerical.to_s)
-            if numerical == false
-              #  logger.debug("NUMERICAL FALSE")
-              h_discarded_phenotypes[t_header[i]] = 1 
+            
+            
+            new_lines.push t
+            
+            (2 .. t.size-1).to_a.each do |i|
+              numerical = true
+              if ['', 'na', 'NA'].include? t[i]
+                val = nil
+              elsif t[i].match(/^\-?\d+$/)
+                val = t[i].to_i
+              elsif t[i].match(/^\-?\d*?\.?\d*?$/) or t[i].match(/^-?\d+\.?\d*?[eE][\-+]?\d+$/)
+                val = t[i].to_f
+              else
+                val = t[i]
+                numerical = false
+              end
+              # logger.debug("NUMERICAL: " + numerical.to_s)
+              if numerical == false
+                #  logger.debug("NUMERICAL FALSE")
+                h_discarded_phenotypes[t_header[i]] = 1 
+              end
+              h_data[dgrp_line_name]['sex'].push t[1] if i == 2
+              h_data[dgrp_line_name][t_header[i]]||=[]
+              h_data[dgrp_line_name][t_header[i]].push val
             end
-            h_data[dgrp_line_name]['sex'].push t[1] if i == 2
-            h_data[dgrp_line_name][t_header[i]]||=[]
-            h_data[dgrp_line_name][t_header[i]].push val
+            
+            dgrp_lines.push dgrp_line_name
+            dgrp_lines_by_sex[t[1]]||=[]
+            dgrp_lines_by_sex[t[1]].push dgrp_line_name if !dgrp_lines_by_sex[t[1]].include? dgrp_line_name
+            
+            if t_header.size != t.size
+              not_same_col_nber.push t[0] + " (#{t.size})"
+            end
+            
+          else
+            invalid_dgrp.push j+2
           end
-          
-          dgrp_lines.push dgrp_line_name
-          dgrp_lines_by_sex[t[1]]||=[]
-          dgrp_lines_by_sex[t[1]].push dgrp_line_name
-          
           if t_header.size != t.size
             not_same_col_nber.push t[0] + " (#{t.size})"
           end
+        end
+        if add_sex == true
+          warnings.push("Column 'sex' not found in second position, thus it has been added setting all values to NA.")
+        end
 
-        else
-          invalid_dgrp.push j+2
+        final_phenotypes = phenotypes - h_discarded_phenotypes.keys - ['sex']
+        
+        if h_duplicated_dgrp_lines.keys.size > 0
+        #  errors.push("Some DGRP lines are not unique by sex (#{h_duplicated_dgrp_lines.keys.join(", ")}).<br/><b>Please summarize your dataset by DGRP line and sex prior upload.</b>")
+          if h_duplicated_dgrp_lines.keys.size > 10
+            warnings.push("Some pairs (DGRP line, sex) are not unique (#{h_duplicated_dgrp_lines.keys.size}).<br/><b>Note that we compute the mean data in this case.</b>")
+          else
+            warnings.push("Some pairs (DGRP line, sex) are not unique (#{h_duplicated_dgrp_lines.keys.join(", ")}).<br/><b>Note that we compute the mean data in this case.</b>")
+          end
+          h_data.each_key do |dgrp_line_name|
+            list_sex =  h_data[dgrp_line_name]["sex"].uniq
+
+            new_h = {"sex" => []}
+            final_phenotypes.map{|p| new_h[p] = []}
+            
+            list_sex.each_with_index do |s, i|
+              new_h['sex'].push s
+              final_phenotypes.map{|p| new_h[p][i] = []}
+              
+              h_data[dgrp_line_name]["sex"].each_with_index do |s2, j|
+                if s == s2
+                  final_phenotypes.map{|p| new_h[p][i].push h_data[dgrp_line_name][p][j] }
+                end
+              end
+              final_phenotypes.each do |p|
+                if new_h[p][i] and new_h[p][i].size > 1
+                  mean = Basic.mean new_h[p][i]
+                  new_h[p][i] = mean
+                end
+              end
+              
+            end
+
+            h_data[dgrp_line_name] = new_h
+            
+          end
         end
-        if t_header.size != t.size
-          not_same_col_nber.push t[0] + " (#{t.size})"
+        if invalid_sex.size > 0
+          errors.push "Lines with invalid sex were ignored. Sex column should contain only one of ['M', 'F', 'NA'] values which is not the case on line(s) #{invalid_sex.join(", ")}"
         end
+        if invalid_dgrp.size > 0
+          errors.push "Lines with invalid DGRP line were ignored. DGRP line column contains a wrong value on lines #{invalid_dgrp.join(", ")}"
+        end
+        if not_enough_cols.size > 0
+          errors.push "Lines with less than 3 columns were ignored: lines #{not_enough_cols.join(", ")}"
+        end
+        
+        if not_same_col_nber.size > 0
+          errors.push "Not the same number of columns for DGRP #{not_same_col_nber.join(",")} compared to header (#{t_header.size} column(s))."
+        end
+
       end
-      if add_sex == true
-        warnings.push("Column 'sex' not found in second position, thus it has been added setting all values to NA.")
-      end
-      if h_duplicated_dgrp_lines.keys.size > 0
-        errors.push("Some DGRP lines are not unique by sex (#{h_duplicated_dgrp_lines.keys.join(", ")}).<br/><b>Please summarize your dataset by DGRP line and sex prior upload.</b>")
-      end
-      if invalid_sex.size > 0
-        errors.push "Lines with invalid sex were ignored. Sex column should contain only one of ['M', 'F', 'NA'] values which is not the case on line(s) #{invalid_sex.join(", ")}"
-      end
-      if invalid_dgrp.size > 0
-        errors.push "Lines with invalid DGRP line were ignored. DGRP line column contains a wrong value on lines #{invalid_dgrp.join(", ")}"
-      end
-      if not_enough_cols.size > 0
-        errors.push "Lines with less than 3 columns were ignored: lines #{not_enough_cols.join(", ")}"
+
+      matrix = []
+      h_data.each_key do |dgrp_line_name|
+        h_data[dgrp_line_name]["sex"].each_with_index do |s, i|
+          pheno_data = final_phenotypes.map{|p| h_data[dgrp_line_name][p][i].to_s}
+          matrix.push [dgrp_line_name, s] + pheno_data #h_data[dgrp_line_name][s][0].to_s]
+        end
       end
       
-      if not_same_col_nber.size > 0
-        errors.push "Not the same number of columns for DGRP #{not_same_col_nber.join(",")} compared to header (#{t_header.size} column(s))."
-      end
-
       h_data = {
         :errors => errors,
         :warnings => warnings,
         :discarded_phenotypes => h_discarded_phenotypes.keys,
-        :phenotypes => phenotypes - h_discarded_phenotypes.keys - ['sex'],
+        :phenotypes => final_phenotypes,
         :dgrp_lines => dgrp_lines,
         :dgrp_lines_by_sex => dgrp_lines_by_sex,
         :header => t_header,
-        :matrix => new_lines, #.map{|e| e.split("\t")},
+       # :matrix => new_lines, #.map{|e| e.split("\t")},
+        :matrix => matrix,
         :h_pheno => h_data,
         :sex_list => h_sex.keys
       }

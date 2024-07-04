@@ -25,11 +25,37 @@
 <% end %>
 
 <%# raw @h_files.to_json %>
-
+<div id='all_gwas_analyses'>
  <%= render :partial => 'all_gwas_analysis', :locals => {:phenotype => @phenotype, :h_output => @h_output, :h_files => @h_files, :anova => @anova, :h_gwas_results => @h_gwas_results, :output_dir => @gwas_dir, :download_namespace => 'gwas', :md5 => nil} %>
+</div>
 
 <%= javascript_tag do %>
   document.addEventListener('DOMContentLoaded', function () {
 <%= render :partial => 'gwas_analysis_js', :locals => {:h_snps => @h_snps, :phenotype => @phenotype} %>
+
+console.log("toto")
+
+
+
+function refresh_gwas2(){
+console.log("gene_id:" + $("#filter_gene_id").val())
+console.log("binding_site:" + $("#filter_binding_site").val())
+refresh("all_gwas_analyses", "<%= raw gwas_analysis_phenotype_path(@phenotype) %>?nolayout=1&filter_gene_name=" + $("#filter_gene_name").val() + "&filter_by_pos=" + $("#filter_by_pos").val() + "&filter_variant_impact=" + $("#filter_variant_impact").val() + "&filter_binding_site=" + $("#filter_binding_site").val() + "&filter_involved_binding_site=" + (($("#filter_involved_binding_site").prop('checked')) ? '1' : '0'), {loading:'fa-2x'})
+}
+
+
+
+$("#all_gwas_analyses").on("change", ".filter_widget", function(){
+refresh_gwas2()
+})
+
+$("#all_gwas_analyses").on("click", "#upd_filter_btn", function(){
+console.log("toti")
+refresh_gwas2()
+})
+
+
+
+
 })
 <% end %>

@@ -1,5 +1,5 @@
 class ApplicationController < ActionController::Base
-  helper_method :admin?,  :curator?, :accessible?
+  helper_method :admin?,  :curator?, :accessible?, :plain_text_file?
   before_action :init_var, :init_session
        
 
@@ -64,8 +64,23 @@ class ApplicationController < ActionController::Base
 
   def init_session
      session[:gs_settings]||={:limit => 10, :free_text => ''}
+     session[:history]||=[]
+#     session[:filter_gene_id]||=''
+     session[:filter_gene_name]||=''
+     session[:filter_by_pos]||=''
+     session[:filter_binding_site]||=''
+     session[:filter_involved_binding_site]||='0'
+     session[:filter_variant_impact]||=''
   end
 
+  def plain_text_file?(content)
+    sample = content[0, 1024]
+    non_text_bytes = sample.each_byte.count { |byte| byte < 9 || (byte > 13 && byte < 32) || byte > 126 }
+    
+    # Consider the file as plain text if less than 5% of the bytes are non-text
+    non_text_bytes.to_f / sample.size < 0.05
+  end
+  
   protected
   
   def configure_permitted_parameters

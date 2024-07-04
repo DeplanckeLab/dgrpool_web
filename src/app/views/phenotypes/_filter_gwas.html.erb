@@ -1,0 +1,98 @@
+<%# @h_snps.keys.to_json %>
+<%# @genes.to_json %>
+<%# session.to_json %>
+<div id='filter_container' class='card mt-3 mb-3 hidden'>
+  <div class='card-body'>
+    <div class='row'>
+      <b>Filters</b>
+      
+      <div class='col-md-6'>
+	
+	<table>
+	  <tbody>
+            <tr><td>
+		By genomic position
+              </td><td>
+		<%= text_field_tag 'filter_by_pos', (session[:filter_by_pos] || ''), {:style => 'width:400px', :placeholder => '3L:4000-80000', :class => 'form-control filter_text'} %>
+            </td></tr>
+            <tr><td>
+		Variant impact
+              </td><td>
+		<% l = @h_impact.keys.map{|e| [e,e]} %>
+		<% l.unshift(["All", ""]) %>
+		<%= select_tag 'filter_variant_impact', options_for_select(l, (session[:filter_variant_impact] || '')), {:style => 'width:400px', :class => 'form-control filter_widget'} %>
+            </td></tr>
+	    <tr><td>
+		Gene name
+              </td><td>
+		<%# l = [] %>
+		<%# l = @genes.map{|e| [e.name, e.id]}.sort %>
+		<%# l = l.unshift(["Any gene", ""]) %>
+		<%# select_tag 'filter_gene_id', options_for_select(l, (session[:filter_gene_id] || '')), {:style => 'width:400px', :class => 'form-control filter_widget'} %>
+		<%= text_field_tag 'filter_gene_name', (session[:filter_gene_name] || ''), {:style => 'width:400px', :class => 'form-control filter_widget'} %>
+		<%# hidden_field_tag 'filter_gene_id', session[:filter_gene_id] || '' %>
+		<div class='filter_gene_name_container'></div>
+	    </td></tr>
+	  </tbody>
+	</table>
+      </div>
+       <div class='col-md-6'>
+         <table>
+           <tbody>
+	      <% if @binding_sites %>
+	     <tr><td>
+		 Involved in binding site
+               </td><td>
+		 <%= check_box_tag 'filter_involved_binding_site', '1', ((session[:filter_involved_binding_site] == '1') ? true : false), {:class => 'filter_check'} %>
+             </td></tr>
+	     <tr><td>
+		 Binding site
+               </td><td>
+	      <% l = @binding_sites.uniq.sort.map{|e| [e,e]}.unshift(["Any binding site", ""]) %>
+            <%= select_tag 'filter_binding_site', options_for_select(l, (session[:filter_binding_site] || '')), {:style => 'width:400px', :class => 'form-control filter_check'} %>
+        </td></tr>
+	     	     <% end %>
+      </tbody>
+	 </table>
+	 <button id='upd_filter_btn' class='btn btn-success' type='button'>Update</button>
+       </div>
+    </div>
+  </div>
+</div>
+
+
+<%= javascript_tag do %>
+
+var gene_names = <%= raw ( @genes) ? @genes.map{|g| g.name}.sort.to_json : '[]' %>;
+<%# raw @genes.sort{|a, b| a.name <=> b.name}.map{|e| {:label => e.name, :id => e.id}}.to_json %>
+
+
+ $("#filter_gene_name").autocomplete({
+  minLength: 0,
+  appendTo: '#filter_gene_name_container',
+classes: {
+   "ui-autocomplete": "test_ui",
+  },
+html: true,
+position: {
+   offset: '0 0' // Shift 0px left, 4px down.
+  },
+source:  function(request, response) {
+ var data = gene_names;
+  var filteredData = $.ui.autocomplete.filter(data, request.term);
+                  var maxItemsToShow = 20;
+var slicedData = filteredData.slice(0, maxItemsToShow);
+                response(slicedData);
+
+},
+// select: function( event, ui ) {
+//                   return false
+//}
+}).focus(function () {
+    $(this).autocomplete("search");
+}).click(function(){
+    $(this).autocomplete("search");
+});
+
+
+<% end %>

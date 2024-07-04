@@ -1,6 +1,54 @@
 class PhenotypesController < ApplicationController
-  before_action :set_phenotype, only: %i[ show edit update destroy gwas_analysis compute_correlation]
+  before_action :set_phenotype, only: %i[ show edit update destroy gwas_analysis compute_correlation download]
 
+  
+  def download
+
+    study = @phenotype.study
+    @phenotype_name = @phenotype.name
+
+    data = [["DGRP", "sex", "value"]]
+    tmp_pheno = nil
+    filename_label = ''
+    if !params[:s_i]
+      filename_label = 'original'
+      @h_pheno =  Basic.safe_parse_json(study.pheno_json, {})
+       
+      tmp_pheno = (@phenotype.is_summary == true) ? @h_pheno["sum"] :
+                    ((@h_pheno["raw"]) ? @h_pheno["raw"][@phenotype.dataset_id.to_s] : nil)
+      if tmp_pheno
+        dgrp_lines = tmp_pheno.keys
+        dgrp_lines.each do |dgrp_line|
+          sex_list = tmp_pheno[dgrp_line]['sex']
+          sex_list.each_index do |sex_i|
+            val = tmp_pheno[dgrp_line][@phenotype.name][sex_i]
+            if val
+              l = [dgrp_line, sex_list[sex_i], val]
+              data.push(l)
+            end
+          end
+        end
+      end
+    else
+      filename_label = 'summary_' +  @list_sum_types[params[:s_i].to_i].gsub(" ", "_")
+      @h_pheno_sum = Basic.safe_parse_json(study.pheno_sum_json, {})
+      dgrp_lines = @h_pheno_sum.keys
+      
+      dgrp_lines.each do |dgrp_line|
+        sex_list =  @h_pheno_sum[dgrp_line]['sex']
+        sex_list.each_index do |sex_i|
+          if  val = @h_pheno_sum[dgrp_line][@phenotype.id.to_s][sex_i]
+            val = @h_pheno_sum[dgrp_line][@phenotype.id.to_s][sex_i][params[:s_i].to_i]
+            if val
+              l = [dgrp_line, sex_list[sex_i], val]
+              data.push(l)
+            end
+          end
+        end
+      end    
+    end
+    send_data data.map{|e| e.join("\t")}.join("\n") + "\n", :disposition => "attachment; filename=S#{study.id}_#{@phenotype.name}_#{filename_label}.tsv"
+  end
   
   def get_gwas_boxplot
     
@@ -27,11 +75,11 @@ class PhenotypesController < ApplicationController
       @h_pheno_sum = Basic.safe_parse_json(@study.pheno_sum_json, {})
       dgrp_lines = @h_pheno_sum.keys
       first_dgrp_line =  dgrp_lines.first
-    elsif params[:phenoname] and params[:md5] 
+    elsif params[:phenotype_name] and params[:md5] 
       tmp_dir = Pathname.new(APP_CONFIG[:data_dir]) + 'tmp' + params[:md5]
       dataset_sum_file = tmp_dir + 'dataset_sum.json'
-      phenotype_key = params[:phenoname]
-      @phenotype_name = params[:phenoname]
+      phenotype_key = params[:phenotype_name]
+      @phenotype_name = params[:phenotype_name]
       if File.exist? dataset_sum_file
         pheno_sum_json = File.read(dataset_sum_file)
         @h_pheno_sum = Basic.safe_parse_json(pheno_sum_json, {})
@@ -65,7 +113,7 @@ class PhenotypesController < ApplicationController
               
               dgrp_lines.map{|d| @h_dgrp_lines[d] = @h_pheno_sum[d][phenotype_key][sex_i]}
              # logger.debug("H_DGRP_LINES: " + sex_i.to_s + ": " + @h_pheno_sum["2765"].to_json)
-              @h_res.each_key do |k|
+              ['0', '2'].each do |k|
                 trace = {
                   :y => @h_res[k].map{|e| (@h_dgrp_lines[e.name]) ? @h_dgrp_lines[e.name][0] : nil}.compact,
                   :text => @h_res[k].map{|e| (@h_dgrp_lines[e.name]) ? e.name : nil}.compact,
@@ -73,7 +121,8 @@ class PhenotypesController < ApplicationController
                   :type => 'box',
                   :jitter => 0.3,
                   :pointpos => -1.8,
-                  :boxpoints => 'all'
+                  :boxpoints => 'all',
+                  :showlegend => false
                 }
                 @h_traces[sex].push trace
               end
@@ -104,7 +153,10 @@ class PhenotypesController < ApplicationController
     h_pheno = Basic.safe_parse_json(study.pheno_sum_json, {})
     first_dgrp_line = h_pheno.keys.first
     @list_sex = h_pheno[first_dgrp_line]['sex'] #.sort{|a, b|  @h_res[@list_sex[i]][:res].size <=>  @h_res[@list_sex[i]][:res].size}
- 
+
+    @h_units = {}
+    Unit.all.map{|u| @h_units[u.id] = u}
+    
   #  h_content={}
   # 
   #  @h_res = {}
@@ -140,6 +192,16 @@ class PhenotypesController < ApplicationController
   end
 
   def gwas_analysis
+
+    @nber_filters = 0
+    [:filter_gene_name, :filter_by_pos, :filter_binding_site, :filter_involved_binding_site, :filter_variant_impact].each do |e|
+      session[e] = params[e] if params[e]
+      if session[e] != '' and session[e] != '0'
+        @nber_filters+=1
+      end
+    end
+
+    filter_gene_id = (g = Gene.where(:name => session[:filter_gene_name]).first) ? g.id : ''
 
     @h_impact = {
       'HIGH' => 'danger',
@@ -191,8 +253,15 @@ class PhenotypesController < ApplicationController
     @h_snps = {}
     @h_gwas_results={}
     @all_snps = []
+    h_all_snps = {}
+     
     @h_snps = {}
     @h_nber_res = {}
+    @genes = []
+    @binding_sites = []
+    @filter_nber = {}
+
+   
     @list_sex.each do |s|
       prefix = "S#{@study.id}_#{@phenotype.id}_#{s}"
       @h_files[s] = {
@@ -202,11 +271,11 @@ class PhenotypesController < ApplicationController
         :plink2 => "#{prefix}.pheno.plink2.tsv",
         :anova => "#{prefix}.cov.anova.txt",
         :annot => (File.exist?(@gwas_dir + "#{prefix}.glm.linear.top_0.01.annot.tsv.gz")) ? "#{prefix}.glm.linear.top_0.01.annot.tsv.gz" : "#{prefix}.glm.logistic.hybrid.top_0.01.annot.tsv.gz"#,
-#        :done => "done"
+        #        :done => "done"
       }
       
-    #  @h_snps = {}
-#      @gwas_results = GwasResult.where().all
+      #  @h_snps = {}
+      #      @gwas_results = GwasResult.where().all
       @h_gwas_results[s] = []
       @h_nber_res[s] = -1
       if File.exist?(@gwas_dir + @h_files[s][:annot])
@@ -218,18 +287,63 @@ class PhenotypesController < ApplicationController
           i=0
           gz.each_line do |l|
             if i > 0
-              @h_gwas_results[s].push l.split("\t")
+              t = l.split("\t")
+              @h_gwas_results[s].push t #l.split("\t")
             end
             i+=1
-            break if i> 1000
+#            break if i> 1000
           end
         }
       end
-      tmp_str = "{" + Snp.where(:identifier => @h_gwas_results[s].map{|e| e[2]}).all.map{|snp|
-        #  @h_snps[s][snp.identifier] = snp.
-        '"' + ((snp.identifier) ? snp.identifier : 'NA') + '":' + ((snp.annots_json) ? snp.annots_json : "null") 
+#      tmp_str = "{" + Snp.where(:identifier => @h_gwas_results[s].map{|e| e[2]}).all.map{|snp|
+#        #  @h_snps[s][snp.identifier] = snp.
+#        '"' + ((snp.identifier) ? snp.identifier : 'NA') + '":' + ((snp.annots_json) ? snp.annots_json : "null") 
+#      }.join(",") + "}"
+#      @h_snps.merge!(Basic.safe_parse_json(tmp_str, {}))
+
+      all_snps = Snp.where(:identifier => @h_gwas_results[s].map{|e| e[2]}).all
+      all_snps.map{|s| h_all_snps[s.identifier] = s.id}
+    #  @times.push([tmp = Time.now, tmp-@times.last[0]])
+      
+      #      logger.debug("all_snps" + all_snps.size.to_s)                                                                                                                                                   
+      h_snp_genes = {}
+      snp_genes =  SnpGene.where(:snp_id => all_snps.map{|e| e.id}).all
+      snp_genes.map{|sg| h_snp_genes[sg.snp_id] ||= [];  h_snp_genes[sg.snp_id].push sg}
+      @genes |= Gene.where(:id => snp_genes.map{|e| e.gene_id}).all
+     # @times.push([tmp = Time.now, tmp-@times.last[0]])
+      
+      #h_genes={}                                                                                                                                                                                      
+      #@genes[s].map{|g| h_genes[g.id] = g}                                                                                                                                                            
+      #     logger.debug(@genes[s].first.to_json)                                                                                                                                                           
+      tmp_str = "{" + all_snps.map{|snp|
+        '"' + ((snp.identifier) ? snp.identifier : 'NA') + '":' + ((snp.annots_json) ? snp.annots_json : "null")
       }.join(",") + "}"
-      @h_snps.merge!(Basic.safe_parse_json(tmp_str, {}))
+      h_tmp_snps = Basic.safe_parse_json(tmp_str, {})
+      @h_snps.merge!(h_tmp_snps)
+      
+      # {"transcript_annot":{"INTERGENIC":{"":[""]}},"binding_site_annot":{"TF_binding_site":{"BDTNP1_TFBS_dl":["FBsf0000295671"],"BDTNP1_TFBS_hb":["FBsf0000290429"],"BDTNP1_TFBS_Med":["FBsf0000276997"],"BDTNP1_TFBS_twi":["FBsf0000200439"],"mE1_TFBS_cad":["FBsf0000240997"],"mE1_TFBS_HSA":["FBsf0000343845"]}}}                                                                                       
+      @binding_sites |= ["TF_binding_site", "regulatory_region"].map{|k| h_tmp_snps.values.map{|v| (v and v['binding_site_annot'] and v['binding_site_annot'][k]) ? v['binding_site_annot'][k].keys : []}}.flatten.uniq
+      
+      ### filter results                                                                                                                                                                               
+      #@times.push([tmp = Time.now, tmp-@times.last[0]])
+      
+      @h_gwas_results[s].select!{|e|
+        snp_genes = h_snp_genes[h_all_snps[e[2]]]
+        
+        (session[:filter_gene_name] == '' or (snp_genes and snp_genes.map{|e| e.gene_id}.include? filter_gene_id)) and
+          (session[:filter_binding_site] == '' or (@h_snps[e[2]] and @h_snps[e[2]]['binding_site_annot'] and ["TF_binding_site", "regulatory_region"].map{|k| (@h_snps[e[2]]['binding_site_annot'][k]) ? @h_snps[e[2]]['binding_site_annot'][k].keys : []}.flatten.uniq.include? session[:filter_binding_site])) and
+          (session[:filter_involved_binding_site] == '0' or (@h_snps[e[2]] and @h_snps[e[2]]['binding_site_annot'] and ["TF_binding_site", "regulatory_region"].map{|k| (@h_snps[e[2]]['binding_site_annot'][k]) ? @h_snps[e[2]]['binding_site_annot'][k].keys : []}.flatten.uniq.size > 0)) and
+          (session[:filter_by_pos] == '' or (e2 = session[:filter_by_pos].split(":") and e3 = e2[1].split("-") and e2[0] == e[0] and e[1].to_i >= e3[0].to_i and e[1].to_i <= e3[1].to_i)) and
+          (session[:filter_variant_impact] == '' or (snp_genes and snp_genes.map{|e2| @h_var_types[e2.var_type_id].impact}.include? session[:filter_variant_impact]))
+      }
+     # @times.push([tmp = Time.now, tmp-@times.last[0]])
+      
+      @filter_nber[s] = @h_gwas_results[s].size
+      
+     # @times.push([tmp = Time.now, tmp-@times.last[0]])
+      
+      @h_gwas_results[s] = @h_gwas_results[s].first(1000)
+
       # @all_snps.push tmp_str
      # tmp_h = JSON.parse(tmp_str)
      # tmp_h.each_key do |k|
@@ -286,11 +400,11 @@ class PhenotypesController < ApplicationController
       if  @anova[s].size == 0 and nber_lines == 0
         @anova[s] = nil
       end
-
+      
       @annot[s] = []
-
-#      @annot_content = ''
-#      infile = @gwas_dir + @h_files[s][:annot]
+      
+      #      @annot_content = ''
+      #      infile = @gwas_dir + @h_files[s][:annot]
 #       logger.debug infile
 #       if File.exist?(infile)
 #        gz = Zlib::GzipReader.new(infile)
@@ -300,6 +414,13 @@ class PhenotypesController < ApplicationController
 #        @annot_content = gz.read
 #      end
     end
+
+    if params[:nolayout]=="1"
+      render :partial => 'all_gwas_analysis', :locals => {:phenotype => @phenotype, :h_output => @h_output, :h_files => @h_files, :anova => @anova, :h_gwas_results => @h_gwas_results, :output_dir => @gwas_dir, :download_namespace => 'gwas', :md5 => nil}
+    else
+      render
+    end
+    
   end
   
   def autocomplete
@@ -337,7 +458,7 @@ class PhenotypesController < ApplicationController
     #Organism.where(:id => exps.map{|e| e.project_id}.uniq).all.map{|p| h_projects[p.id] = p}                                    
     h_studies = {}
     Study.where(:id => phenotypes.map{|p| p.study_id}.uniq).all.map{|e| h_studies[e.id] = e}
-  
+    
   
     phenotypes.each do |p|
       p
@@ -363,8 +484,8 @@ class PhenotypesController < ApplicationController
       # ((o.description != '') ? " (#{o.common_name})" : "") + " [taxID:#{o.tax_id}]"})
       i+=1
     end
- #   end
-
+    #   end
+    
     render :plain => to_render.to_json #to_render.sort{|a, b| [a[:label].downcase,a[:label]]  <=> [b[:label].downcase, b[:label]]}.to_json                                                                                                                           
   end
 
@@ -381,7 +502,8 @@ class PhenotypesController < ApplicationController
     SummaryType.all.map{|st| @h_summary_types[st.id] = st}
     @h_studies = {}
     Study.all.map{|s| @h_studies[s.id] = s}
-
+    @h_units = {}
+    Unit.all.map{|u| @h_units[u.id] = u}
     #    @h_nber_dgrp_line_studies ={}
     
     #    DgrpLineStudy.select("dgrp_line_study_id, phenotype_id").joins("join dgrp_line_studies_phenotypes on (dgrp_line_studies.id = dgrp_line_study_id)").all.map{|e| @h_nber_dgrp_line_studies[e[:phenotype_id]]||=0; @h_nber_dgrp_line_studies[e[:phenotype_id]]+=1}
@@ -390,20 +512,21 @@ class PhenotypesController < ApplicationController
         format.html {
           render }
         format.json { render :json => @phenotypes }
-    end
-
-    
-    
+      end
+      
+      
+      
   end
-
+  
   
   # GET /phenotypes/1 or /phenotypes/1.json
   def show
-
+    
     params[:nber_bins] ||= 100
     @h_sex = {'F' => 'female', 'M' => 'male', 'NA' => 'undefined sex'}
     @study = @phenotype.study
     @h_pheno = nil
+  
     @h_figure_types = {}
     FigureType.all.map{|ft| @h_figure_types[ft.id] = ft}
     @h_figures = {}
@@ -417,7 +540,7 @@ class PhenotypesController < ApplicationController
     else
       @h_pheno = tmp_h_pheno['raw'][@phenotype.dataset_id.to_s] if tmp_h_pheno['raw']
     end
-    @h_pheno_mean = Basic.safe_parse_json(@study.pheno_sum_json, {})
+    @h_pheno_sum = Basic.safe_parse_json(@study.pheno_sum_json, {})
 #    @data_type = 'numeric'
     @max_num = 1
     @mean_vector = {}
@@ -472,20 +595,20 @@ class PhenotypesController < ApplicationController
     phenotype_id = @phenotype.id.to_s
     
     if @h_pheno
-      @h_pheno.keys.select{|dgrp_line| @h_pheno_mean[dgrp_line]}.each do |dgrp_line|
-        tmp_sex = @h_pheno_mean[dgrp_line]['sex']
+      @h_pheno.keys.select{|dgrp_line| @h_pheno_sum[dgrp_line]}.each do |dgrp_line|
+        tmp_sex = @h_pheno_sum[dgrp_line]['sex']
         tmp_sex.each_index do |i|
 
           if !@mean_vector[tmp_sex[i]]
             undefined_sex.push("#{tmp_sex[i]} in #{dgrp_line}")
           else
-            if @h_pheno_mean[dgrp_line][phenotype_id] and @h_pheno_mean[dgrp_line][phenotype_id][i]   
-              @mean_vector[tmp_sex[i]].push @h_pheno_mean[dgrp_line][phenotype_id][i][0]
-              @h_mean_values[tmp_sex[i]][dgrp_line] = @h_pheno_mean[dgrp_line][phenotype_id][i][0]
-              @median_vector[tmp_sex[i]].push @h_pheno_mean[dgrp_line][phenotype_id][i][1]
-              @h_median_values[tmp_sex[i]][dgrp_line] = @h_pheno_mean[dgrp_line][phenotype_id][i][1]
-              @sum_vector[tmp_sex[i]].push @h_pheno_mean[dgrp_line][phenotype_id][i][params[:displayed_sum_type].to_i]
-              @h_sum_values[tmp_sex[i]][dgrp_line] = @h_pheno_mean[dgrp_line][phenotype_id][i][params[:displayed_sum_type].to_i]
+            if @h_pheno_sum[dgrp_line][phenotype_id] and @h_pheno_sum[dgrp_line][phenotype_id][i]   
+              @mean_vector[tmp_sex[i]].push @h_pheno_sum[dgrp_line][phenotype_id][i][0]
+              @h_mean_values[tmp_sex[i]][dgrp_line] = @h_pheno_sum[dgrp_line][phenotype_id][i][0]
+              @median_vector[tmp_sex[i]].push @h_pheno_sum[dgrp_line][phenotype_id][i][1]
+              @h_median_values[tmp_sex[i]][dgrp_line] = @h_pheno_sum[dgrp_line][phenotype_id][i][1]
+              @sum_vector[tmp_sex[i]].push @h_pheno_sum[dgrp_line][phenotype_id][i][params[:displayed_sum_type].to_i]
+              @h_sum_values[tmp_sex[i]][dgrp_line] = @h_pheno_sum[dgrp_line][phenotype_id][i][params[:displayed_sum_type].to_i]
               @dgrp_lines[tmp_sex[i]].push dgrp_line
             elsif @phenotype.is_numeric == false
               if @h_pheno[dgrp_line][@phenotype.name] and  @h_pheno[dgrp_line][@phenotype.name][i]
@@ -549,20 +672,79 @@ class PhenotypesController < ApplicationController
         end
       end
     end
-  end
 
+    ## generate the data for json output
+    @h_original_data = {}
+    if @h_pheno
+      dgrp_lines = @h_pheno.keys
+      dgrp_lines.each do |dgrp_line|
+        sex_list = @h_pheno[dgrp_line]['sex']
+        tmp_h = {}
+        sex_list.each_index do |sex_i|
+          val = @h_pheno[dgrp_line][@phenotype.name][sex_i]
+          if val
+            tmp_h[sex_list[sex_i]] ||= []
+            tmp_h[sex_list[sex_i]].push val
+          end
+        end
+        @h_original_data[dgrp_line] = tmp_h
+      end
+    end
+
+    sum_types = [:mean, :median, :variance, :std_dev, :std_err, :cv]
+    @h_summary_data = {}
+    sum_types.map{|e| @h_summary_data[e] = {}}
+    
+    if @phenotype.is_summary == false
+      dgrp_lines = @h_pheno_sum.keys
+      
+      sum_types.each_with_index do |sum_type, sum_type_i|
+        dgrp_lines.each do |dgrp_line|
+          sex_list =  @h_pheno_sum[dgrp_line]['sex']
+          tmp_h = {}
+          sex_list.each_index do |sex_i|
+            if @h_pheno_sum[dgrp_line][@phenotype.id.to_s][sex_i]
+              val = @h_pheno_sum[dgrp_line][@phenotype.id.to_s][sex_i][sum_type_i]
+              if val
+                tmp_h[sex_list[sex_i]] ||= []
+                tmp_h[sex_list[sex_i]].push val
+              end
+            end
+          end
+          @h_summary_data[sum_type][dgrp_line] = tmp_h
+        end
+      end
+      
+    end
+    
+    if params[:partial]
+      if params[:partial] == 'ordered_barplot_js'
+        render :partial => 'ordered_barplot_js', :locals => {:ordered_index => @global_ordered_index_barplot, :h_sum_values => @h_sum_values, :h_pheno => @h_pheno, :dgrp_lines => @all_dgrp_lines, :phenotype => @phenotype} 
+      elsif params[:partial] == 'ordered_boxplot_js'
+        render :partial => 'ordered_boxplot_js', :locals => {:ordered_index => @global_ordered_index, :h_mean_values => @h_mean_values, :h_pheno => @h_pheno, :dgrp_lines => @all_dgrp_lines, :phenotype => @phenotype}
+      elsif params[:partial] == 'ordered_plot_js'
+        render :partial => 'ordered_plot_js', :locals => {:ordered_index => @global_ordered_index, :h_mean_values => @h_mean_values, :sex_list => @sex_list, :dgrp_lines => @all_dgrp_lines, :mean_vector => @mean_vector, :phenotype => @phenotype}
+      elsif params[:partial] == 'distri_plots_js'
+        render :partial => 'distri_plots_js', :locals => {:phenotype => @phenotype}
+      end
+    else
+      render
+    end 
+  
+  end
+  
   # GET /phenotypes/new
   def new
     @phenotype = Phenotype.new
   end
-
+  
   # GET /phenotypes/1/edit
   def edit
     if !curator?
       redirect_to unauthorized_path
     end
   end
-
+  
   # POST /phenotypes or /phenotypes.json
   def create
     @phenotype = Phenotype.new(phenotype_params)
@@ -600,11 +782,11 @@ class PhenotypesController < ApplicationController
      #   elsif @phenotype.description.match(/median/i)
      #     sum_type = "median"
      #   elsif @phenotype.description.match(/sd/i) or @phenotype.description.match(/standard deviation/i)
-     #     sum_type = "sd"
-     #   elsif @phenotype.description.match(/cv/i) or @phenotype.description.match(/coef[^ ]* of variation/i)
-     #     sum_type = 'cv'
-     #   end
-     #   summary_type = h_summary_types[sum_type]
+        #     sum_type = "sd"
+        #   elsif @phenotype.description.match(/cv/i) or @phenotype.description.match(/coef[^ ]* of variation/i)
+        #     sum_type = 'cv'
+        #   end
+        #   summary_type = h_summary_types[sum_type]
         ##name changed
         if prev_name != @phenotype.name
           ## change in json
@@ -637,7 +819,7 @@ class PhenotypesController < ApplicationController
             end
           end
           FileUtils.move(data_dir + tmp_filename, filepath)
-
+          
         end
         Basic.upd_sums(@phenotype.study)
         
@@ -649,7 +831,7 @@ class PhenotypesController < ApplicationController
       end
     end
   end
-
+  
   # DELETE /phenotypes/1 or /phenotypes/1.json
   def destroy
     if admin?
@@ -662,10 +844,10 @@ class PhenotypesController < ApplicationController
       format.json { head :no_content }
     end
   end
-
+  
   private
-    # Use callbacks to share common setup or constraints between actions.
-    def set_phenotype
+  # Use callbacks to share common setup or constraints between actions.
+  def set_phenotype
       @phenotype = Phenotype.find(params[:id])
     end
 

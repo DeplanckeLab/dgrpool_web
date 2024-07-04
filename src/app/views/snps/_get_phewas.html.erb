@@ -42,9 +42,9 @@ These results were computed across all phenotypes on DGRPool. We display only p-
     <% @gwas_results.each do |gwas_result| %>
 
     <tr>
-      <td><%= raw display_phenotype(@h_phenotypes[gwas_result.phenotype_id]) %></td>
-      <td><%= raw display_reference(@h_studies[@h_phenotypes[gwas_result.phenotype_id].study_id]) %></td>
-      <td><%= raw display_status(@h_studies[@h_phenotypes[gwas_result.phenotype_id].study_id], @h_statuses) %></td>
+      <td><%= raw (@h_phenotypes[gwas_result.phenotype_id]) ? display_phenotype(@h_phenotypes[gwas_result.phenotype_id]) : "NA #{gwas_result.phenotype_id}" %></td>
+      <td><%= raw (@h_phenotypes[gwas_result.phenotype_id]) ? display_reference(@h_studies[@h_phenotypes[gwas_result.phenotype_id].study_id]) : 'NA' %></td>
+      <td><%= raw (@h_phenotypes[gwas_result.phenotype_id]) ? display_status(@h_studies[@h_phenotypes[gwas_result.phenotype_id].study_id], @h_statuses) : 'NA' %></td>
       <td><%= raw display_corr_num(2, gwas_result.p_val) %></td>
   <!--    <td><%=  raw display_corr_num(2, gwas_result.fdr) %></td> -->
     </tr>
@@ -63,9 +63,9 @@ These results were computed across all phenotypes on DGRPool. We display only p-
   })
 */
 
- $("#phewas_table").DataTable('{
+ $("#phewas_table").DataTable({
         pageLength:100,
-        order : [[1, 'asc']]
+        order : [[3, 'asc']]
         })
 
      initTooltips();

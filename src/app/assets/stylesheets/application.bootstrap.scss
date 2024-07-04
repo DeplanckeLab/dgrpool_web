@@ -8,8 +8,11 @@ $lightgreen: #90EE90;
 @import 'jquery-ui';
 //@import 'tooltipster.bundle.min';
 
-body {margin:60px}
+body {margin:15px; margin-top:60px; margin-bottom:60px}
 
+.desc_table tr td {padding:5px}
+.navbar-nav {background-color:rgba(var(--bs-light-rgb), var(--bs-bg-opacity))}
+.nav-link {background-color:rgba(var(--bs-light-rgb), var(--bs-bg-opacity))}
 .tooltip {z-index:1000000}
 .pointer {cursor:pointer}
 .nowrap {white-space:nowrap}
@@ -113,6 +116,23 @@ body {margin:60px}
 }
 
 #ontop_popup_container2 {
+overflow:scroll
+}
+
+#ontop_popup_window3 {
+    position: fixed;
+    z-index:1000000;
+    margin-right:15px;
+    padding:20px;
+    background: #fff;
+    border: 1px solid;
+    border-radius: .5rem;
+    cursor:hand;
+    display:none;
+
+}
+
+#ontop_popup_container3 {
 overflow:scroll
 }
 
