@@ -1,0 +1,14 @@
+<p style="color: green"><%= notice %></p>
+
+<h1>Oma orthologs</h1>
+
+<div id="oma_orthologs">
+  <% @oma_orthologs.each do |oma_ortholog| %>
+    <%= render oma_ortholog %>
+    <p>
+      <%= link_to "Show this oma ortholog", oma_ortholog %>
+    </p>
+  <% end %>
+</div>
+
+<%= link_to "New oma ortholog", new_oma_ortholog_path %>

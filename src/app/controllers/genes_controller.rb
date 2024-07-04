@@ -1,5 +1,26 @@
 class GenesController < ApplicationController
   before_action :set_gene, only: %i[ show edit update destroy ]
+
+  def autocomplete
+    to_render = []
+    
+    q = (params[:q].strip != '') ? params[:q].strip.split(/ +/).last : ''
+    
+    query = Gene.search do
+      fulltext q.gsub(/\$\{jndi\:/, '').gsub(/[+\-"\/]/) { |c| "\\" + c } + "*"
+      field_list [:name]
+      order_by :name_order, :asc
+      paginate :page => 1, :per_page => 15
+    end
+
+    genes = query.results
+    genes.each do |g|
+      to_render.push({:id => g.id, :label => g.name})
+    end
+    
+    render :plain => to_render.to_json
+    
+  end
   
   def set_search_session
     [:search_type].each do |e|
@@ -92,6 +113,8 @@ class GenesController < ApplicationController
     Gene.where(:id => @snp_genes.map{|e| e.gene_id}).all.map{|e| @h_genes[e.id] = e}
     @h_snps = {}
     Snp.where(:id => @snp_genes.map{|e| e.snp_id}).all.map{|e| @h_snps[e.id] = e}
+
+    @gwas_results = GwasResult.where(:snp_id => @h_snps.keys).all
     
     render :partial => 'do_search' #'search_' + session[:settings][:search_view_type] + "_view"                                                                                                               
     
@@ -99,7 +122,7 @@ class GenesController < ApplicationController
   
   # GET /genes or /genes.json
   def index
-    @genes = Gene.all
+#    @genes = Gene.all
   end
 
   # GET /genes/1 or /genes/1.json

@@ -182,7 +182,7 @@ class HomeController < ApplicationController
         @data = ""
         @data = params[:file].read()
         @h_res = Parse.parse_user_tsv(@data, logger, false)
-        
+        logger.debug(@h_res.to_json)
         missing_dgrp_lines = []
         tmp_dgrp_lines = []
          tmp_dgrp_lines_by_sex = {}
@@ -190,7 +190,8 @@ class HomeController < ApplicationController
           tmp_dgrp_lines_by_sex[sex] = []
         end
         # logger.debug("MATRIX:" + @h_res[:matrix].to_json)
-        h_sums = Basic.upd_dataset_sums(nil, nil, @h_res[:h_pheno], {}, @h_res[:sex_list])
+        logger.debug( @h_res[:sex_list])
+        h_sums = Basic.upd_dataset_sums(nil, nil, @h_res[:h_pheno], {}, @h_res[:sex_list], logger)
         @h_sex_color.each_key do |sex|
           if @h_res[:dgrp_lines_by_sex][sex]
             @h_res[:dgrp_lines_by_sex][sex].each do |e|

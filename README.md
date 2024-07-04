@@ -18,7 +18,7 @@ Users can explore the repository by searching for keywords or browsing through c
 
 ### Community Curated
 
-DGRPool encourages community participation by allowing users to become curators. Curators help maintain the platform by formatting and validating submitted datasets, ensuring the quality of the data.
+DGRPool encourages community participation by allowing users to become curators. If you are interested in becoming a curator, please e-mail us at [bioinfo.epfl@gmail.com](mailto:bioinfo.epfl@gmail.com?subject=Volunteering%20as%20a%20curator). Curators help maintain the platform by formatting and validating submitted datasets, ensuring the quality of the data.
 
 ### Interactive Data Analysis
 
@@ -28,7 +28,19 @@ Users can perform various analyses including phenotype correlation and GWAS. Pre
 
 DGRPool provides proof-of-concept studies to showcase its potential in facilitating biological discoveries. These studies highlight associations between phenotypes, providing valuable insights for further research.
 
-## Development Server Setup
+## Contributing
+
+DGRPool welcomes contributions from the community. Users interested in becoming curators or contributing to the development of the platform can reach out through the provided contact information on the [website](https://dgrpool.epfl.ch/).
+
+## Contact
+
+For inquiries or support, please contact the DGRPool team at [bioinfo.epfl@gmail.com](mailto:bioinfo.epfl@gmail.com)
+
+## License
+
+See LICENSE file
+
+## [DGRPool dev team] Development Server Setup
 
 To set up the development server for DGRPool, follow these steps:
 
@@ -75,46 +87,3 @@ Check that everything is working out. Then you can stop the Docker, and re-run i
    docker-compose up -d
 ```
 This runs the Dockerized website in "detached" mode, so everything is handled by the Docker daemon (e.g. restarting in case of abnormal behaviour).
-
-5. **Create services**:
-We have two main app running in DGRPool, the main Dockerized web server, and a daemon running outside of the Docker for user-submitted GWAS analysis.
-
-The web server "service" is automatically handled by the Docker daemon. 
-We will **create** and **enable** a service for running the gwas job daemon, and restarting it if it reaches an abnormal state.
-   You can find it in [./services](./services)
-
-First, start by editing this file, with the correct path location: `WorkingDirectory=$srv`. You can also change the path to podman-compose or docker-compose depending on the containerization method you use.
-   
- On a linux system, you should copy this file in `/etc/systemd/system/`
- Then, you can reboot the service daemon:
- ```bash
- systemctl daemon-reload
- ```
-
- After that, you can start the service with the commands:
- ```bash
- systemctl start run_user_gwas
- ```
-
- And check if they are running properly using:
- ```bash
- systemctl status run_user_gwas
- ```
-
- The service will automatically restart the programs if they fail. We will also **enable** them so that they automatically start when the server boots:
- ```bash
- systemctl enable run_user_gwas
- ```
-**Note**: In case of this error: `ERROR: Couldn’t connect to Docker daemon at http+docker://localhost - is it running?`, you can try adding root into the "docker" group
-
-## Contributing
-
-DGRPool welcomes contributions from the community. Users interested in becoming curators or contributing to the development of the platform can reach out through the provided contact information on the website.
-
-## Contact
-
-For inquiries or support, please contact the DGRPool team at [bioinfo.epfl@gmail.com](mailto:bioinfo.epfl@gmail.com)
-
-## License
-
-See LICENSE file

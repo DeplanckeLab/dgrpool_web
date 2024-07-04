@@ -1,0 +1,5 @@
+ <%= render :partial => 'list_gwas_results', :locals => {:h_studies => h_studies, :h_var_types => h_var_types, :gwas_results => gwas_results, :h_snps => h_snps, :h_snp_info => h_snp_info, :h_genes => h_genes, :h_phenotypes => h_phenotypes, :h_snp_genes => h_snp_genes} %>
+
+ <%= javascript_tag do %>
+ $("#ontop_window").addClass("hidden")
+ <% end %>

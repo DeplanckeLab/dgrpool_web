@@ -1,0 +1,2 @@
+class FlybaseAllele < ApplicationRecord
+end

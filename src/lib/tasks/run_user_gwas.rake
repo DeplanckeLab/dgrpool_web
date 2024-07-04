@@ -1,5 +1,5 @@
-desc '####################### run_user_gwas'
-task run_user_gwas: :environment do
+desc '####################### run_gwas'
+task run_gwas: :environment do
   puts 'Executing...'
 
 
@@ -35,8 +35,8 @@ task run_user_gwas: :environment do
       cov_file = data_dir + "dgrp.cov.tsv"
       annot_file = data_dir + "dgrp.fb557.annot.txt.gz"
       File.delete(output_dir + "done") if File.exist?(output_dir + "done")
-      cmd = "Rscript #{ENV["WORKING_DIR"]}/lib/running_GWAS_user.R #{tmp_file} #{plink_file} #{cov_file} #{annot_file} #{output_dir} 2 0.2 0.05 1> #{output_dir + "gwas_output.json"} 2> #{output_dir + "gwas_output.err"}"
-      puts cmd
+      cmd = "/usr/bin/Rscript ./lib/running_GWAS_user.R #{tmp_file} #{plink_file} #{cov_file} #{annot_file} #{output_dir} 2 0.2 0.05 1> #{output_dir + "gwas_output.json"} 2> #{output_dir + "gwas_output.err"}"
+      puts "CMD: " + cmd
       `#{cmd}`
 
       `touch #{output_dir + "done"}`

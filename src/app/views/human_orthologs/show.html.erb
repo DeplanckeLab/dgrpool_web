@@ -1,0 +1,10 @@
+<p style="color: green"><%= notice %></p>
+
+<%= render @human_ortholog %>
+
+<div>
+  <%= link_to "Edit this human ortholog", edit_human_ortholog_path(@human_ortholog) %> |
+  <%= link_to "Back to human orthologs", human_orthologs_path %>
+
+  <%= button_to "Destroy this human ortholog", @human_ortholog, method: :delete %>
+</div>

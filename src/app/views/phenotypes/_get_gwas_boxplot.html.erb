@@ -4,7 +4,7 @@
 <%# @geno_table.to_json %>
 <%# raw @h_res.to_json %>
 <%# raw @h_dgrp_lines.to_json %>
-
+<%# raw @h_pheno_sum.to_json %>
 <% @h_traces.each_key do |k| %>
 <div id='gwas_boxplot_<%= k %>' width='100%'></div>
 <% end %>
@@ -90,7 +90,7 @@ $( document ).ready(function(){
 <% @h_traces.each_key do |k| %>
 var traces = <%= raw @h_traces[k].to_json %>
 var w = $("#ontop_popup_window2").width()
-var h = 500; // $("#ontop_popup_window2").height()-100
+var h = 400; // $("#ontop_popup_window2").height()-100
 console.log(h)
 console.log("#gwas_boxplot_<%= k %>: " + w)
 var layout = {

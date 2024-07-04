@@ -3,12 +3,14 @@ module ApplicationHelper
   def display_var_type(snp_id, var_type, genes)
     html = ''
     if var_type
-      html = "<span id='transcript_annot_btn-#{snp_id}-#{var_type.name}' data-bs-toggle='tooltip' data-bs-placement='bottom' data-bs-html='true' class='transcript_annot_btn badge bg-#{var_type.impact_class} pointer' title='#{var_type.description}'>#{var_type.name}
-           <br/>
-           <small>#{genes.first[0]}" +
-             ((genes.size > 1) ? (" & " + (genes.size-1).to_s + " other" + ((genes.size > 2) ? 's' : '')) : '') +
-             "</small>
-      </span>"
+      html = "<span id='transcript_annot_btn-#{snp_id}-#{var_type.name}' data-bs-toggle='tooltip' data-bs-placement='bottom' data-bs-html='true' class='transcript_annot_btn badge bg-#{var_type.impact_class}' title='#{var_type.description}'>#{var_type.name}
+           <br/>"
+      if genes.size > 0
+        html += "<small>#{genes.first[0]}" +
+                ((genes.size > 1) ? (" & " + (genes.size-1).to_s + " other" + ((genes.size > 2) ? 's' : '')) : '') +
+                "</small>"
+      end
+      html += "</span>"  
     end
     return html
   end
@@ -119,6 +121,10 @@ module ApplicationHelper
 
   def display_reference_short2 s
     return (s) ? link_to("#{s.authors}, #{s.year}", study_path(s), {:target => "_blank", :class => 'badge bg-info nodec'}) : ''
+  end
+
+  def display_reference_short3 s
+    return (s) ? link_to("#{s.authors}, #{s.year}", study_path(s), {:target => "_blank", :class => 'badge bg-secondary nodec'}) : ''
   end
   
   def display_categories s, h_cats_by_study, h_cats

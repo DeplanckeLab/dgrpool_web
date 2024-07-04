@@ -22,10 +22,15 @@
 
 <% order = (!current_user) ? [[2, 'asc'], [3, 'desc']] : [[0, 'asc']] %>
 
-  document.addEventListener('DOMContentLoaded', function () {
-$( document ).tooltip();
+document.addEventListener('DOMContentLoaded', function () {
+//$( document ).tooltip();
+
 //let table = new DataTable('#studies', {pageLength:100,order:<%= raw order.to_json %>})
 $("#studies").DataTable({pageLength:100,order:<%= raw order.to_json %>})
+
+//initTooltips()
+
+
 });
 
 <% end %>

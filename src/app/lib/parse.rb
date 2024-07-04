@@ -55,7 +55,7 @@ module Parse
           if h_data[dgrp_line_name] and h_data[dgrp_line_name]['sex'].include? t[1]
             h_duplicated_dgrp_lines[dgrp_line_name + "/" + t[1]] = 1
           else
-            h_data[dgrp_line_name] = {'sex' => []}
+            h_data[dgrp_line_name] ||= {'sex' => []}
           end
         
           

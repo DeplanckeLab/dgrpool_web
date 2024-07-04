@@ -24,6 +24,7 @@ body {margin:60px}
 
 .topaligned tr td {vertical-align:top}
 
+.badge-qualifier {background-color:black}
 
 .ui-menu-item-wrapper{text-decoration: none; color:black;}
 .ui-widget.ui-widget-content {
@@ -46,6 +47,42 @@ body {margin:60px}
 }
 .ui-corner-all, .ui-corner-top, .ui-corner-left, .ui-corner-tl {
   border-top-left-radius: 3px;
+}
+
+/* Pagination buttons styling */
+.dataTables_wrapper .dataTables_paginate .paginate_button {
+  padding: 5px 10px; /* Adjust padding as needed */
+  margin-left: 2px; /* Adjust margin as needed */
+  border: 1px solid #ccc;
+  background-color: #f0f0f0;
+  color: #333;
+  cursor: pointer;
+  border-radius: 3px;
+}
+
+/* Current page button styling */
+.dataTables_wrapper .dataTables_paginate .paginate_button.current {
+  background-color: #007bff;
+  color: #fff;
+  border-color: #007bff;
+}
+
+/* Page number buttons styling */
+.dataTables_wrapper .dataTables_paginate .paginate_button.page-item {
+  padding: 5px 10px; /* Adjust padding as needed */
+  margin-left: 2px; /* Adjust margin as needed */
+  border: 1px solid #ccc;
+  background-color: #f0f0f0;
+  color: #333;
+  cursor: pointer;
+  border-radius: 3px;
+}
+
+/* Current page button styling */
+.dataTables_wrapper .dataTables_paginate .paginate_button.page-item.active {
+  background-color: #007bff;
+  color: #fff;
+  border-color: #007bff;
 }
 
 #main_footer {position:fixed;bottom:0; width:100%; left:0; margin:0}

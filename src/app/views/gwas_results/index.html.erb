@@ -1,14 +1,16 @@
 <p style="color: green"><%= notice %></p>
 
-<h1>Gwas results</h1>
+<div id='search_container' class=''></div>
 
-<div id="gwas_results">
-  <% @gwas_results.each do |gwas_result| %>
-    <%= render gwas_result %>
-    <p>
-      <%= link_to "Show this gwas result", gwas_result %>
-    </p>
-  <% end %>
-</div>
+<%= javascript_tag do %>
 
-<%= link_to "New gwas result", new_gwas_result_path %>
+document.addEventListener('DOMContentLoaded', function () {
+
+refresh("search_container", "<%= search_gwas_results_path(:nolayout => 1) %>", {loading:'fa-2x'})
+
+})
+
+<% end %>
+
+
+

@@ -14,8 +14,11 @@ import 'datatables.net'
 import './src/jquery-ui'
 import './src/jquery.ui.autocomplete.html'
 
+//import './src/tooltipster'
+import "bootstrap-tooltip"
+
 import './src/custom'                              
-import './src/tooltipster' 
+
 
 /*import 'datatables.net'
 import './src/custom'

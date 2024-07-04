@@ -1,0 +1,2 @@
+class HumanOrtholog < ApplicationRecord
+end

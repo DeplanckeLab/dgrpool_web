@@ -1,5 +1,5 @@
 
-var h_snps = <%= raw @h_snps.to_json %> 
+var h_snps = <%= raw h_snps.to_json %> 
 
 $(".gwas_res_table").on("click", '.binding_site_annot_btn', function(){
 var t = this.id.split("-")
@@ -65,7 +65,7 @@ var bsa_table = $('<table width="750">');
 			      var ww = 800 
 			      var snp_id = t[1]
 			      var var_type = t[2]
-			      if (h_snps[snp_id]){
+			      if (h_snps[snp_id] && h_snps[snp_id]['transcript_annot']){
 			      var h_ta = h_snps[snp_id]['transcript_annot'][var_type]
 			      var genes = Object.keys(h_ta)
 			      
@@ -127,17 +127,26 @@ console.log("ERROR: snp_id:" + snp_id + " not found")
         }).show(0);
 								     
         })
-<% if @phenotype or @md5 %>
+<%# if phenotype or @md5 %>
 								     
 	$(".gwas_res_table").on("click", '.boxplot-link', function(){
 	var t = this.id.split("-")
 	var snp_id = t[2]
-	var sex = t[3]
-<% if @phenotype %>
-refresh('ontop_popup_container2', "<%= raw get_gwas_boxplot_phenotypes_path() %>?phenotype_id=<%= @phenotype.id %>&sex=" + sex + "&snp_id=" + snp_id, {loading:'fa-2x'})
+        var sex = t[3]
+var phenotype_id = null
+  console.log("bla")
+        if (t.length > 4){
+	 phenotype_id = t[4]
+        }
+						       if (phenotype_id){
+						       refresh('ontop_popup_container2', "<%= raw get_gwas_boxplot_phenotypes_path() %>?phenotype_id=" + phenotype_id + "&sex=" + sex + "&snp_id=" + snp_id, {loading:'fa-2x'})
+						       }else{
+<% if phenotype %>
+refresh('ontop_popup_container2', "<%= raw get_gwas_boxplot_phenotypes_path() %>?phenotype_id=<%= phenotype.id %>&sex=" + sex + "&snp_id=" + snp_id, {loading:'fa-2x'})
 <% elsif @md5 %>
 refresh('ontop_popup_container2', "<%= raw get_gwas_boxplot_phenotypes_path() %>?md5=<%= @md5 %>&phenoname=<%= params[:phenoname] %>&sex=" + sex + "&snp_id=" + snp_id, {loading:'fa-2x'})
 <% end %>
+}
 	var w = $(window).width()
 	var h = $(window).height()
 	$("#ontop_popup_container2").css({
@@ -153,13 +162,15 @@ refresh('ontop_popup_container2', "<%= raw get_gwas_boxplot_phenotypes_path() %>
 	
 	})
 
-<% end %>
+<%# end %>
 
 //	$( document ).tooltip();
-<% if !@phenotype %> 
+<% if !phenotype %> 
+document.addEventListener('DOMContentLoaded', function () {
 initTooltips()
+})
 <% end %>
 
-<%# if @phenotype %>				   
+<%# if phenotype %>				   
 //	});
 	<%# end %>

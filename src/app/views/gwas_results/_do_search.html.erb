@@ -1,0 +1,96 @@
+<!--<h4 class=''> GWAS results (<%= @gwas_results.size %>)</h4>-->
+
+<%= render :partial => 'gene_details' %>
+
+<%= render :partial => 'oma_orthologs' %>
+
+<%= render :partial => 'flybase_orthologs' %>
+
+<%= render :partial => 'list_flybase_alleles' %>
+
+<h4 class='mt-3'>GWAS results</h4>
+
+<% if @gwas_results.size > 1000 %>
+<div class='alert alert-warning'>
+  <div class='float-end'>
+    <button id='download_all_btn' type='button' class='btn btn-secondary'><i class='fa fa-download'></i> Download all</button>
+  </div>
+  Only 1000 first results (out of <%= @gwas_results.size %>) having the smallest p-value to allow the page to load faster.
+</div>
+<% else %>
+<div class='alert alert-success'>
+  <div class='float-end'>
+    <button id='download_all_btn' type='button' class='btn btn-secondary'><i class='fa fa-download'></i> Download all</button>
+  </div>
+  <%= @gwas_results.size %> results.
+</div>
+
+<% end %>
+<%# @h_snps.to_json %>
+
+<%# hidden_field_tag 'gene_total', @snp_genes.total_entries %>
+<%= hidden_field_tag 'gene_gene_ids', @snp_genes.map{|p| p.id}.join(",") %>
+
+<%= render :partial => ("search_" + session[:gs_settings][:search_view_type] + "_view"), :locals => {:h_studies => @h_studies, :h_var_types => @h_var_types, :h_phenotypes => @h_phenotypes, :h_genes => @h_genes, :h_snps => @h_snps, :h_snp_info => @h_snp_info, :h_snp_genes => @h_snp_genes, :gwas_results => @gwas_results, :type => ''} %>
+
+
+
+<%= javascript_tag do %>
+
+$("#download_all_btn").click(function(){
+var q = $("#gene_free_text").val()
+var link = "<%= raw get_search_gwas_results_path() %>?q=" + q
+console.log(link)
+console.log(q.replace(" ", "_"))
+window.download_from_link(link, 'gwas_results_' + q.replace(" ", "_") + ".tsv")
+})
+
+
+document.addEventListener('DOMContentLoaded', function () {
+
+$("#gene_per_page").change(function(){
+ var t = this.id.split("_")
+ var h = {loading:'fa-2x'}
+ gene_search([], h)
+})
+
+$("#search_menu-nav li .nav-link").click(function(){
+ console.log("bla")
+ var p = [{name : 'search_type', value :  this.id.split("_")[0]}];
+ refresh_post(null, "<%= set_search_session_gwas_results_path %>", p, 'post', {})
+})
+
+$(".gene_page_nav-btn").click(function(){
+ var t = this.id.split("_")
+ // var search_type = t[0]
+ var direction = t[0]
+ var cur_val = parseInt($("#gene_page").val())
+ if (direction == 'prev'){
+  $("#gene_page").val(cur_val - 1)
+ }else{
+  $("#gene_page").val(cur_val + 1)
+ }
+ console.log("#gene_page: " + $("#gene_page").val())
+ var h = {loading:'fa-2x'}
+ gene_search([], h)
+})
+
+$(".gene_page").keyup(function(e){
+ var t = this.id.split("_")
+// var type = t[0]
+ // console.log("KEY:" + e.key)
+ if (e.key == 'Enter'){
+  // validate page #
+  if (parseInt($("#gene_total").val()) < (parseInt($("#gene_page").val())-1) * parseInt($("#gene_per_page").val())){
+   console.log("Too high page number!")
+   $("#gene_page").val(Math.round(parseInt($("#gene_total").val())/parseInt($("#gene_per_page").val()))+1)
+  }
+  var h = {loading:'fa-2x'}
+  gene_search([], h)
+ }
+})
+
+})
+
+<% end %>
+

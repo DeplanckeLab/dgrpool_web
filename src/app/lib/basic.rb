@@ -174,11 +174,11 @@ module Basic
       list_sex = h_sex.keys.sort
       
       if h_pheno["summary"]
-        h_sums = upd_dataset_sums(study.id, nil, h_pheno["summary"], h_sums, list_sex)
+        h_sums = upd_dataset_sums(study.id, nil, h_pheno["summary"], h_sums, list_sex, nil)
       end
       if h_pheno["raw"]
         h_pheno["raw"].each_key do |dataset_id|
-          h_sums = upd_dataset_sums(study.id, dataset_id.to_i, h_pheno["raw"][dataset_id], h_sums, list_sex)
+          h_sums = upd_dataset_sums(study.id, dataset_id.to_i, h_pheno["raw"][dataset_id], h_sums, list_sex, nil)
         end
       end
 
@@ -207,7 +207,7 @@ module Basic
       
     end
     
-    def upd_dataset_sums study_id, dataset_id, h_pheno, h_sums, sex_list
+    def upd_dataset_sums study_id, dataset_id, h_pheno, h_sums, sex_list, logger
 
       #  h_sums = {:mean => {}, :median => {}}
       #  h_pheno.each_key do |type|
@@ -230,10 +230,13 @@ module Basic
         Phenotype.where(:study_id => study_id, :dataset_id => dataset_id, :name => h_all_phenos.keys).all.map{|p| h_phenotypes[p.name] = p}
       end
       #  puts h_phenotypes.to_json
+
+      logger.debug(h_pheno.to_json)
       
       h_pheno.each_key do |dgrp_line|
         phenos = h_pheno[dgrp_line].keys - ["sex"]
         sex =  h_pheno[dgrp_line]["sex"]
+        logger.debug dgrp_line +  " -> " + sex.to_json
         h_sex_idx = {}
         sex.each_index do |i|
           h_sex_idx[sex[i]]||=[]
@@ -258,18 +261,24 @@ module Basic
           phenotype_id = (study_id and phenotype) ? phenotype.id : pheno
           # is_numeric = Basic.is_numeric_vector(h_pheno[dgrp_line][pheno])
           if phenotype
+            logger.debug phenotype if logger
             #  puts phenotype.name
             if (study_id) ? phenotype.is_numeric : true
-              #  puts "numeric"
+              logger.debug "numeric" if logger
              # list_sums = (phenotype.is_summary == true) ? [:mean] : [:mean, :median, :variance, :std_dev, :std_err, :cv]
               tmp_v = {}
+              logger.debug sex_list if logger
+              logger.debug h_sex_idx.to_json if logger
               sex_list.each do |sex_item|
                 #    puts sex_item
                 list_val = (h_sex_idx[sex_item]) ? h_sex_idx[sex_item].map{|i| (h_pheno[dgrp_line][pheno]) ? h_pheno[dgrp_line][pheno][i] : nil} : []
                 #                if phenotype.name == 'Cuticul_n_C28'
                 #                  puts "#{dgrp_line} #{sex_item} => #{list_val.to_json}"
                 #                end
-                
+                if logger
+                  logger.debug sex_item
+                  logger.debug list_val
+                end
                 [:mean, :median, :all].each do |k|
                   val = nil
                   if list_val.compact.size > 0
@@ -347,6 +356,7 @@ module Basic
               end
                 
             else
+              logger.debug "else" if logger
               sex_list.each_index do |sex_i|
                 sex_item = sex_list[sex_i]
                 list_val = (h_sex_idx[sex_item]) ? h_sex_idx[sex_item].map{|i| (h_pheno[dgrp_line][pheno]) ? h_pheno[dgrp_line][pheno][i] : nil} : []               

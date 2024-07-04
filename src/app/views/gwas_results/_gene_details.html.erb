@@ -1,0 +1,42 @@
+<h4>Gene details</h4>
+
+<table id='genes' class="gwas_res_table table-striped" width='100%'>
+  <thead>
+    <tr>
+      <th>Gene ID</th>
+      <th>Gene name</th>
+      <th>Gene full name</th>
+      <th>Synonyms</th>
+      <th>Summaries</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% @h_genes.each do |gene_id, g| %>
+    <tr>
+      <td><%= link_to g.identifier, "https://flybase.org/reports/#{g[:identifier]}", :target => '_blank' %></td>
+      <td><%= g.name %></td>
+      <td><%= g.full_name %></td>
+      <td>
+	<% g.synonyms.split("|").each do |s| %>
+	<span class='badge bg-primary'><%= s %></span>
+	<% end %>
+      </td>
+      <td><% summaries = Basic.safe_parse_json(g.summary_json, {}) %>
+	<% summaries.each do |k, v| %>
+	<span class='badge bg-dark'><%= k %></span>  <%= v %></br>
+	<% end %>
+      </td>
+    </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<%= javascript_tag do %>
+
+$("#genes").DataTable()
+
+/*$("#download_flybase_alleles").click(function(){
+window.downloadFullHtml("genes")
+})
+*/
+<% end %>

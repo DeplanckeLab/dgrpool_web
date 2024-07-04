@@ -1,14 +1,33 @@
 
 window.initTooltips = function(){
-    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+/*    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
     var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
         return new bootstrap.Tooltip(tooltipTriggerEl)
     })
+*/
+    $(document).ready(function(){
+	$('[data-bs-toggle="tooltip"]').tooltip()
+    })
 }
 
-document.addEventListener('DOMContentLoaded', function () {
+/*document.addEventListener('DOMContentLoaded', function () {
     initTooltips();
-})
+})*/
+
+window.download_from_link = function(link, filename){
+    // Create a new anchor element
+    var downloadLink = document.createElement("a");
+    // Set the href attribute to the URL of the file to download
+    downloadLink.href = link; // Replace 'path_to_your_file.ext' with the actual file path
+    // Set the download attribute to specify the filename
+    downloadLink.download = filename; // Replace 'filename.ext' with the desired filename
+    // Append the anchor element to the body
+    document.body.appendChild(downloadLink);
+    // Trigger a click event on the anchor element
+    downloadLink.click();
+    // Clean up by removing the anchor element from the DOM
+    document.body.removeChild(downloadLink);
+}
 
 window.downloadFullHtml = function(el_to_download) {
     // Create a new HTML document
