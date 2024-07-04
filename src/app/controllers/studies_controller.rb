@@ -568,12 +568,16 @@ class StudiesController < ApplicationController
   def create
     @study = Study.new(study_params)
     @study.status_id = 1
-    h = CustomFetch.doi_info(@study.doi)
-    existing_study = Study.where(:doi => @study.doi).first
+    doi = nil
+    if m =  @study.doi.strip.match(/(10\.\d{4,9}\/[\-._;()\/\:a-zA-Z0-9]+)$/)
+      doi = m[1]
+    end
+    h = CustomFetch.doi_info(doi)
+    existing_study = Study.where(:doi => doi).first
     h[:submitter_id] = current_user.id if current_user
     
     respond_to do |format|
-      if !existing_study and h[:first_author] and @study.save
+      if doi and !existing_study and h[:first_author] and @study.save
        # format.html { redirect_to study_url(@study), notice: "Study was successfully created." }
         @study.update(h)
         format.html {
@@ -583,6 +587,10 @@ class StudiesController < ApplicationController
       elsif existing_study
         format.html { #render :new, status: :unprocessable_entity
           render :plain => "<span class='text-warning'>This reference already exists (<a href='" + study_path(existing_study) + "' target='_blank'>see here</a>)!</span>"
+        }
+      elsif doi
+          format.html { #render :new, status: :unprocessable_entity              
+          render :plain => "<span class='text-danger'>DOI #{doi} is not a valid reference!</span>"
         }
       else
         format.html { #render :new, status: :unprocessable_entity  
