@@ -373,7 +373,11 @@ class StudiesController < ApplicationController
         end
         
         #update stats
-        cmd = "rails compute_stats"
+        cmd = "rails compute_penotype_stats & rails compute_stats"
+        `#{cmd}`
+
+        #update export                                                                                                                                                                    
+        cmd = "rails export"
         `#{cmd}`
         
       end
@@ -527,6 +531,9 @@ class StudiesController < ApplicationController
       @h_dgrp_statuses ={}
       DgrpStatus.all.map{|e| @h_dgrp_statuses[e.id]=e}
 
+      @h_units = {}
+      Unit.all.map{|u| @h_units[u.id] = u}
+      
       @h_pheno = Basic.safe_parse_json(@study.pheno_json, {})
        @h_stats = {"sex" => {}}
        h_tmp_dgrp_lines = {}
@@ -606,8 +613,10 @@ class StudiesController < ApplicationController
 
   # PATCH/PUT /studies/1 or /studies/1.json
   def update
+    
     h = {}
-    h[:validator_id] = current_user.id if [1, 2].include? @study.status_id and !@study.validator_id and study_params[:status_id] == 4
+    h[:validator_id] = current_user.id if [1, 2].include? @study.status_id and !@study.validator_id and study_params[:status_id] == "4"
+
     respond_to do |format|
 
       authors = []
@@ -628,6 +637,15 @@ class StudiesController < ApplicationController
       if format_ok == 1 and curator? and @study.update(study_params)
         if h.keys.size > 0
           @study.update(h)
+          
+          #update stats                        
+          cmd = "rails compute_phenotype_stats & rails compute_stats"
+          `#{cmd}`
+
+          #update export                                                   
+          cmd = "rails export"
+          `#{cmd}`
+
         end
         format.html { redirect_to study_url(@study), notice: "Study was successfully updated." }
         format.json { render :show, status: :ok, location: @study }
