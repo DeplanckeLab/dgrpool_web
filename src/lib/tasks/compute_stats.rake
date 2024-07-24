@@ -175,6 +175,15 @@ task compute_stats: :environment do
   end
   
   #  h_stats[:h_sex] = h_sex
+
+  phenotypes =  Phenotype.joins(:study).where(:obsolete => false).all
+  nber_phenotypes_and_sex = 0
+  phenotypes.each do |p|
+    [p.nber_sex_male, p.nber_sex_female, p.nber_sex_na].each do |e|
+      nber_phenotypes_and_sex+=1 if e and e > 0
+    end
+  end
+
   
   h_stats[:all_studies] = {
     :nber_all =>  Study.where(:status_id => [1, 2, 4]).count,
@@ -182,14 +191,24 @@ task compute_stats: :environment do
     :nber_submitted => Study.where(:status_id => 1).count,
     :nber_validated => Study.where(:status_id => 2).count,
     :nber_phenotypes => Phenotype.where(:obsolete => false).count,
+    :nber_phenotypes_and_sex => nber_phenotypes_and_sex,
     :nber_phenotypes_with_data => Phenotype.where("obsolete is false and (nber_sex_male > 0 or nber_sex_female > 0 or nber_sex_na > 0)").count,
     :nber_phenotypes_male => Phenotype.where("obsolete is false and nber_sex_male > 0").count,
     :nber_phenotypes_female => Phenotype.where("obsolete is false and nber_sex_female > 0").count,
     :nber_phenotypes_na => Phenotype.where("obsolete is false and nber_sex_na > 0").count
   }
 
+  phenotypes =  Phenotype.joins(:study).where(:study => {:status_id => 4}, :obsolete => false).all
+  nber_phenotypes_and_sex = 0
+  phenotypes.each do |p|
+    [p.nber_sex_male, p.nber_sex_female, p.nber_sex_na].each do |e|
+      nber_phenotypes_and_sex+=1 if e and e > 0
+    end
+  end
+  
   h_stats[:integrated_studies] = {
     :nber_phenotypes => Phenotype.joins(:study).where(:study => {:status_id => 4}, :obsolete => false).count,
+    :nber_phenotypes_and_sex => nber_phenotypes_and_sex,
     :nber_phenotypes_with_data => Phenotype.joins(:study).where("studies.status_id = 4 and obsolete is false and (nber_sex_male > 0 or nber_sex_female > 0 or nber_sex_na > 0)").count,
     :nber_phenotypes_male => Phenotype.joins(:study).where("studies.status_id = 4 and obsolete is false and nber_sex_male > 0").count,
     :nber_phenotypes_female => Phenotype.joins(:study).where("studies.status_id = 4 and obsolete is false and nber_sex_female > 0").count,

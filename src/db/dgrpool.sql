@@ -322,8 +322,8 @@ affects_tf_binding_site bool,
 primary key (id)
 );
 
-create index snp_genes_gene_id on  gwas_results(gene_id);
-create index snp_genes_snp_id on gwas_results(snp_id);
+create index snp_genes_gene_id on snp_genes(gene_id);
+create index snp_genes_snp_id on snp_genes(snp_id);
 
 create table gwas_results(
 id serial,
