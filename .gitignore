@@ -20,6 +20,8 @@ src/solr*
 src/nohup.out
 nohup.out
 
+public/assets
+
 */node_modules
 .env.prod
 .env.dev
