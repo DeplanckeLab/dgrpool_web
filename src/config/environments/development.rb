@@ -21,7 +21,7 @@ Rails.application.configure do
  
   config.force_ssl = false
 
-  config.logger = Logger.new(STDOUT) if config.logger.nil?
+  #config.logger = Logger.new(STDOUT) if config.logger.nil?
   
   # Enable/disable caching. By default caching is disabled.
   # Run rails dev:cache to toggle caching.
@@ -59,8 +59,8 @@ Rails.application.configure do
   config.active_record.migration_error = :page_load
 
   # Highlight code that triggered database queries in logs.
-  #config.active_record.verbose_query_logs = true
-  config.active_record.logger = nil
+  config.active_record.verbose_query_logs = true
+  #config.active_record.logger = nil
   
   # Suppress logger output for asset requests.
   config.assets.quiet = true

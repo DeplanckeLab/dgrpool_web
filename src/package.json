@@ -18,8 +18,8 @@
     "sass": "^1.77.4"
   },
   "scripts": {
-    "build": "esbuild app/javascript/*.* --bundle --outdir=app/assets/builds --watch &",
-    "build:css": "sass ./app/assets/stylesheets/application.bootstrap.scss:./app/assets/builds/application.css --no-source-map --load-path=node_modules --watch &"
+    "build": "esbuild app/javascript/*.* --bundle --outdir=app/assets/builds --watch=forever",
+    "build:css": "sass ./app/assets/stylesheets/application.bootstrap.scss:./app/assets/builds/application.css --no-source-map --load-path=node_modules --watch"
   },
   "devDependencies": {
     "concurrently": "^8.2.2"
