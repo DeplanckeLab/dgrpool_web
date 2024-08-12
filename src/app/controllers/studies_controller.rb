@@ -441,6 +441,10 @@ class StudiesController < ApplicationController
       @studies = Study.joins(:status).where(:status => {:name => ['submitted', 'accepted', 'integrated']})
     end
 
+    @phenotypes = Phenotype.all
+    @h_phenotypes_by_study_id = {}
+    @phenotypes.map{|p| @h_phenotypes_by_study_id[p.study_id] ||= []; @h_phenotypes_by_study_id[p.study_id].push p.id}
+    
     @h_users = {}
     User.all.map{|u| @h_users[u.id] = u}
     
@@ -454,6 +458,34 @@ class StudiesController < ApplicationController
     }
     Category.joins(:studies).select("categories.id as category_id, studies.id as study_id").map{|e| @h_cats_by_study[e.study_id]||=[]; @h_cats_by_study[e.study_id].push(e.category_id)} #.where(["study_id in (?)",  @studies.map{|s| s.id}).all #.map{|e|  @h_cats_by_study[e.study_id].push(e.category_id)}
 
+    respond_to do |format|
+      format.html { render }
+      format.json {
+        studies = @studies.map{|s|
+          study = s.attributes
+          ["pheno", "pheno_mean", "pheno_median", "pheno_sum"].each do |e|
+            study[e] = Basic.safe_parse_json(study[(e + "_json")], {})
+            study.delete(("#{e}_json"))
+          end
+	  ["authors", "pheno_json_old", "pmid", "journal_id", "status_id"].each do |e|
+            study.delete(e)
+          end
+          
+          if !admin?
+            ["submitter_id", "validator_id", "pheno", "pheno_mean", "pheno_median", "pheno_sum"].each do |e|
+              study.delete(e)
+            end
+          end
+          study["phenotype_ids"] = @h_phenotypes_by_study_id[s.id]
+          study["journal"] = (j = s.journal) ? j.name : nil
+          study["status"] = (s = s.status) ? s.label : nil
+          study
+        }
+        render :json => studies.to_json
+      }
+    end
+    
+    
   end
 
   # GET /studies/1 or /studies/1.json
@@ -511,6 +543,19 @@ class StudiesController < ApplicationController
           study[e] = Basic.safe_parse_json(study[(e + "_json")], {})
           study.delete(("#{e}_json"))
         end
+        ["authors", "pheno_json_old", "pmid", "journal_id", "status_id"].each do |e|
+          study.delete(e)
+        end
+
+        if !admin?
+          ["submitter_id", "validator_id", "pheno", "pheno_mean", "pheno_median", "pheno_sum"].each do |e|
+             study.delete(e)
+          end
+        end
+        study["phenotype_ids"] = phenotypes.map{|p| p.id}
+        study["journal"] = (j = @study.journal) ? j.name : nil
+        study["status"] = (s = @study.status) ? s.label : nil
+#        logger.debug(study.keys.to_json)
         render :json => study.to_json
       }
     end

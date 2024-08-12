@@ -1,5 +1,50 @@
 module ApplicationHelper
 
+  def shapiro_results(shapiro)
+
+    html = []
+
+    shapiro_result = (shapiro['pvalue'] <= 0.05) ? "Null Hypothesis is rejected (p<=0.05). <br/>Interpretation: <span class='badge bg-danger'>NOT NORMAL</span> distribution of this phenotype" : "Null hypothesis is not rejected (p>0.05).<br/> Interpretation: <span class='badge bg-success'>NORMAL</span> distribution of this phenotype"
+    sci_val = '%.3E' % shapiro['pvalue']
+    val = sci_val
+    if m = sci_val.to_s.match(/^(.+?)E([+-])(\d+)$/)
+      val = "#{m[1]}e<sup>" + ((m[2] == '-') ? "-" : "") + "#{m[3].to_i}</sup>"
+    end
+
+    html.push "<b>Shapiro-Wilk test of normality</b> (p-value=#{val})<br/>#{shapiro_result}<br/>"
+
+    return html.join("")
+    
+  end
+  
+  def covariate_test_results(kruskal, h_covariate_mapping)
+
+    thresholds = [0, 0.001, 0.01, 0.05, 0.1].reverse
+
+    html = []
+
+    #    html.push "<b>Kruskal-Wallis test</b>"
+    html.push "<table class='covariates mt-2'>"
+    html.push "<thead><tr><th>Covariate</th><th>&chi;<sup>2</sup></th><th>p-value</th><th>Significance</th></tr></thead>"
+    html.push "<tbody>"
+    kruskal.each do |e|
+      if e['covariate']
+        m = e['covariate'].match(/factor\((.+?)\)/)
+
+        stars = 0
+        thresholds.each_with_index do |t, i|
+          if e['pvalue'] > t
+            stars = i; break
+          end
+        end
+        html.push "<tr><td>" + link_to(m[1], phenotype_path(h_covariate_mapping[m[1]]), {:class => '', :target => '_blank'}) + "</td><td>#{e['chisquared']}</td><td>#{e['pvalue']}</td><td>" + "<i class='fa fa-star'></i>" * stars + "<i class='far fa-star'></i>" * (4-stars) + "</td></tr>" if stars > 0
+      end
+    end
+    html.push "</tbody></table>"
+
+    return html.join("")
+  end
+  
   def display_duration(total_seconds)
     minutes = total_seconds / 60
     seconds = total_seconds % 60
@@ -7,13 +52,14 @@ module ApplicationHelper
   end
   
   def display_var_type(snp_id, var_type, genes)
+    valid_genes = (genes.is_a? Array) ? genes.select{|g| g != ''} : genes.keys.select{|g| g != ''}
     html = ''
     if var_type
-      html = "<span id='transcript_annot_btn-#{snp_id}-#{var_type.name}' data-bs-toggle='tooltip' data-bs-placement='bottom' data-bs-html='true' class='transcript_annot_btn badge bg-#{var_type.impact_class}' title='#{var_type.description}'>#{var_type.name}
+      html = "<span id='transcript_annot_btn-#{snp_id}-#{var_type.name}' data-bs-toggle='tooltip' data-bs-placement='bottom' data-bs-html='true' class='badge bg-#{var_type.impact_class} #{(valid_genes.size > 0) ? 'transcript_annot_btn pointer' : ''}' title='#{var_type.description}'>#{var_type.name}
            <br/>"
-      if genes.size > 0
-        html += "<small>#{genes.first[0]}" +
-                ((genes.size > 1) ? (" & " + (genes.size-1).to_s + " other" + ((genes.size > 2) ? 's' : '')) : '') +
+      if valid_genes.size > 0
+        html += "<small>#{valid_genes[0]}" +
+                ((valid_genes.size > 1) ? (" & " + (valid_genes.size-1).to_s + " other" + ((valid_genes.size > 2) ? 's' : '')) : '') +
                 "</small>"
       end
       html += "</span>"  
@@ -159,6 +205,10 @@ module ApplicationHelper
   def display_status s, h_statuses
     status = h_statuses[s.status_id]
     return (status) ? "<div class='badge bg-#{status.css_class}'>#{status.label}</div>" : 'NA'
+  end
+    def display_status2 s, h_statuses
+    status = h_statuses[s.status_id]
+    return (status) ? status.label : 'NA'
   end
 
     def display_date(c)

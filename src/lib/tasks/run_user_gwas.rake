@@ -35,7 +35,17 @@ task run_gwas: :environment do
       cov_file = data_dir + "dgrp.cov.tsv"
       annot_file = data_dir + "dgrp.fb557.annot.txt.gz"
       File.delete(output_dir + "done") if File.exist?(output_dir + "done")
-      cmd = "/usr/bin/Rscript ./lib/running_GWAS_user.R #{tmp_file} #{plink_file} #{cov_file} #{annot_file} #{output_dir} 2 0.2 0.05 1> #{output_dir + "gwas_output.json"} 2> #{output_dir + "gwas_output.err"}"
+#      1. [Required] Path to phenotype file
+#      2. [Required] Path to PLINK genotype file prefix (bed)
+#3. [Required] Path to covariate file
+#4. [Required] Path to annotation file
+#5. [Required] Output folder path
+#6. [Required] Number of threads
+#7. [Required] Minimum genotyping ratio
+#8. [Required] Minimum MAF
+#9. [Required] Filtering threshold for p-value
+#10. [Optional] Name of phenotype to load (if file contains multiple phenotypes)
+      cmd = "/usr/bin/Rscript ./lib/running_GWAS_user.R #{tmp_file} #{plink_file} #{cov_file} #{annot_file} #{output_dir} 2 0.2 0.01 0.001 1> #{output_dir + "gwas_output.json"} 2> #{output_dir + "gwas_output.err"}"
       puts "CMD: " + cmd
       `#{cmd}`
 

@@ -63,7 +63,8 @@ class ApplicationController < ActionController::Base
   end
 
   def init_session
-     session[:gs_settings]||={:limit => 10, :free_text => ''}
+     session[:gs_settings]||={:limit => 10, :free_text => '', :search_view_type => 'list'}
+     session[:vs_settings]||={:limit => 10, :free_text => '', :search_view_type => 'list'}
      session[:history]||=[]
 #     session[:filter_gene_id]||=''
      session[:filter_gene_name]||=''

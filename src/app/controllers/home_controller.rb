@@ -6,21 +6,66 @@ class HomeController < ApplicationController
   
   def api
 
-    @fields = [[:id, :integer, "The phenotype ID"],
-               [:study_id, :integer, "The study ID"],
-               [:name, :string, "The phenotype name"],
-               [:is_summary, :boolean, "True if the original data is of a summary type (only one value per DGRP line and sex), or False in the opposite case (many samples per DGRP line and sex)"],
-               [:is_continuous, :boolean, "True if the data are numerical and continuous"],
-               [:is_numeric, :boolean, "True if the data are numeric"],
-               [:created_at, :timestamp, "Date of creation"],
-               [:updated_at, :timestamp, "Date of modification"],
-               [:summary_type, :string, "Type of the summary if is_summary is true"],
-               [:unit, :string, "The unit in which the data are expressed"],
-               [:original_data, :hash, "Original data by DGRP line and sex"],
-               [:summary_data, :hash, "Summary data by type of summary data, DGRP line and sex"],  
-               [:url, :string, "The URL where to download this resource"]
-              ]
-
+    @links = [
+      ["Gene-centric page", "https://dgrpool.epfl.ch/genes?q=[GENE_SYMBOL|GENE_NAME|FLYBASE_IDENTIFIER]", ["https://dgrpool.epfl.ch/genes?q=Arfip", "https://dgrpool.epfl.ch/genes?q=Arfaptin", "https://dgrpool.epfl.ch/genes?q=FBgn0037884"]],
+      ["Variant-centric page", "https://dgrpool.epfl.ch/variants?q=[VARIANT_IDENTIFIER|RANGE]&assembly=[dm3|dm6]", ["https://dgrpool.epfl.ch/variants?q=3R_1007_SNP&assembly=dm3", "https://dgrpool.epfl.ch/variants?q=2R:4600000-4620000&assembly=dm3"]]
+    ]
+    
+    @fields = {      
+#json.extract! dgrp_line, :id, :name, :nber_studies, :nber_phenotypes, :fbsn, :bloomington_id, :created_at, :updated_at
+#dgrp_status_id int references dgrp_statuses,
+#json.dgrp_status (ds = dgrp_line.dgrp_status) ? ds.name : nil
+#json.url dgrp_line_url(dgrp_line, format: :json)
+      :dgrp_line => [[:id, :integer, "The DGRP line ID"],
+                     [:name, :text, "The name of the DGRP line (<i>e.g.</i> DGRP_398)"],
+                     [:nber_studies, :integer, "Number of associated studies"],
+                     [:nber_phenotypes, :integer, "Number of associated phenotypes"],
+                     [:fbsn, :text, "FlyBase identifier"],
+                     [:bloomington_id, :integer, "Bloomington ID"],
+                     [:dgrp_status, :text, "DGRP status (Unavailable, Genotyped, Available)"],
+                     [:created_at, "Date of creation"],
+                     [:updated_at, :timestamp, "Date of modification"]],
+      :study => [[:id, :integer, "The study ID"],
+                 [:title, :text, "The title of the related article"],
+                 [:authors_json, :text, "List of authors in JSON format"],
+                 [:abstract, :text, "Abstract of the related article"],
+                 [:journal, :text, "Journal of the related article"],
+                 [:doi, :text, "DOI of the related article"],
+                 [:created_at, "Date of creation"],
+                 [:updated_at, :timestamp, "Date of modification"],
+                 [:status, :text, "Status of the study (accepted, integrated (curated), rejected)"],
+                 [:first_author, :text, "Last name of the first author of the study"],
+                 [:volume, :text, "Journal volume"],
+                 [:year, :text, "Journal issue"],
+                 [:published_at, :timestamp, "Date of publication of the study"],
+                 [:comment, :text, "DGRPool comment about the study"],
+                 [:flybase_ref, "text", "Flybase reference for this study"],
+                 [:description, "text", "Description of the study"],
+                 [:repository_identifiers, "text", "List of identifiers to repositories"],
+                 #                 [:pheno, "text", "JSON describing submitted phenotypic data"],
+                 #                 [:pheno_mean, "text", "JSON describing mean phenotypic data"],
+                 #                 [:pheno_median, "text", "JSON describing median phenotypic data"],
+                 #                 [:pheno_sum, "text", "JSON describing summarized phenotypic data"],
+                 [:phenotype_ids, "text", "JSON array of the phenotype IDs"]
+                 
+                ],
+      :phenotype =>
+      [[:id, :integer, "The phenotype ID"],
+       [:study_id, :integer, "The study ID"],
+       [:name, :string, "The phenotype name"],
+       [:is_summary, :boolean, "True if the original data is of a summary type (only one value per DGRP line and sex), or False in the opposite case (many samples per DGRP line and sex)"],
+       [:is_continuous, :boolean, "True if the data are numerical and continuous"],
+       [:is_numeric, :boolean, "True if the data are numeric"],
+       [:created_at, :timestamp, "Date of creation"],
+       [:updated_at, :timestamp, "Date of modification"],
+       [:summary_type, :string, "Type of the summary if is_summary is true"],
+       [:unit, :string, "The unit in which the data are expressed"],
+       [:original_data, :hash, "Original data by DGRP line and sex (only for the individual phenotype request)"],
+       [:summary_data, :hash, "Summary data by type of summary data, DGRP line and sex (only for the individual phenotype request)"],  
+       [:url, :string, "The URL where to download this resource"]
+      ]
+    }
+      
   end
   
   def get_upload_form
@@ -103,9 +148,11 @@ class HomeController < ApplicationController
 
     @h_files = {}
     @anova = {}
+    @kruskal = {}
+    @shapiro = {}
     @annot = {}
     @h_snps = {}
-    h_all_snps = {}
+    @h_all_snps = {}
     @h_gwas_results={}
     @all_snps = []
     @h_snps = {}
@@ -122,8 +169,10 @@ class HomeController < ApplicationController
         :dgrp2 => "#{prefix}.pheno.dgrp2.csv",
         :plink2 => "#{prefix}.pheno.plink2.tsv",
         :anova => "#{prefix}.cov.anova.txt",
-        #mn_Longevity_F.glm.linear.top_0.01.annot.tsv.gz
-        :annot => (File.exist?(@tmp_dir + "#{prefix}.glm.linear.top_0.01.annot.tsv.gz")) ? "#{prefix}.glm.linear.top_0.01.annot.tsv.gz" : "#{prefix}.glm.logistic.hybrid.top_0.01.annot.tsv.gz",
+        #mn_Longevity_F.glm.linear.top_0.001.annot.tsv.gz
+        :annot => (File.exist?(@tmp_dir + "#{prefix}.glm.linear.top_0.001.annot.tsv.gz")) ? "#{prefix}.glm.linear.top_0.001.annot.tsv.gz" : "#{prefix}.glm.logistic.hybrid.top_0.001.annot.tsv.gz",
+        :go_enrich => (File.exist?(@gwas_dir + "#{prefix}.glm.linear.top_0.001.gene_enrichment.go.tsv")) ? "#{prefix}.glm.linear.top_0.001.gene_enrichment.go.tsv" : "#{prefix}.glm.logistic.hybrid.top_0.001.gene_enrichment.go.tsv",
+        :flybase_pheno_enrich => (File.exist?(@gwas_dir + "#{prefix}.glm.linear.top_0.001.gene_enrichment.phenotypes.tsv")) ? "#{prefix}.glm.linear.top_0.001.gene_enrichment.phenotypes.tsv" : "#{prefix}.glm.logistic.hybrid.top_0.001.gene_enrichment.phenotypes.tsv",
         :done => "#{@md5}/done"
       }
 #      @h_md5s[s] = @md5
@@ -155,7 +204,7 @@ class HomeController < ApplicationController
 
 #      logger.debug("gwas_res:" + @h_gwas_results[s].first.to_json)
       all_snps = Snp.where(:identifier => @h_gwas_results[s].map{|e| e[2]}).all
-      all_snps.map{|s| h_all_snps[s.identifier] = s.id}
+      all_snps.map{|s| @h_all_snps[s.identifier] = s}
             @times.push([tmp = Time.now, tmp-@times.last[0]])
 
 #      logger.debug("all_snps" + all_snps.size.to_s)
@@ -181,7 +230,7 @@ class HomeController < ApplicationController
       @times.push([tmp = Time.now, tmp-@times.last[0]])
 
      @h_gwas_results[s].select!{|e|
-       snp_genes = h_snp_genes[h_all_snps[e[2]]]
+       snp_genes = h_snp_genes[@h_all_snps[e[2]].id]
        
         (session[:filter_gene_name] == '' or (snp_genes and snp_genes.map{|e| e.gene_id}.include? filter_gene_id)) and
           (session[:filter_binding_site] == '' or (@h_snps[e[2]] and @h_snps[e[2]]['binding_site_annot'] and ["TF_binding_site", "regulatory_region"].map{|k| (@h_snps[e[2]]['binding_site_annot'][k]) ? @h_snps[e[2]]['binding_site_annot'][k].keys : []}.flatten.uniq.include? session[:filter_binding_site])) and
@@ -199,10 +248,13 @@ class HomeController < ApplicationController
         
  @times.push([tmp = Time.now, tmp-@times.last[0]])
 
+ @kruskal[s] = []
+ @shapiro[s]=[]
  @anova[s]= []
       nber_lines = 0
       #      @anova_content = File.read(@gwas_dir + @h_files[s][:anova])                                                                                                                                                                
       if File.exist?(@tmp_dir + @h_files[s][:anova])
+        tmp_kruskal = ""
         File.open(@tmp_dir + @h_files[s][:anova], 'r') do |f|
           flag = 0
           while (l = f.gets) do
@@ -210,6 +262,11 @@ class HomeController < ApplicationController
               flag = 1
             elsif l.match(/^Residuals/)
               flag = 2
+             #{"shapiro"={"statistic":0.846767333431102,"pvalue":2.85529301422287e-12}}              
+            elsif m = l.chomp.match(/^{"shapiro"=(.+?)\}$/)
+              @shapiro[s] = Basic.safe_parse_json(m[1], {})
+            elsif m = l.match(/\{"covariate"\:/)
+              tmp_kruskal += l.chomp
             else
               if flag == 1
                 #                if l.match(/^factor\(.+?\).+?(.|\*)+/)                                                                                                                                                                           
@@ -232,6 +289,7 @@ class HomeController < ApplicationController
             end
           end
         end
+        @kruskal[s] = Basic.safe_parse_json(tmp_kruskal, [])
       end
       if  @anova[s].size == 0 and nber_lines == 0
         @anova[s] = nil
@@ -477,6 +535,12 @@ class HomeController < ApplicationController
   end
 
   def compute_correlation
+# Log the expected and received CSRF tokens
+    expected_token = form_authenticity_token
+    received_token = request.headers['X-CSRF-Token']
+    Rails.logger.info "Expected CSRF Token: #{expected_token}"
+    Rails.logger.info "Received CSRF Token: #{received_token}"
+
     @log = []
     #    params[:only_integrated_studies] ||= '1'
     phenotypes = [Phenotype.where(:id => params[:phenotype_id1]).first, Phenotype.where(:id => params[:phenotype_id2]).first]

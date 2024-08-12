@@ -249,11 +249,13 @@ class PhenotypesController < ApplicationController
     
     @h_files = {}
     @anova = {}
+    @kruskal = {}
+    @shapiro = {}
     @annot = {}
     @h_snps = {}
     @h_gwas_results={}
     @all_snps = []
-    h_all_snps = {}
+    @h_all_snps = {}
      
     @h_snps = {}
     @h_nber_res = {}
@@ -270,7 +272,9 @@ class PhenotypesController < ApplicationController
         :dgrp2 => "#{prefix}.pheno.dgrp2.csv",
         :plink2 => "#{prefix}.pheno.plink2.tsv",
         :anova => "#{prefix}.cov.anova.txt",
-        :annot => (File.exist?(@gwas_dir + "#{prefix}.glm.linear.top_0.01.annot.tsv.gz")) ? "#{prefix}.glm.linear.top_0.01.annot.tsv.gz" : "#{prefix}.glm.logistic.hybrid.top_0.01.annot.tsv.gz"#,
+        :annot => (File.exist?(@gwas_dir + "#{prefix}.glm.linear.top_0.001.annot.tsv.gz")) ? "#{prefix}.glm.linear.top_0.001.annot.tsv.gz" : "#{prefix}.glm.logistic.hybrid.top_0.001.annot.tsv.gz",
+        :go_enrich => (File.exist?(@gwas_dir + "#{prefix}.glm.linear.top_0.001.gene_enrichment.go.tsv")) ? "#{prefix}.glm.linear.top_0.001.gene_enrichment.go.tsv" : "#{prefix}.glm.logistic.hybrid.top_0.001.gene_enrichment.go.tsv",
+        :flybase_pheno_enrich => (File.exist?(@gwas_dir + "#{prefix}.glm.linear.top_0.001.gene_enrichment.phenotypes.tsv")) ? "#{prefix}.glm.linear.top_0.001.gene_enrichment.phenotypes.tsv" : "#{prefix}.glm.logistic.hybrid.top_0.001.gene_enrichment.phenotypes.tsv"
         #        :done => "done"
       }
       
@@ -302,7 +306,7 @@ class PhenotypesController < ApplicationController
 #      @h_snps.merge!(Basic.safe_parse_json(tmp_str, {}))
 
       all_snps = Snp.where(:identifier => @h_gwas_results[s].map{|e| e[2]}).all
-      all_snps.map{|s| h_all_snps[s.identifier] = s.id}
+      all_snps.map{|s| @h_all_snps[s.identifier] = s}
     #  @times.push([tmp = Time.now, tmp-@times.last[0]])
       
       #      logger.debug("all_snps" + all_snps.size.to_s)                                                                                                                                                   
@@ -328,7 +332,7 @@ class PhenotypesController < ApplicationController
       #@times.push([tmp = Time.now, tmp-@times.last[0]])
       
       @h_gwas_results[s].select!{|e|
-        snp_genes = h_snp_genes[h_all_snps[e[2]]]
+        snp_genes = h_snp_genes[@h_all_snps[e[2]].id]
         
         (session[:filter_gene_name] == '' or (snp_genes and snp_genes.map{|e| e.gene_id}.include? filter_gene_id)) and
           (session[:filter_binding_site] == '' or (@h_snps[e[2]] and @h_snps[e[2]]['binding_site_annot'] and ["TF_binding_site", "regulatory_region"].map{|k| (@h_snps[e[2]]['binding_site_annot'][k]) ? @h_snps[e[2]]['binding_site_annot'][k].keys : []}.flatten.uniq.include? session[:filter_binding_site])) and
@@ -362,10 +366,14 @@ class PhenotypesController < ApplicationController
       #factor(In_3R_K)  0.0206   2   0.5902 0.55604
       #factor(In_3R_Mo) 0.0552   2   1.5824 0.21033
       #Residuals        1.8306 105
+      @shapiro[s]={}
+      @kruskal[s]={}
       @anova[s]= []
 #      @anova_content = File.read(@gwas_dir + @h_files[s][:anova])
       nber_lines = 0
+
       if File.exist?(@gwas_dir + @h_files[s][:anova])
+        tmp_kruskal = ""   
         File.open(@gwas_dir + @h_files[s][:anova], 'r') do |f|
           flag = 0
           while (l = f.gets) do
@@ -373,6 +381,11 @@ class PhenotypesController < ApplicationController
               flag = 1
             elsif l.match(/^Residuals/)
               flag = 2
+              #{"shapiro"={"statistic":0.846767333431102,"pvalue":2.85529301422287e-12}}
+            elsif m = l.chomp.match(/^{"shapiro"=(.+?)\}$/)
+              @shapiro[s] = Basic.safe_parse_json(m[1], {})
+            elsif m = l.match(/\{"covariate"\:/)
+              tmp_kruskal += l.chomp
             else
               if flag == 1
 #                if l.match(/^factor\(.+?\).+?(.|\*)+/)
@@ -381,7 +394,7 @@ class PhenotypesController < ApplicationController
                   nber_lines +=1
                 end
 
-                if t[5] and n = t[5].match(/(.|\*+)$/)
+                if t[5] and n = t[5].match(/([.\*]+)/)
                   if m = t[0].match(/^factor\((.+?)\)/)
                     level = 0
                     if n[1] == '.'
@@ -396,6 +409,7 @@ class PhenotypesController < ApplicationController
             end
           end
         end
+        @kruskal[s]=Basic.safe_parse_json(tmp_kruskal, [])        
       end
       if  @anova[s].size == 0 and nber_lines == 0
         @anova[s] = nil
@@ -440,6 +454,20 @@ class PhenotypesController < ApplicationController
       dgrp_line_studies = phenotype.dgrp_line_studies if phenotype
     end
     #logger.debug("DGRP_LINE_STUDIES:" + dgrp_line_studies.map{|e| e.id}.to_json)
+
+    query = Phenotype.search do
+      fulltext params[:q].gsub(/\$\{jndi\:/, '').gsub(/[+\-"\/]/) { |c| "\\" + c }, :fields => [:name, :description, :study_authors]
+      with(:dgrp_line_ids,  dgrp_line_studies.map{|e| e.dgrp_line_id}.uniq) if params[:phenotype_id] != ''
+      with(:has_dgrp_line_studies, true)
+      with(:integrated_study, true) if params[:only_integrated_studies] == "1"
+      with(:is_numeric, true) if params[:is_numeric] == '1'
+      with(:obsolete, false)
+      #        with(:tax_id, (organisms.size > 0) ? organisms.map{|e| e.tax_id} : [])                                                                    
+      order_by("name_order", "asc") ## propose several sorts                                                                                                                                                                                                                                                    
+      paginate :page => 1, :per_page => 50
+    end
+    phenotypes = query.results
+    
     query = Phenotype.search do
       fulltext "*" + params[:q].gsub(/\$\{jndi\:/, '').gsub(/[+\-"\/]/) { |c| "\\" + c } + "*", :fields => [:name, :description, :study_authors]
       with(:dgrp_line_ids,  dgrp_line_studies.map{|e| e.dgrp_line_id}.uniq) if params[:phenotype_id] != ''
@@ -452,7 +480,7 @@ class PhenotypesController < ApplicationController
       paginate :page => 1, :per_page => 50
     end
 
-    phenotypes = query.results
+    phenotypes |= query.results
     h_res = {}
     i=0
     #Organism.where(:id => exps.map{|e| e.project_id}.uniq).all.map{|p| h_projects[p.id] = p}                                    
@@ -492,12 +520,30 @@ class PhenotypesController < ApplicationController
   
   # GET /phenotypes or /phenotypes.json
   def index
-    params[:only_curated_studies]||="1"
 
+    params[:only_curated_studies]||="1" if request.format.symbol == :html  
+
+    h_where = {}
+
+    @phenotypes = []
+    if params[:all] == '1' or curator?
+      @phenotypes = Phenotype.all
+    else
+      if params[:only_curated_studies] == "1"
+        h_where[:study] = {:status_id => 4}
+      end
+      if params[:no_obsolete] == "1"
+        h_where[:obsolete] = false
+      end
+      @phenotypes = Phenotype.joins(:study).where(h_where).all
+    end
+    #      Phenotype.joins(:study).where(:study => {:status_id => 4}).all :
+    #                     ((params[:no_obsolete] == "1") ?  
+    #                    ((params[:only_curated_studies] != '1' or params[:all] == '1') ? Phenotype.all : Phenotype.joins(:study).where(:study => {:status_id => 4}).all) :
+    #                        ((params[:only_curated_studies] != '1' or params[:all] == '1') ? Phenotype.where(:obsolete => false).all : Phenotype.joins(:study).where(:obsolete => false, :study => {:status_id => 4}).all)
     
-    @phenotypes = (params[:all] == '1' or curator?) ?
-                    ((params[:only_curated_studies] != '1' or params[:all] == '1') ? Phenotype.all : Phenotype.joins(:study).where(:study => {:status_id => 4}).all) :
-                    ((params[:only_curated_studies] != '1' or params[:all] == '1') ? Phenotype.where(:obsolete => false).all : Phenotype.joins(:study).where(:obsolete => false, :study => {:status_id => 4}).all)
+    #                     @phenotypes = 
+    
     @h_summary_types = {}
     SummaryType.all.map{|st| @h_summary_types[st.id] = st}
     @h_studies = {}
@@ -508,11 +554,11 @@ class PhenotypesController < ApplicationController
     
     #    DgrpLineStudy.select("dgrp_line_study_id, phenotype_id").joins("join dgrp_line_studies_phenotypes on (dgrp_line_studies.id = dgrp_line_study_id)").all.map{|e| @h_nber_dgrp_line_studies[e[:phenotype_id]]||=0; @h_nber_dgrp_line_studies[e[:phenotype_id]]+=1}
 
-      respond_to do |format|
-        format.html {
-          render }
-        format.json { render :json => @phenotypes }
-      end
+#      respond_to do |format|
+#        format.html {
+#          render }
+#        format.json { render :json => @phenotypes }
+#      end
       
       
       
@@ -681,10 +727,12 @@ class PhenotypesController < ApplicationController
         sex_list = @h_pheno[dgrp_line]['sex']
         tmp_h = {}
         sex_list.each_index do |sex_i|
-          val = @h_pheno[dgrp_line][@phenotype.name][sex_i]
-          if val
-            tmp_h[sex_list[sex_i]] ||= []
-            tmp_h[sex_list[sex_i]].push val
+          if @h_pheno[dgrp_line][@phenotype.name]
+            val = @h_pheno[dgrp_line][@phenotype.name][sex_i]
+            if val
+              tmp_h[sex_list[sex_i]] ||= []
+              tmp_h[sex_list[sex_i]].push val
+            end
           end
         end
         @h_original_data[dgrp_line] = tmp_h
@@ -703,7 +751,7 @@ class PhenotypesController < ApplicationController
           sex_list =  @h_pheno_sum[dgrp_line]['sex']
           tmp_h = {}
           sex_list.each_index do |sex_i|
-            if @h_pheno_sum[dgrp_line][@phenotype.id.to_s][sex_i]
+            if @h_pheno_sum[dgrp_line][@phenotype.id.to_s] and @h_pheno_sum[dgrp_line][@phenotype.id.to_s][sex_i]
               val = @h_pheno_sum[dgrp_line][@phenotype.id.to_s][sex_i][sum_type_i]
               if val
                 tmp_h[sex_list[sex_i]] ||= []

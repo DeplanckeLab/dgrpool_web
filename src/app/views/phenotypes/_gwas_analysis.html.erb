@@ -1,5 +1,5 @@
 <% filter_text = (@filter_nber and @filter_nber[sex] and @filter_nber[sex] != @h_nber_res[sex]) ? "Computed on all results" : "" %>
-
+<%# @anova[sex].to_json %>
 <%# @h_snps.to_json %>
 <%# h_files.to_json %>
 <%# output_dir + h_files[:annot] %>
@@ -28,26 +28,41 @@
 
     <div class='card'>
       <div class='card-body'>
-	<h3>Covariates
+	<div class='float-end'>
+	  <%= link_to raw("<i class='fa fa-download'></i> Full results"), get_file_study_path(@study, :namespace => download_namespace, :name => h_files[:anova]), {:target => '_blank', :class => 'btn btn-sm btn-secondary'}  %>	  
+	</div>
+	<h3>Phenotype distribution and association to known covariates
 	  <% if filter_text != '' %>
 	  <small><span class='badge bg-warning'><%= filter_text %></span></small>
 	  <% end %>
 	</h3>
 	
-	<div class='alert alert-success'>
-	  We tested for association of this phenotypes with known covariates <%= display_reference_short2(s) %>.
+	<% if @shapiro[sex] %>
+	<div class='alert alert-info mt-3'>
+	  <%= raw shapiro_results(@shapiro[sex]) %>
 	</div>
-	<% if anova and anova.size > 0 %>    
-	<div class='alert alert-warning mt-3'>      
-	 <!-- The following covariates (phenotypes from study <%= display_reference_short2(s) %>) were included in the GWAS model. -->A preliminary ANOVA association analysis was carried out to check if any of the covariates was associated with the phenotype, prior correction.
+	<% end %>
+
+	<div class='alert alert-success'>
+          We tested for association of this phenotype with <%= @h_covariate_mapping.keys.size %> known covariates <%= display_reference_short2(s) %> using
+	  both ANOVA and Kruskal-Wallis association tests.
+        </div>
+
+	<%# if anova and anova.size > 0 %>    
+	<div class='alert alert-info mt-3'>      
+	  <!-- The following covariates (phenotypes from study <%= display_reference_short2(s) %>) were included in the GWAS model. -->
+	  <!-- A preliminary ANOVA association analysis was carried out to check if any of the covariates was associated with the phenotype, prior correction. -->
+<!--	  ANOVA and Kruskal-Wallis association tests were carried out to check if any of the covariates were associated with the phenotype, prior correction.-->
 	  
 	  <div class='row'>
 	    <div class='col-5'>
-	      <table id='covariates' class='mt-2'>
+	      <b>ANOVA test</b><br/>
+	      <% if anova and anova.size > 0 %>
+	      <table id='covariates' class='covariates mt-2'>
 		<thead>
 		  <tr>
-		    <th>Phenotype</th>
-		    <th>P-value</th>
+		    <th>Covariate</th>
+		    <th>p-value</th>
 		    <th>Significance</th>
 		  </tr>
 		</thead>
@@ -61,36 +76,45 @@
 		  <% end %>
 		</tbody>
 	      </table>
-	    </div>
-	    <div class='col-5'>
-	      <%= link_to raw("<i class='fa fa-download'></i> Full covariate identification results"), get_file_study_path(@study, :namespace => download_namespace, :name => h_files[:anova]), {:target => '_blank', :class => 'btn btn-sm btn-secondary'}  %>
+	      <% else %>
+              <i>No significant result.</i>
+              <% end %>
+
 	    </div>
 	    
+	    <div class='col-5'>
+	      <b>Kruskal-Wallis test</b><br/>
+	      <% if @kruskal[sex] and @kruskal[sex].select{|e| e['pvalue'] < 0.1}.size > 0 %>
+	      <%# @kruskal[sex] %>
+	      <%= raw covariate_test_results(@kruskal[sex], @h_covariate_mapping) %>
+	      <% else %>
+	      <i>No significant result.</i>
+	      <% end %>
+	    </div>
 	  </div>
+	  <%# raw covariate_test_results(@kruskal[sex], @shapiro[sex], @h_covariate_mapping) %>
 	</div>
-	<% elsif anova and anova.size == 0 %>
+	<!--
+	<%# elsif anova and anova.size == 0 %>
 	<div class='alert alert-success mt-3'>
-	  <% if File.exist? (output_dir + h_files[:anova]) %>
+	  <%# if File.exist? (output_dir + h_files[:anova]) %>
 	  <div class='row'>
 	    <div class='col-5'>
 	      There is no covariate that is significantly associated with this phenotype.
 	    </div>
-	    <div class='col-5'>
-	      <%= link_to raw("<i class='fa fa-download'></i> Full covariate identification results"), get_file_study_path(@study, :namespace => download_namespace, :name => h_files[:anova]), {:target => '_blank', :class => 'btn btn-sm btn-secondary'}  %>
-	    </div>
-	  </div>
-	  <% else %>
+      </div>
+      <%# raw covariate_test_results(@kruskal[sex], @shapiro[sex], @h_covariate_mapping) %>
+	  <%# else %>
 	  <i>No covariate identification file found</i>
-	  <% end %>
+	  <%# end %>
 	</div>
-	<% else %>
+	<%# else %>
 	<div class='alert alert-danger mt-3'>
 	  An error occured while evaluating covariates. 
-	  <%= link_to raw("<i class='fa fa-download'></i> Full covariate identification results"), get_file_study_path(@study, :namespace => download_namespace, :name => h_files[:anova]), {:target => '_blank', :class => 'btn btn-sm btn-secondary'}  %>
-	  
 	</div>
-	<% end %>
+	<%# end %>
       </div>
+      -->
     </div>
     
     <div class='row ms-0 me-0'>
@@ -143,21 +167,28 @@
 	
 	<h3>GWAS results</h3>
 	<% if @h_nber_res[sex] > 0 %>
-
-	<div class='legend_annotations'>
-	  <b>Variant impact</b> <%= raw @h_impact.keys.map{|k| "<span class='badge bg-#{@h_impact[k]}'>#{k}</span>"}.join(" ") %>
-	</div>
-
+	
 	<div class='alert alert-success'>
 	  <% if @filter_nber and @filter_nber[sex] and @filter_nber[sex] != @h_nber_res[sex] %>
 	  <b><%= @filter_nber[sex] %></b> filtered from
 	  <% end %>
 	  <%= @h_nber_res[sex] %>
-	  significant hits at p-value < 0.01.
+	  significant hits at p-value < 0.001.
 					<% if @h_nber_res[sex] > 1000 %>
-            The 1000 top results are displayed in this table.
+            The 1000 top results are displayed in the table below.
             <% end %>
             <!--      First 1000 results over <%# nber_res %> are displayed.-->
+        </div>
+	<% if action_name == 'gwas_analysis' %>
+	<div class='alert alert-info'>
+	  We performed a gene enrichment calculation (Fisher's exact test) of all GWAS-associated genes at p < 0.001.
+													       Genesets were taken from two database: the Gene Ontology (GO) and the FlyBase phenotypes.
+													       <%= link_to "GO enrichment", get_file_study_path(@study, :namespace => download_namespace, :name => h_files[:go_enrich]),{:id=>'go_enrichment_btn', :class=>'btn bg-primary'} %>
+            <%= link_to "FlyBase phenotype enrichment", get_file_study_path(@study, :namespace => download_namespace, :name => h_files[:flybase_pheno_enrich]), {:id=>'go_enrichment_btn', :class=>'btn bg-primary'} %>
+	</div>
+	<% end %>
+	<div class='legend_annotations'>
+          <b>Variant impact</b> <%= raw @h_impact.keys.map{|k| "<span class='badge bg-#{@h_impact[k]}'>#{k}</span>"}.join(" ") %>
         </div>
 	
 	<table id='gwas_res_<%= sex %>' width="100%" class='gwas_res_table table-striped mt-3'>
@@ -181,7 +212,9 @@
 	     <tr>
 	      <td><%= t[0] %></td>
 	      <td><%= t[1] %></td>
-	      <td><%= t[2] %></td>
+	      <td><span class='nowrap'><%= t[2] %> [dm3]</span>
+		<span class='nowrap'><%= link_to @h_all_snps[t[2]].identifier_dm6, "http://flybase.org/jbrowse/?data=data%2Fjson%2Fdmel&loc=#{t[0]}%3A#{t[1].to_i-50}..#{t[1].to_i+50}&tracks=Gene_span%2CGene%2Cdgrp_r6%2Csequence_variant&highlight=", :target => '_blank' %> [dm6]</span>
+	      </td>
               <td><small>
 		  <%= display_variant(t[3]) %>
 	      </small></td>
@@ -222,7 +255,7 @@
 
          var gwas_table = $('#gwas_res_<%= sex %>').DataTable({
         pageLength:100,
-        order : [[6, 'asc']]
+        order : [[5, 'asc']]
                                    })
 //	   })
 

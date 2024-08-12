@@ -21,7 +21,7 @@ task load_phewas: :environment do
     h_sex.keys.select{|e| p_attr['nber_sex_' + h_sex[e]] > 0}.each do |s|
       prefix = "S#{study.id}_#{p.id}_#{s}"
       
-      annot_file = (File.exist?(gwas_dir + "#{prefix}.glm.linear.top_0.01.annot.tsv.gz")) ? "#{prefix}.glm.linear.top_0.01.annot.tsv.gz" : "#{prefix}.glm.logistic.hybrid.top_0.01.annot.tsv.gz"
+      annot_file = (File.exist?(gwas_dir + "#{prefix}.glm.linear.top_0.001.annot.tsv.gz")) ? "#{prefix}.glm.linear.top_0.001.annot.tsv.gz" : "#{prefix}.glm.logistic.hybrid.top_0.01.annot.tsv.gz"
 
       # puts annot_file
       if File.exist? gwas_dir + annot_file

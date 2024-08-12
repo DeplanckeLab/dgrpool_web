@@ -1,0 +1,48 @@
+
+<% if @snps.size > 1000 %>
+<div class='alert bg-danger'>
+  More than 1000 variants found (<%= @snps.size %>)), please constraint more this request.
+</div>
+<% else %>
+<h4 class='mt-3'><%= @snps.size %> variants found</h4>
+
+<%= render :partial => 'list_snps', :locals => {:h_var_types => h_var_types, :h_snps => h_snps, :h_snp_info => h_snp_info}  %>
+<% end %>
+
+
+<div id='gwas_results_container' class='mt-3'>
+  
+<%# if @snps.size > 100 %>
+
+<!--<div class='alert bg-danger'>
+  Cannot display GWAS results for than 100 variants.
+</div>-->
+<%# else %>
+<% if h_snps.size > 0 %>
+<h4 class='mt-3'>GWAS results (PheWAS)</h4>
+
+<% if @gwas_results.size > 1000 %>
+<div class='alert alert-warning'>
+  <div class='float-end'>
+    <button id='download_all_btn' type='button' class='btn btn-secondary'><i class='fa fa-download'></i> Download all</button>
+  </div>
+  Showing top 1000 results (out of <%= @gwas_results.size %> across all studies at raw p-value < 0.001 cutoff). <br/><b>Note: </b>p-value is not adjusted.
+</div>
+
+<% else %>
+<div class='alert alert-success'>
+  <div class='float-end'>
+    <button id='download_all_btn' type='button' class='btn btn-secondary'><i class='fa fa-download'></i> Download all</button>
+  </div>
+  <%= @gwas_results.size %> results across all studies at raw p-value < 0.001 cutoff. <br/><b>Note:</b> p-value is not adjusted.
+								</div>
+
+<%= render :partial => 'list_gwas_results', :locals => {:h_studies => h_studies, :h_var_types => h_var_types, :gwas_results => gwas_results, :h_snps => h_snps, :h_snp_info => h_snp_info, :h_genes => h_genes, :h_phenotypes => h_phenotypes, :h_snp_genes => h_snp_genes} %>
+<% end %>
+
+    <% end %>
+</div>
+
+ <%= javascript_tag do %>
+ $("#ontop_window").addClass("hidden")
+ <% end %>

@@ -1,14 +1,13 @@
 <p style="color: green"><%= notice %></p>
 
-<h1>Snps</h1>
+<div id='search_container' class=''></div>
 
-<div id="snps">
-  <% @snps.each do |snp| %>
-    <%= render snp %>
-    <p>
-      <%= link_to "Show this snp", snp %>
-    </p>
-  <% end %>
-</div>
+<%= javascript_tag do %>
 
-<%= link_to "New snp", new_snp_path %>
+//document.addEventListener('DOMContentLoaded', function () {
+
+refresh("search_container", "<%= search_snps_path(:nolayout => 1) %>", {loading:'fa-2x'})
+
+//})
+
+<% end %>

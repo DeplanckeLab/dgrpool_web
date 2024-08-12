@@ -7,6 +7,7 @@ Rails.application.routes.draw do
     collection do
       get :autocomplete
       get :search
+      get :get_search
       post :do_search
       post :set_search_session
     end
@@ -25,7 +26,16 @@ Rails.application.routes.draw do
     end
   end
   resources :snps do
-    get :get_phewas
+     collection do
+      get :search
+      get :get_search
+      post :do_search
+      post :set_search_session
+    #  get :get_phewas
+     end
+     member do
+        get :get_phewas
+     end
   end
   resources :units
   resources :uploads
@@ -93,7 +103,8 @@ Rails.application.routes.draw do
   match '/pheno_correlation' => 'home#pheno_correlation', :via => [:get]
   match '/compute_correlation' => 'home#compute_correlation', :via => [:post]
   match '/gwas_analysis' => 'home#gwas_analysis', :via => [:get]
-
+  match '/variants' => 'snps#index', :via => [:get]
+  
   root "home#welcome"
 
 

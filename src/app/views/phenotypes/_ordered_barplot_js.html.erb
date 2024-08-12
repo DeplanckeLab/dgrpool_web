@@ -30,7 +30,10 @@ if (font_size < 6)
 if (font_size > 12)
  font_size = 12 
 
-var width = (font_size+1) * dgrp_lines.length
+//  console.log(((font_size+1) * dgrp_lines.length, $(window).width()-100))
+//var width = Math.max((font_size+1) * dgrp_lines.length, $(window).width()-100)
+  console.log(((font_size+1) * dgrp_lines.length, $("#container_ordered_barplot").width()-50))
+  var width = Math.max((font_size+1) * dgrp_lines.length, $("#container_ordered_barplot").width()-100)
   
   var layout = {
   width : width,

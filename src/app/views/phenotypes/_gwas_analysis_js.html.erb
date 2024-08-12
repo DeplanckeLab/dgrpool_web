@@ -62,7 +62,7 @@ var bsa_table = $('<table width="750">');
 			      var t = this.id.split("-")
 			      var w = $(window).width()
 			      var h = $(window).height()
-			      var ww = 800 
+			      var ww = 900 
 			      var snp_id = t[1]
 			      var var_type = t[2]
 			      if (h_snps[snp_id] && h_snps[snp_id]['transcript_annot']){
@@ -70,7 +70,8 @@ var bsa_table = $('<table width="750">');
 			      var genes = Object.keys(h_ta)
 			      
 			      $("#ontop_popup_container2").css({
-			      height:h-240
+			      height:h-240,
+			      overflow:"auto"
 			      })
 			      $("#ontop_popup_window2").css({
 			      left: 240,
@@ -79,10 +80,23 @@ var bsa_table = $('<table width="750">');
 			      top: 100
 			      }).show(0)
 			      
-			      var ta_table = $('<table width="750">');
+			      var ta_table = $('<table width="750" class="gene_list">');
+			      var row = $('<tr>').addClass('')
+			      var cell = $('<th>').text("Gene symbol")
+			      row.append(cell)
+			      cell = $('<th>').html("Gene details<br/>(orthologs, FlyBase phenotypes, <i>etc...</i>)")
+                              row.append(cell)
+			      cell = $('<th>').text("List of transcripts")
+                              row.append(cell)
+			      ta_table.append(row); 
 			      for(i=0; i<genes.length; i++){
-						       var row = $('<tr>').addClass('') 
+						       var row = $('<tr>').addClass('')
 						       var cell = $('<td>').text(genes[i])
+						       row.append(cell)
+						       var link = $('<a class="" target="_blank" href="<%= genes_path() %>?gene_name=' + genes[i] + '">Link</a>')
+
+						       cell = $('<td>')
+						       cell.append(link)
 				   row.append(cell)
 				   var cell = $('<td>')
 				   for(j=0; j<h_ta[genes[i]].length; j++){
@@ -99,7 +113,7 @@ var bsa_table = $('<table width="750">');
     ta_table.append(row);
    }
 
-        $("#ontop_popup_container2").html(ta_table)
+        $("#ontop_popup_container2").html("<b>List of involved genes with impact " + var_type + "</b><br/><br/>").append(ta_table)
 
 //        $("#ontop_popup_window2").show(0);
 								     }else{

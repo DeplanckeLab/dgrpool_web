@@ -8,7 +8,7 @@ $lightgreen: #90EE90;
 @import 'jquery-ui';
 //@import 'tooltipster.bundle.min';
 
-body {margin:15px; margin-top:60px; margin-bottom:60px}
+body {margin:150px; margin-top:60px; margin-bottom:60px}
 
 .desc_table tr td {padding:5px}
 .navbar-nav {background-color:rgba(var(--bs-light-rgb), var(--bs-bg-opacity))}
@@ -116,7 +116,7 @@ body {margin:15px; margin-top:60px; margin-bottom:60px}
 }
 
 #ontop_popup_container2 {
-overflow:scroll
+overflow:auto
 }
 
 #ontop_popup_window3 {
@@ -143,6 +143,12 @@ overflow:scroll
 #corr_table {font-size:.7em}
 #phenotypes {font-size:.8em}
 #studies {font-size:.8em}
-#covariates tr th {border: 1px solid black; padding:.5em}
-#covariates tr td {border: 1px solid black; padding:.5em}
+.covariates tr th {border: 1px solid black; padding:.5em}
+.covariates tr td {border: 1px solid black; padding:.5em}
+.gene_list tr th {border: 1px solid black; padding:.5em}
+.gene_list tr td {border: 1px solid black; padding:.5em}
 .gwas_res_table {font-size: 12px}
+
+#container_ordered_barplot .card-body {overflow-y:scroll}
+#container_ordered_boxplot .card-body {overflow-y:scroll}
+#container_ordered_plot .card-body {overflow-y:scroll}

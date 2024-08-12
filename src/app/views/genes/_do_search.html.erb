@@ -1,37 +1,60 @@
-<h4 class=''> SNP records (<%= @snp_genes.total_entries %> of <%= @h_counts[:all] %>) </h4>
+<% if @not_found.size > 0 %>
 
-<% if @snp_genes.total_entries > 2000 %>
-<div class='alert alert-danger'>Only 2000 first results are shown. Please restrict your request.</div>
+<div class= 'alert alert-danger'>
+  The following gene names or identifiers were not found: <%= @not_found.join(", ") %>
+</div>
+
 <% end %>
 
-<!--
-<div class='float-right'>
-  <div class='float-left mr-1 pt-2'><span class=''>Page</span></div>
-  <div class='float-left'>
-    <%= text_field_tag 'article_page', session[:gs_settings][:page], {:class => 'form-control mr-2 gene_page', :style => 'width:60px'} %>
-  </div>
-  <div class='float-left'>
-    <div class="input-group btn-group" role="group" aria-label="nav_search_btns">
-      <button id='gene_prev_btn' type="button" class="gene_page_nav-btn btn btn-outline-primary" <%= "disabled='disabled'" if session[:gs_settings][:page] ==1 %>><i class="fas fa-chevron-left"></i> Prev page</button>
-      <button id='gene_next_btn' type="button" class="gene_page_nav-btn btn btn-outline-primary" <%= "disabled='disabled'" if session[:gs_settings][:page] == (@snp_genes.total_entries.to_i / session[:gs_settings][:per_page].to_i ).round + 1 %>>Next page <i class="fas fa-chevron-right"></i></button>
-    </div>
-  </div>
-</div>
-<% l = [5, 25, 50, 100, 500].map{|e| ["#{e} results per page", e]} %>
-<%= select_tag 'gene_per_page', options_for_select(l, session[:gs_settings][:per_page] || 5), {:class => 'form-control col-md-2 per_page'} %>
--->
+<% if @h_genes.keys.size > 0 %>
+<!--<h4 class=''> GWAS results (<%= @gwas_results.size %>)</h4>-->
+<%= render :partial => 'gene_details' %>
 
-<%= hidden_field_tag 'gene_total', @snp_genes.total_entries %>
+<%= render :partial => 'oma_orthologs' %>
+
+<%= render :partial => 'flybase_orthologs' %>
+
+<%= render :partial => 'list_flybase_alleles' %>
+
+<h4 class='mt-3'>GWAS results</h4>
+
+<% if @gwas_results.size > 1000 %>
+<div class='alert alert-warning'>
+  <div class='float-end'>
+    <button id='download_all_btn' type='button' class='btn btn-secondary'><i class='fa fa-download'></i> Download all</button>
+  </div>
+  Showing top 1000 results (out of <%= @gwas_results.size %> across all studies at raw p-value < 0.001 cutoff). <br/><b>Note: </b>p-value is not adjusted.
+</div>
+<% else %>
+<div class='alert alert-success'>
+  <div class='float-end'>
+    <button id='download_all_btn' type='button' class='btn btn-secondary'><i class='fa fa-download'></i> Download all</button>
+  </div>  
+  <%= @gwas_results.size %> results across all studies at raw p-value < 0.001 cutoff. <br/><b>Note:</b> p-value is not adjusted.
+</div>
+
+<% end %>
+<%# @h_snps.to_json %>
+
+<%# hidden_field_tag 'gene_total', @snp_genes.total_entries %>
 <%= hidden_field_tag 'gene_gene_ids', @snp_genes.map{|p| p.id}.join(",") %>
 
-<%= render :partial => ("search_" + session[:gs_settings][:search_view_type] + "_view"), :locals => {:snp_genes => @snp_genes, :type => ''} %>
+<%= render :partial => ("search_" + session[:gs_settings][:search_view_type] + "_view"), :locals => {:h_studies => @h_studies, :h_var_types => @h_var_types, :h_phenotypes => @h_phenotypes, :h_genes => @h_genes, :h_snps => @h_snps, :h_snp_info => @h_snp_info, :h_snp_genes => @h_snp_genes, :gwas_results => @gwas_results, :type => ''} %>
 
-</div>
+
 
 <%= javascript_tag do %>
 
- document.addEventListener('DOMContentLoaded', function () {
+$("#download_all_btn").click(function(){
+var q = $("#gene_free_text").val()
+var link = "<%= raw get_search_genes_path() %>?q=" + q
+console.log(link)
+console.log(q.replace(" ", "_"))
+window.download_from_link(link, 'gwas_results_genes_' + q.replace(" ", "_") + ".tsv")
+})
 
+
+document.addEventListener('DOMContentLoaded', function () {
 
 $("#gene_per_page").change(function(){
  var t = this.id.split("_")
@@ -75,7 +98,9 @@ $(".gene_page").keyup(function(e){
  }
 })
 
-					    })
+})
 
 <% end %>
 
+
+<% end %>

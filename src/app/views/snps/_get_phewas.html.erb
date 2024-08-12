@@ -1,8 +1,11 @@
 <h3><%=  @gwas_results.size %> results for variant <%= @snp.identifier %></h3>
 
 <div class='alert alert-info'>
-These results were computed across all phenotypes on DGRPool. We display only p-values <= 0.01
+These results were computed across all phenotypes on DGRPool. We display only p-values <= 0.001
 </div>
+
+<%= check_box_tag 'only_curated', '1', true %> Only curated studies
+<!--<%# check_box_tag 'exclude_obsolete', '1', true %> Exclude obsolete phenotypes-->
 
 <table>
   <thead>
@@ -31,6 +34,8 @@ These results were computed across all phenotypes on DGRPool. We display only p-
   <thead>
     <tr>
       <th>Phenotype</th>
+<!--      <th>Curated study?</th>-->
+      <th>Obsolete phenotype?</th>
       <th>Study</th>
       <th>Study status</th>
       <th>p-value</th>
@@ -40,11 +45,13 @@ These results were computed across all phenotypes on DGRPool. We display only p-
   <tbody>
 
     <% @gwas_results.each do |gwas_result| %>
-
+    <% p = @h_phenotypes[gwas_result.phenotype_id] %>
     <tr>
-      <td><%= raw (@h_phenotypes[gwas_result.phenotype_id]) ? display_phenotype(@h_phenotypes[gwas_result.phenotype_id]) : "NA #{gwas_result.phenotype_id}" %></td>
-      <td><%= raw (@h_phenotypes[gwas_result.phenotype_id]) ? display_reference(@h_studies[@h_phenotypes[gwas_result.phenotype_id].study_id]) : 'NA' %></td>
-      <td><%= raw (@h_phenotypes[gwas_result.phenotype_id]) ? display_status(@h_studies[@h_phenotypes[gwas_result.phenotype_id].study_id], @h_statuses) : 'NA' %></td>
+      <td><%= raw (p) ? display_phenotype(p) : "NA #{gwas_result.phenotype_id}" %></td>
+      <!--<td><%= (p) ? ((s = @h_studies[p.study_id]) ? display_status2(s, @h_statuses) : '-') : '-' %></th>-->
+      <td><%= (p) ? ((p.obsolete == true) ? 'Yes' : 'No') : '-' %></td>
+      <td><%= raw (p) ? display_reference(@h_studies[p.study_id]) : 'NA' %></td>
+      <td><%= raw (p) ? display_status(@h_studies[p.study_id], @h_statuses) : 'NA' %></td>
       <td><%= raw display_corr_num(2, gwas_result.p_val) %></td>
   <!--    <td><%=  raw display_corr_num(2, gwas_result.fdr) %></td> -->
     </tr>
@@ -63,11 +70,31 @@ These results were computed across all phenotypes on DGRPool. We display only p-
   })
 */
 
- $("#phewas_table").DataTable({
+ var table = $("#phewas_table").DataTable({
         pageLength:100,
-        order : [[3, 'asc']]
+        order : [[4, 'asc']]
         })
 
+$("#only_curated").click(function(){
+if ($(this).prop("checked") == true){
+table.column(3).search('Curated').draw();
+}else{
+table.column(3).search('').draw();
+}
+
+})
+
+$("#exclude_obsolete").click(function(){
+//var val = ($(this).prop("checked") == 'true') ? 'No' : 'Yes'
+if ($(this).prop("checked") == true){
+table.column(1).search('No').draw();
+}else{
+table.column(1).search('').draw();
+}
+})
+
      initTooltips();
+
+table.column(3).search('Curated').draw()
 
 <% end %>

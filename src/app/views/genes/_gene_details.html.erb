@@ -17,8 +17,10 @@
       <td><%= g.name %></td>
       <td><%= g.full_name %></td>
       <td>
-	<% g.synonyms.split("|").each do |s| %>
+	<% if synonyms = g.synonyms %>
+	<% synonyms.split("|").each do |s| %>
 	<span class='badge bg-primary'><%= s %></span>
+	<% end %>
 	<% end %>
       </td>
       <td><% summaries = Basic.safe_parse_json(g.summary_json, {}) %>

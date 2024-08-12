@@ -1,0 +1,49 @@
+<table id='list_snps' class="gwas_res_table table-striped" width='100%'>
+  <thead>
+    <tr>
+      <th>Identifier</th>
+      <th>Chromosome</th>
+      <th>Position dm3</th>
+      <th>Position dm6</th>
+      <th>From</th>
+      <th>To</th>
+      <th>Transcript annotation</th>
+      <th>Binding site annotation</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% @snps.each do |snp| %>
+    <tr>
+      <td><span class='nowrap'><%= h_snps[snp.id].identifier %> [dm3]</span><br/>
+         <% if h_snps[snp.id].identifier_dm6 %>
+         <% t = h_snps[snp.id].identifier_dm6.split("_") %>
+         <span class='nowrap'><%= link_to h_snps[snp.id].identifier_dm6, "http://flybase.org/jbrowse/?data=data%2Fjson%2Fdmel&loc=#{t[0]}%3A#{t[1].to_i-50}..#{t[1].to_i+50}&tracks=Gene_span%2CGene%2Cdgrp_r6%2Csequence_variant&highlight=", :target => '_blank' %> [dm6]</span>
+         <% end %></td>
+      <td><%= snp.chr %></td>
+      <td><%= snp.pos %></td>
+      <td><%= snp.pos_dm6 %></td>
+      <td><%= raw display_variant(snp.ref) %></td>
+      <td><%= raw display_variant(snp.alt) %></td>
+      <td><% if h_snp_info[h_snps[snp.id].identifier] %>
+        <%# raw h_snp_info[h_snps[snp.id].identifier]['transcript_annot'].to_json %>
+        <%= raw h_snp_info[h_snps[snp.id].identifier]['transcript_annot'].keys.map{|k| display_var_type(h_snps[snp.id].identifier, h_var_types[k], h_snp_info[h_snps[snp.id].identifier]['transcript_annot'][k])}.join("<br/>") %>
+        <% end %>
+      </td>
+       <td><% if h_snp_info[h_snps[snp.id].identifier] %>
+         <% h_snp_info[h_snps[snp.id].identifier]['binding_site_annot'].each_key do |k| %>
+         <b><%= k.gsub("_", " ") %></b>
+         <small><%= raw h_snp_info[h_snps[snp.id].identifier]['binding_site_annot'][k].map{|e| "<span id='binding_site_annot_btn-" + h_snps[snp.id].identifier + "-" + k + "-" + e[0] + "' class='pointer badge bg-success binding_site_annot_btn'>#{e[0]}</span>"}.join(" ") %></small>
+         <br/><% end %>
+         <% end %>
+       </td>
+
+    </tr>
+    <% end %>
+  </tbody>  
+</table>
+
+<%= javascript_tag do %>
+
+$("#list_snps").DataTable({})
+
+<% end %>

@@ -18,8 +18,11 @@
     <tr>
       <th>Gene name</th>
       <th>Variant ID</th>
+      <th>Ref</th>
+      <th>Alt</th>
       <th>Variant type</th>
       <th>Phenotype</th>
+      <th>Study</th>
       <th>Sex</th>
       <th>p-value</th>
       <th>Transcript annotation</th>
@@ -31,17 +34,19 @@
      <% gwas_results.sort{|a, b| a.p_val <=> b.p_val}.first(1000).each do |gr| %>
      <tr>
        <td><%= h_genes[h_snp_genes[gr.snp_id].gene_id].name %></td>
-       <td><%= h_snps[gr.snp_id].identifier %> [dm3]<br/>
+       <td><span class='nowrap'><%= h_snps[gr.snp_id].identifier %> [dm3]</span><br/>
 	 <% if h_snps[gr.snp_id].identifier_dm6 %>
 	 <% t = h_snps[gr.snp_id].identifier_dm6.split("_") %>
-	 <%= link_to h_snps[gr.snp_id].identifier_dm6, "http://flybase.org/jbrowse/?data=data%2Fjson%2Fdmel&loc=#{t[0]}%3A#{t[1].to_i-50}..#{t[1].to_i+50}&tracks=Gene_span%2CGene%2Cdgrp_r6%2Csequence_variant&highlight=", :target => '_blank' %> [dm6]
+	 <span class='nowrap'><%= link_to h_snps[gr.snp_id].identifier_dm6, "http://flybase.org/jbrowse/?data=data%2Fjson%2Fdmel&loc=#{t[0]}%3A#{t[1].to_i-50}..#{t[1].to_i+50}&tracks=Gene_span%2CGene%2Cdgrp_r6%2Csequence_variant&highlight=", :target => '_blank' %> [dm6]</span>
 	 <% end %>
        </td>
+       <td><%= raw display_variant(h_snps[gr.snp_id].ref) %></td>
+       <td><%= raw display_variant(h_snps[gr.snp_id].alt) %></td>
        <td><%= vt = h_var_types[h_snp_genes[gr.snp_id].var_type_id]; raw display_var_type(gr.snp_id, vt, []) %></td><%# @h_snp_info[gr.snp_id]['transcript_annot'][k] %>
        <td>
 	 <%= raw display_phenotype h_phenotypes[gr.phenotype_id] %>
 	 <%# (gr.phenotype_id) ? link_to(h_phenotypes[gr.phenotype_id].name, raw(phenotype_path(gr.phenotype_id)), {:target => '_blank'}) : gr.phenotype_id %>
-	 <br/>
+       </td><td>
 	 <%= raw (h_phenotypes[gr.phenotype_id]) ? display_reference_short2(h_studies[h_phenotypes[gr.phenotype_id].study_id]) : '' %>
        </td>
        <td><%= gr.sex %></td>
@@ -78,7 +83,7 @@ $("#filter_container").toggleClass("hidden")
 
 window.initTooltips()
 
-$("#gwas_results").DataTable({order : [[5, 'asc']]})
+$("#gwas_results").DataTable({order : [[8, 'asc']]})
 
 <%= render :partial => 'phenotypes/gwas_analysis_js', :locals => {:h_snps => @h_snp_info, :phenotype => nil} %>
 

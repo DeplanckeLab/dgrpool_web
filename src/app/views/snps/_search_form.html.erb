@@ -1,0 +1,125 @@
+<div class="container">
+  <div class='row justify-content-md-center'>
+    <div class='col-md-4  mb-2'>
+      <div class="input-group btn-group" role="group" aria-label="Search">
+      <div class='mt-2 me-3'>Assembly</div>
+      <% l = ['dm3', 'dm6'] %>
+      <%= select_tag 'assembly', options_for_select(l, session[:vs_settings][:assembly]), :class => 'form-control' %>
+      </div>
+    </div>
+    <div class='col-md-7  mb-2'>
+      <div class="input-group btn-group" role="group" aria-label="Search">
+        <%= text_field_tag 'variant_free_text', session[:vs_settings][:free_text] || '', {:size => 30, :class => "form-control", :placeholder => "Search"} %>
+        <button id='variant_search-btn' type="button" class="btn btn-primary"><i class="fas fa-search"></i> Search</button>
+      </div>
+      <br/>
+      <div id='variant_search-message' class='search_helper'><i>i.e.</i>
+	<%= link_to "3R_1007_SNP", snps_path(:assembly => 'dm3', :q => '3R_1007_SNP') %>
+	<i>or</i>
+	<%= link_to "2R:4600000-4620000", snps_path(:assembly => 'dm3', :q => '2R:4600000-4620000').gsub('%3A', ':') %>
+      </div>
+    </div>
+  </div>
+  <%= hidden_field_tag 'variant_search_view_type', session[:vs_settings][:search_view_type] %>
+</div>
+
+
+
+<div id='variant_search_results' class="m-4"></div>
+
+<%= javascript_tag do  %>
+
+//  document.addEventListener('DOMContentLoaded', function () {
+
+
+$(".variant_search_view_btn").click(function(){
+ var v = this.id.split("_")[0]
+ var l = ['card', 'list']
+ if (v != $("#variant_search_view_type").val()){
+  // console.log("v")
+   $("#variant_search_view_type").val(v)
+   for (var i=0; i< l.length; i++){
+    // console.log("remove " + l[i])
+     $("#variant_" + l[i] + "_view_btn").removeClass("btn-success")
+     $("#variant_" + l[i] + "_view_btn").addClass("btn-outline-success")
+   }
+   $("#variant_" + v + "_view_btn").addClass("btn-success")
+   $("#variant_" + v + "_view_btn").removeClass("btn-outline-success")
+   var p = [{name : 'free_text', value : $("#variant_free_text").val()}]
+   var h = {loading:'fa-2x'}
+   variant_search(p, h)
+ }
+})
+
+<% if params[:q] %>
+ $("#variant_free_text").val('<%= params[:q] %>')
+<% end %>
+
+<% if params[:assembly] %>
+ $("#assembly").val('<%= params[:assembly] %>')
+<% end %>
+
+function variant_search(p, h) {
+ if (p.length > 0 && p[0].name == 'auto'){ // refresh without input if auto
+  h.not_upd_if_empty = 1
+ }
+ if ($("#variant_search_results").html() != ''){
+  var fields = ['per_page', 'page', 'search_view_type']
+  for (var i=0; i< fields.length; i++){
+   p.push({name : fields[i], value : $("#variant_" + fields[i]).val()})
+  }
+ }
+ <% if workspace_key = params[:workspace_key] %>
+   p.push({name : "workspace_key", value : "<%= workspace_key %>"})
+ <% end %>
+
+ p.push({name: 'assembly', value: $("#assembly").val()})
+ 
+ console.log("do_search")
+ if ($("#variant_free_text").val() != ''){
+ refresh_post("variant_search_results", "<%= do_search_snps_path() %>", p, 'post', h);
+ }else{
+// $("#variant_search_results").html("<div class='alert alert-danger'>\
+//  Please enter one or several variant ID (<i>e.g.</i> ) or a chromosomic coordinate range (<i>e.g.</i> )).\
+//</div>") 
+ }
+}
+
+function variant_init_search(){
+  $("#variant_page").val(1)
+}
+
+$("#assembly").change(function(){
+  variant_init_search()
+  var p = [{name : 'free_text', value : $("#variant_free_text").val()}]
+  var h = {loading:'fa-2x'}
+  variant_search(p, h)
+})
+ 
+$("#variant_search-btn").click(function(){
+  variant_init_search()
+  console.log("bla")
+  var p = [{name : 'free_text', value : $("#variant_free_text").val()}]
+  var h = {loading:'fa-2x'}
+  variant_search(p, h)
+})
+ 
+$("#variant_free_text").keyup(function(e){
+ // console.log("KEY:" + e.key)
+ if (e.key == 'Enter'){
+  variant_init_search()
+  var p = [{name : 'free_text', value : $("#variant_free_text").val()}]
+  var h = {loading:'fa-2x'}
+  variant_search(p, h)
+ }
+})
+
+ $(document).ready(function(){
+var p = [{name : 'free_text', value : $("#variant_free_text").val()}]
+var h = {loading:'fa-2x'}
+variant_search(p, h)
+})
+
+//})
+
+<% end %>

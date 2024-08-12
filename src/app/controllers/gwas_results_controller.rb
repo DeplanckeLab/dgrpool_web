@@ -176,6 +176,7 @@ class GwasResultsController < ApplicationController
   
   # GET /gwas_results or /gwas_results.json
   def index
+    session[:gs_settings][:free_text] = params[:gene_name]  if params[:gene_name]
 #    @gwas_results = GwasResult.all
   end
 

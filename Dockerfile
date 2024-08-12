@@ -21,6 +21,10 @@ RUN apk add  R \
     libjpeg-turbo-dev \
     libxt-dev \
     openblas-dev\
+    cairo-dev \
+    pango-dev \
+    gdk-pixbuf-dev \
+    musl-dev \
     postgresql-dev git build-base nodejs npm yarn busybox-extras curl wget openjdk8-jre less gzip unzip
 
 RUN echo 'toto'
@@ -45,6 +49,9 @@ RUN Rscript -e "BiocManager::install('ramwas')"
 
 # Install R.utils package
 RUN Rscript -e "install.packages('R.utils', repos='https://cloud.r-project.org')"
+
+# Install the Cairo package in R
+RUN R -e "install.packages('Cairo', repos='http://cran.r-project.org')"
 
 # Verify R installation
 RUN R --version

@@ -1,44 +1,180 @@
-<h4>API</h4>
+<h4>API & links</h4>
 
-<div class='card'>
+<div class='card mt-3'>
+  <div class='card-body'>
+
+      <h5>Useful links</h5>
+
+      <table class='desc_table table-striped'>
+        <thead>
+	  <th>Description</th>
+	  <th>URL template</th>
+	  <th>URL examples</th>
+	</thead>
+	<tbody>
+	  <% @links.each do |l| %>
+	  <tr>
+	    <td><%= l[0] %></td>
+	    <td><%= l[1] %></td>
+	    <td>
+	      <% l[2].each do |e| %>
+	      <%= link_to e, e %><br/>
+	      <% end %>
+	    </td>
+	  </tr>
+	  <% end %>
+	</tbody>
+      </table>
+  </div>
+</div>
+      
+
+<div class='card mt-3'>
+  <div class='card-body'>
+
+      <h5>DGRP line data</h5>
+
+      Get data associated to a DGRP line
+      <code>
+        https://dgrpool.epfl.ch/dgrp_line/#ID.json
+      </code>
+      <br/>
+      For example:
+
+      <code>
+        <%= link_to "https://dgrpool.epfl.ch/dgrp_lines/230.json", dgrp_line_path(230, :format => :json, :target => "_blank") %>
+      </code>
+      <br/><br/>
+      or the list of all DGRP lines:
+      <code>
+        https://dgrpool.epfl.ch/dgrp_lines.json
+      </code>
+      <br/><br/>      
+      The available fields:
+      <table class='desc_table table-striped'>
+        <thead>
+          <!--  <th>Index</th>-->
+          <th>Field name</th>
+          <th>Type</th>
+          <th>Description</th>
+        </thead>
+        <tbody>
+          <% @fields[:dgrp_line].each_with_index do |f, i| %>
+          <tr>
+            <!--      <td><%= i+1 %></td> -->
+            <td><%= f[0] %></td>
+            <td><%= f[1] %></td>
+            <td><%= raw f[2] %></td>
+          </tr>
+          <% end %>
+        </tbody>
+      </table>
+
+  </div>
+</div>
+
+
+<div class='card mt-3'>
+  <div class='card-body'>
+
+      <h5>Study data</h5>
+      
+      Get data associated to a study
+      <code>
+	https://dgrpool.epfl.ch/studies/#ID.json
+      </code>
+      <br/>
+      For example:
+      
+      <code>
+	<%= link_to "https://dgrpool.epfl.ch/studies/22.json", study_path(22, :format => :json, :target => "_blank") %>
+      </code>
+      <br/></br>
+      or the list of all studies:
+      <code>
+	https://dgrpool.epfl.ch/studies.json
+      </code>
+      <br/><br/>
+      The available fields:
+      <table class='desc_table table-striped'>
+        <thead>
+          <!--  <th>Index</th>-->
+          <th>Field name</th>
+          <th>Type</th>
+          <th>Description</th>
+        </thead>
+	<tbody>
+          <% @fields[:study].each_with_index do |f, i| %>
+          <tr>
+	    <!--      <td><%= i+1 %></td> -->
+            <td><%= f[0] %></td>
+            <td><%= f[1] %></td>
+            <td><%= f[2] %></td>
+	  </tr>
+          <% end %>
+	</tbody>
+      </table>
+      
+  </div>
+</div>
+
+<div class='card mt-3'>
   <div class='card-body'>
     <h5>Phenotype data</h5>
     
     Phenotype data are downloadable throught the following GET path:
-
+    
     <code>
-      /phenotypes/#ID.json      
+       https://dgrpool.epfl.ch/phenotypes/#ID.json      
     </code>
-
+    <br/><br/>
     For example:
-
+    
     <code>
-      <%= link_to "/phenotypes/2797.json", phenotype_path(2797, :format => :json, :target => "_blank") %>
+      <%= link_to "https://dgrpool.epfl.ch/phenotypes/2797.json", phenotype_path(2797, :format => :json, :target => "_blank") %>
     </code>
+    <br/><br/>    
+      or the list of all non-obsolete phenotypes:
+      <code>
+	https://dgrpool.epfl.ch/phenotypes.json?no_obsolete=1
+      </code>
+          <br/><br/>
+      or the list of all phenotypes from curated studies:
+      <code>
+        https://dgrpool.epfl.ch/phenotypes.json?only_curated_studies=1
+      </code>
+      <br/><br/>
+       or the list of all phenotypes (including obsolete ones and from non-curated studies):
+      <code>
+        https://dgrpool.epfl.ch/phenotypes.json?all=1
+      </code>
+
+      
+      <br/><br/>
 
     The available fields:
-      <table class='desc_table table-striped'>
-	<thead>
+    <table class='desc_table table-striped'>
+      <thead>
 	<!--  <th>Index</th>-->
-	  <th>Field name</th>
-	  <th>Type</th>
-	  <th>Description</th>
-	</thead>
+	<th>Field name</th>
+	<th>Type</th>
+	<th>Description</th>
+      </thead>
       <tbody>
-	<% @fields.each_with_index do |f, i| %>
+	<% @fields[:phenotype].each_with_index do |f, i| %>
 	<tr>
-<!--	  <td><%= i+1 %></td> -->
+	  <!--	  <td><%= i+1 %></td> -->
 	  <td><%= f[0] %></td>
 	  <td><%= f[1] %></td>
 	  <td><%= f[2] %></td>
 	</tr>
 	<% end %>
       </tbody>
-      </table>
+    </table>
     
   </div>
 </div>
-	 
+
 
 <%= javascript_tag do %>
 

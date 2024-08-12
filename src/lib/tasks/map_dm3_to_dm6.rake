@@ -43,10 +43,10 @@ task map_dm3_to_dm6: :environment do
           t = l.split("\t")
           identifier = t[2]
           identifier_parts = t[2].split("_")
- #         puts identifier_parts
+  #        puts identifier_parts
           if h_chrs[t[0]] and h_snps[t[2]]
             h_snps[t[2]].update(:chr_dm6 => t[0], :pos_dm6 => t[1], :identifier_dm6 => [t[0], t[1], identifier_parts[2]].join("_"))
-#            puts [t[0], t[1], identifier_parts[2]].join("_")
+ #           puts [t[0], t[1], identifier_parts[2]].join("_")
           end
         else
        #   puts l

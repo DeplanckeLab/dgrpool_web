@@ -32,11 +32,12 @@
 	<li class="nav-item mr-4">
           <%= link_to 'Phenotypes', phenotypes_path(), {:data => {:turbo => 'false', :method => 'get'}, :class => 'nav-link' } %>
         </li>
-<!--
 	<li class="nav-item mr-4">
-	  <%= link_to 'Genes', gwas_results_path(), {:data => {:turbo => 'false', :method => 'get'}, :class => 'nav-link' } %>
+	  <%= link_to 'Genes', genes_path(), {:data => {:turbo => 'false', :method => 'get'}, :class => 'nav-link' } %>
         </li>
--->	
+	<li class="nav-item mr-4">
+          <%= link_to 'Variants', variants_path(), {:data => {:turbo => 'false', :method => 'get'}, :class => 'nav-link' } %>
+        </li>
 <!--        <% if current_user %>
         <li class="nav-item mr-4">
           <%= link_to "Submit new study", new_study_path(),  {:class => 'nav-link' } %> 
@@ -105,7 +106,7 @@
           </ul>
         </li>
 	   <li class='nav-item'>
-            <%= link_to raw("API"), api_home_index_path(), {:class => 'nav-link mr-3'} %>
+            <%= link_to raw("API & links"), api_home_index_path(), {:class => 'nav-link mr-3'} %>
           </li>
 	 
 	  <li class='nav-item'>

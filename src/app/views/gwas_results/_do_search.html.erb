@@ -23,14 +23,14 @@
   <div class='float-end'>
     <button id='download_all_btn' type='button' class='btn btn-secondary'><i class='fa fa-download'></i> Download all</button>
   </div>
-  Showing top 1000 results (out of <%= @gwas_results.size %> across all studies at raw p-value < 0.01 cutoff). <br/><b>Note: </b>p-value is not adjusted.
+  Showing top 1000 results (out of <%= @gwas_results.size %> across all studies at raw p-value < 0.001 cutoff). <br/><b>Note: </b>p-value is not adjusted.
 </div>
 <% else %>
 <div class='alert alert-success'>
   <div class='float-end'>
     <button id='download_all_btn' type='button' class='btn btn-secondary'><i class='fa fa-download'></i> Download all</button>
   </div>  
-  <%= @gwas_results.size %> results across all studies at raw p-value < 0.01 cutoff. <br/><b>Note:</b> p-value is not adjusted.
+  <%= @gwas_results.size %> results across all studies at raw p-value < 0.001 cutoff. <br/><b>Note:</b> p-value is not adjusted.
 </div>
 
 <% end %>

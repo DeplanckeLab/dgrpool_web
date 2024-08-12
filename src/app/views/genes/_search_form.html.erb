@@ -3,18 +3,60 @@
     <div class='col-md-7  mb-2'>
       <div class="input-group btn-group" role="group" aria-label="Search">
         <%= text_field_tag 'gene_free_text', session[:gs_settings][:free_text] || '', {:size => 30, :class => "form-control", :placeholder => "Search"} %>
+	<div id='gene_name_container'></div>
         <button id='gene_search-btn' type="button" class="btn btn-primary"><i class="fas fa-search"></i> Search</button>
+	<div id='gene_search-message'></div>
       </div>
     </div>
   </div>
   <%= hidden_field_tag 'gene_search_view_type', session[:gs_settings][:search_view_type] %>
 </div>
 
-<div id='gene_search_results' class="m-4"></div>
+<div id='gwas_search_results' class="m-4"></div>
 
 <%= javascript_tag do  %>
 
 //  document.addEventListener('DOMContentLoaded', function () {
+
+ $("#gene_free_text").autocomplete({
+  minLength: 0,
+  appendTo: '#gene_name_container',
+  classes: {
+   "ui-autocomplete": "test_ui",
+  },
+  html: true,
+  position: {
+   offset: '0 0' // Shift 0px left, 4px down.
+  },
+  source: function(request, response) {
+    $.ajax({
+          url: "<%= autocomplete_genes_path() %>",
+          dataType: "json",
+          beforeSend: function(){
+         },
+          data: {
+             q: request.term
+          },
+          success: function( data ) {
+            response( data );
+          }
+        });
+  },
+  select: function( event, ui ) {
+   console.log(ui.item.id)
+   if (ui.item){
+    var list_names = $("#gene_free_text").val().split(" ")
+    list_names[list_names.length - 1] = ui.item.label.replace(/\[.+\]$/, '')
+    $("#gene_free_text").val(list_names.join(" "))
+    return false
+   }
+  }
+ }).focus(function () {
+    $(this).autocomplete("search");
+ }).click(function(){
+    $(this).autocomplete("search");
+ });
+
 
 
 $(".gene_search_view_btn").click(function(){
@@ -55,7 +97,13 @@ function gene_search(p, h) {
  <% end %>
 
  console.log("do_search")
- refresh_post("gene_search_results", "<%= do_search_genes_path() %>", p, 'post', h);
+ if ($("#gene_free_text").val() != ''){
+ refresh_post("gwas_search_results", "<%= do_search_genes_path() %>", p, 'post', h);
+ }else{
+ $("#gwas_search_results").html("<div class='alert alert-danger'>\
+  Please enter one or several gene names separated by commas in the field above (e.g. ntc or ntc, sima).\
+</div>") 
+ }
 }
 
 function gene_init_search(){
@@ -75,7 +123,7 @@ $("#gene_free_text").keyup(function(e){
  if (e.key == 'Enter'){
   gene_init_search()
   var p = [{name : 'free_text', value : $("#gene_free_text").val()}]
-  var h = {loading:'fa-2'}
+  var h = {loading:'fa-2x'}
   gene_search(p, h)
  }
 })
