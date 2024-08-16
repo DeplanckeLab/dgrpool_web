@@ -85,7 +85,7 @@ refresh("nav-GWAS", "<%= raw get_gwas_results_home_index_path(:phenotype_name =>
 
 refresh_gwas()
 repeat_refresh_gwas = setInterval(refresh_gwas, 30000);
-
+setInterval_ids.push(repeat_refresh_gwas)
 $("#compare_phenotype_btn").prop("disabled", false)
 
 $("#history_size").html(<%= session[:history].size %>)

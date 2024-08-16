@@ -2,19 +2,20 @@ module Basic
 
   class << self
 
-    def compute_correlation t_header, content #, pheno_name
+    def compute_correlation t_header, content, tmp_dir #, pheno_name
 
       h_res = {}
 
       md5 = Digest::SHA256.hexdigest content
       data_dir = Pathname.new(APP_CONFIG[:data_dir])
-      tmp_file = data_dir + "tmp" + "#{md5}.tmp"
-      output_dir =  data_dir + "tmp" + md5
+#      Dir.mkdir(data_dir + "tmp" + "correlations") if File.exist?(data_dir + "tmp" + "correlations")
+      tmp_file = tmp_dir + "#{md5}.tmp"
+      output_dir = tmp_dir + md5
       
       export_mean_file = data_dir + 'export_mean.tsv'
       t_header[0] = 'DGRP'
       if !File.exist? tmp_file
-        Dir.mkdir(output_dir) if !File.exist? output_dir
+#        Dir.mkdir(output_dir) if !File.exist? output_dir
         File.open(tmp_file, 'w') do |f|
           f.write(t_header.join("\t") + "\n" )
           f.write(content)
@@ -28,14 +29,18 @@ module Basic
       #      cmd = "Rscript running_GWAS_user.R #{tmp_file} #{plink_file} #{cov_file} #{annot_file} #{output_dir} 2 0.2 0.05 1> #{output_dir + "gwas_output.json"} 2> #{output_dir + "gwas_output.err"}"
       
       #      if !File.exist? output_dir
-      Dir.mkdir output_dir if !File.exist? output_dir
-      cmd = "java -jar ./lib/DGRPool-1.0.jar AllCorrelations --pheno #{tmp_file} --phenodb #{export_mean_file} -o #{output_dir} 1> #{output_dir + 'output.json'} 2> #{output_dir + 'output.err'}"
-      res = `#{cmd}`
-      #      end
-      #      File.delete tmp_file if File.exist? tmp_file
-
       output_json = output_dir + 'output.json'
-    #  puts "OUTPUT_JSON: " + output_json.to_s
+
+      if !File.exist? output_dir
+        Dir.mkdir output_dir 
+        # if !File.exist? output_json
+        cmd = "java -jar ./lib/DGRPool-1.0.jar AllCorrelations --pheno #{tmp_file} --phenodb #{export_mean_file} -o #{output_dir} 1> #{output_dir + 'output.json'} 2> #{output_dir + 'output.err'}"
+        res = `#{cmd}`
+        # end
+      end
+        #      end
+        #      File.delete tmp_file if File.exist? tmp_file
+
       h_output = {}
       if File.exist? output_json
         h_output = Basic.safe_parse_json(File.read(output_json), {}) 

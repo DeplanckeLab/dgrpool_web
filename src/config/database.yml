@@ -6,6 +6,10 @@ default: &default
   password: <%= ENV["POSTGRES_PASSWORD"] %>
   host: postgres
 
+production:
+  <<: *default
+  database: dgrpool
+
 development:
   <<: *default
   database: dgrpool

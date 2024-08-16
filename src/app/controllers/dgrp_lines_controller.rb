@@ -42,7 +42,8 @@ class DgrpLinesController < ApplicationController
     Category.all.map{|c| @h_cats[c.id] = c}
     @h_dgrp_statuses = {}
     DgrpStatus.all.map{|a| @h_dgrp_statuses[a.id] = a}
-
+    @h_units = {}
+    Unit.all.map{|u| @h_units[u.id] = u}
     @h_users = {}
     User.all.map{|u| @h_users[u.id]=u }
     

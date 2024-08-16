@@ -322,6 +322,7 @@ class HomeController < ApplicationController
   
   def compute_my_pheno_correlation
 
+    tmp_dir = Pathname.new(APP_CONFIG[:data_dir]) + 'tmp'
 
     clean_history()
 
@@ -440,7 +441,7 @@ class HomeController < ApplicationController
         @h_res[:errors].push("column not found for \"#{params[:phenotype_name]}\"")
       end
       t_header =  col_i.map{|i| @h_res[:header][i]} #.join("\t") + "\n"
-      @h_correlation_res = Basic.compute_correlation(t_header, @content)
+      @h_correlation_res = Basic.compute_correlation(t_header, @content, tmp_dir)
       h = {:md5 => @h_correlation_res[:md5], :filename => params[:file].original_filename, :phenotype_name => params[:phenotype_name]}
       session[:history].push(h) if !session[:history].map{|e| e[:md5]}.include? h[:md5]
       # logger.debug "CMD:" + @h_correlation_res[:cmd]
@@ -612,9 +613,11 @@ class HomeController < ApplicationController
     sum_i2 = list_sums.index(params[("data_source2").to_sym])
     @sex_phenotypes = [[@phenotypes[0].id, sum_i1], [@phenotypes[1].id, sum_i2]]
     base_filename = @sex_phenotypes.map{|e| e[0].to_s + "_" + e[1].to_s}.join("_")
-    filename = Pathname.new(APP_CONFIG[:data_dir]) + "tmp" + (base_filename + ".txt")
+    correlation_dir = Pathname.new(APP_CONFIG[:data_dir]) + "tmp" + "correlations"
+    Dir.mkdir(correlation_dir) if !File.exist?(correlation_dir)
+    filename = correlation_dir + (base_filename + ".txt")
    # logger.debug(filename)
-    output_file = Pathname.new(APP_CONFIG[:data_dir]) + "tmp" + (base_filename + ".json")
+    output_file = correlation_dir + (base_filename + ".json")
     corr_json = ""
     if File.exist? output_file
       corr_json = File.read(output_file)
@@ -667,7 +670,8 @@ class HomeController < ApplicationController
     h_all_corr.each_key do |k|
       @h_corr[k] = h_all_corr[k] if h_all_corr[k]['common.notNA.dgrp'] > 0
     end
-     # .select!{|e| e['common.notNA.dgrp'] > 0}
+
+    # .select!{|e| e['common.notNA.dgrp'] > 0}
     
     @sex_comparisons.each do |sc|
     #  logger.debug("SEX_COMPARISON: #{sc}")

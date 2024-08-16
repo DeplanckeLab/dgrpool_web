@@ -14,8 +14,9 @@ class PhenotypesController < ApplicationController
       filename_label = 'original'
       @h_pheno =  Basic.safe_parse_json(study.pheno_json, {})
        
-      tmp_pheno = (@phenotype.is_summary == true) ? @h_pheno["sum"] :
+      tmp_pheno = (@phenotype.is_summary == true) ? @h_pheno["summary"] :
                     ((@h_pheno["raw"]) ? @h_pheno["raw"][@phenotype.dataset_id.to_s] : nil)
+     # data.push [@h_pheno.to_json]
       if tmp_pheno
         dgrp_lines = tmp_pheno.keys
         dgrp_lines.each do |dgrp_line|
@@ -141,6 +142,10 @@ class PhenotypesController < ApplicationController
   
   def compute_correlation
 
+    tmp_dir = Pathname.new(APP_CONFIG[:data_dir]) + 'tmp' + 'correlations'
+    Dir.mkdir(tmp_dir) if !File.exist? tmp_dir
+
+    
     params[:only_curated_studies] ||= '1'
     @h_phenotypes = {}
     Phenotype.all.map{|p| @h_phenotypes[p.id] = p}
@@ -170,7 +175,7 @@ class PhenotypesController < ApplicationController
       content += h_pheno.keys.select{|k| h_pheno[k][@phenotype.id.to_s]}.map{|dgrp_line| "#{dgrp_line}\t#{@list_sex[i]}\t" + ((h_pheno[dgrp_line][@phenotype.id.to_s][i]) ? h_pheno[dgrp_line][@phenotype.id.to_s][i][0].to_s : '')}
     end
 
-    @h_res = Basic.compute_correlation(t_header, content.join("\n")) 
+    @h_res = Basic.compute_correlation(t_header, content.join("\n"), tmp_dir) 
 
     ## filter results
  
@@ -228,6 +233,7 @@ class PhenotypesController < ApplicationController
     @h_var_types = {}
     VarType.all.each do |vt|
       @h_var_types[vt.name] = vt
+      @h_var_types[vt.id] = vt
     end
 
     
@@ -338,7 +344,7 @@ class PhenotypesController < ApplicationController
           (session[:filter_binding_site] == '' or (@h_snps[e[2]] and @h_snps[e[2]]['binding_site_annot'] and ["TF_binding_site", "regulatory_region"].map{|k| (@h_snps[e[2]]['binding_site_annot'][k]) ? @h_snps[e[2]]['binding_site_annot'][k].keys : []}.flatten.uniq.include? session[:filter_binding_site])) and
           (session[:filter_involved_binding_site] == '0' or (@h_snps[e[2]] and @h_snps[e[2]]['binding_site_annot'] and ["TF_binding_site", "regulatory_region"].map{|k| (@h_snps[e[2]]['binding_site_annot'][k]) ? @h_snps[e[2]]['binding_site_annot'][k].keys : []}.flatten.uniq.size > 0)) and
           (session[:filter_by_pos] == '' or (e2 = session[:filter_by_pos].split(":") and e3 = e2[1].split("-") and e2[0] == e[0] and e[1].to_i >= e3[0].to_i and e[1].to_i <= e3[1].to_i)) and
-          (session[:filter_variant_impact] == '' or (snp_genes and snp_genes.map{|e2| @h_var_types[e2.var_type_id].impact}.include? session[:filter_variant_impact]))
+          (session[:filter_variant_impact] == '' or (snp_genes and snp_genes.map{|e2| @h_var_types[e2.var_type_id] and @h_var_types[e2.var_type_id].impact}.include? session[:filter_variant_impact]))
       }
      # @times.push([tmp = Time.now, tmp-@times.last[0]])
       

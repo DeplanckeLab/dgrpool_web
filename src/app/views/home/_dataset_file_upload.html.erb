@@ -7,24 +7,25 @@
 </div>
 <%= javascript_tag do %>
 
-var repeat_refresh_gwas;
+ var repeat_refresh_gwas;
+ var setInterval_ids = [];
 
  $("#preparse_btn").click(function(){
   var data = new FormData();
-//data.append()
-$(this).prop("disabled", true)
-if ($('#dataset_file')[0].files.length > 0){
-  $.each($('#dataset_file')[0].files, function(i, file) {
+  //data.append()
+  $(this).prop("disabled", true)
+  if ($('#dataset_file')[0].files.length > 0){
+   $.each($('#dataset_file')[0].files, function(i, file) {
     console.log(file)
     data.append('file', file);
-});
-  console.log(data)
-  $.ajax({
+   });
+   console.log(data)
+   $.ajax({
     url: '<%= raw compute_my_pheno_correlation_path() %>',
     data: data,
-    headers: {
-//      "Content-Type": "application/json",
-      "X-CSRF-Token": document.querySelector("meta[name='csrf-token']").content,
+    headers: {  
+     //      "Content-Type": "application/json",
+     "X-CSRF-Token": document.querySelector("meta[name='csrf-token']").content,
     },
     cache: false,
     contentType: false,
@@ -33,7 +34,8 @@ if ($('#dataset_file')[0].files.length > 0){
     type: 'POST', // For jQuery < 1.9
 				  success: function(data){
 				  $("#parsing_info").addClass("hidden")
-     $("#preparsing_result").html(data)
+				  $("#preparsing_result").html(data)
+				  $("#preparsing_result").removeClass("hidden")
     }
 				  })
 				     }else{
