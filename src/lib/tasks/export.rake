@@ -19,9 +19,9 @@ task export: :environment do
 
   filename = download_dir + 'studies.tsv'
   File.open(filename, 'w') do |f|
-    f.write(["study_id", "authors", "title", "year", "doi", "nber_phenotypes", "comment", "description", "categories", "status", "flybase_ref"].join("\t") + "\n")
+    f.write(["study_id", "authors", "title", "journal", "issue", "volume", "year", "doi", "nber_phenotypes", "comment", "description", "categories", "status", "flybase_ref"].join("\t") + "\n")
     Study.all.sort.each do |s|
-      f.write([s.id, s.authors, s.title, s.year, s.doi, s.phenotypes.select{|e| e.obsolete == false}.size, esc(s.comment), esc(s.description), s.categories.map{|e| e.name}.join(","), s.status.name, s.flybase_ref].join("\t") + "\n")
+      f.write([s.id, JSON.parse(s.authors_json).map{|e| [e['fname'], e['lname']].join(",") }, s.title, (j = s.journal) ? j.name : '', s.issue, s.volume, s.year, s.doi, s.phenotypes.select{|e| e.obsolete == false}.size, esc(s.comment), esc(s.description), s.categories.map{|e| e.name}.join(","), s.status.name, s.flybase_ref].join("\t") + "\n")
     end
   end
 
