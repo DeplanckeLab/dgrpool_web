@@ -22,7 +22,7 @@ module Basic
         end
       end
 
-      plink_file = data_dir + 'dgrp2'
+      plink_file = data_dir + 'dgrp2.filtered.fastlmm'
       cov_file = data_dir + "dgrp.cov.tsv"
       annot_file = data_dir + "dgrp.fb557.annot.txt.gz"
      

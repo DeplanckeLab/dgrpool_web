@@ -256,7 +256,7 @@
       <% pos = (md5s.size >0 and md5s.index(md5)) ? md5s.index(md5) + 1 : nil %>
       <br/>
       <% if pos %>
-      <b>Position in queue: <%= pos %> over <%= md5s.size %>. Estimated wait: <%= raw display_duration(90 * pos) %></b>
+      <b>Position in queue: <%= pos %> over <%= md5s.size %>. Estimated wait: <%= raw display_duration(150 * pos) %></b>
       <% else %>
       Not found in the queue
       <% end %>

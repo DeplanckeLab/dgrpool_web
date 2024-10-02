@@ -31,7 +31,7 @@ task run_gwas: :environment do
       #     end
       #   end
       if File.exist? tmp_file
-        plink_file = data_dir + 'dgrp2'
+        plink_file = data_dir + 'dgrp2.filtered.fastlmm'
         cov_file = data_dir + "dgrp.cov.tsv"
         annot_file = data_dir + "dgrp.fb557.annot.txt.gz"
         File.delete(output_dir + "done") if File.exist?(output_dir + "done")

@@ -45,7 +45,10 @@ task load_studies: :environment do
         else
           puts "Update study..."
           #            h[:key] = Basic.create_key(Study, 6) if !s.key
+          h[:authors_json] = s.authors_json
+          h[:title] = s.title
           s.update(h)
+          
         end
       else
         puts "#{doi}: Not found"
