@@ -15,7 +15,7 @@
     <% sex = @list_sex[i] %>
     <!--  <li class="nav-item">-->
       <!--    <a class="nav-link <%= (@cur_sex == sex) ? "active" : "" %>" aria-current="page" href="#"><%= @h_legend[:sex][sex] %></a> -->
-      <button class="nav-link <%= (@cur_sex == sex) ? "active" : "" %>" id="nav-<%= sex %>-tab" data-bs-toggle="tab" data-bs-target="#nav-<%= sex %>" type="button" role="tab" aria-controls="nav-<%= sex %>" aria-selected="true"><%= @h_legend[:sex][sex] %> <span class='badge rounded-pill bg-<%= (@h_res[:res][@list_sex[i]].size > 0) ? 'success' : 'danger' %>'><%= @h_res[:res][@list_sex[i]].size %></span></button>
+      <button class="nav-link <%= (@cur_sex == sex) ? "active" : "" %>" id="nav-<%= sex %>-tab" data-bs-toggle="tab" data-bs-target="#nav-<%= sex %>" type="button" role="tab" aria-controls="nav-<%= sex %>" aria-selected="true"><%= @h_legend[:sex][sex] %> <span class='badge rounded-pill bg-<%= (@h_res[:res][@list_sex[i]] and @h_res[:res][@list_sex[i]].size > 0) ? 'success' : 'danger' %>'><%= (@h_res[:res][@list_sex[i]]) ? @h_res[:res][@list_sex[i]].size : 'NA' %></span></button>
     </li>
     <% end %>
   </div>
@@ -26,7 +26,7 @@
   <% sex = @list_sex[i] %>
   <div class="tab-pane fade <%= (@cur_sex == sex) ? "show active" : "" %>" id="nav-<%= sex %>" role="tabpanel" aria-labelledby="nav-<%= sex %>-tab">    
     <%# @list_sex.each_index do |i| %>
-    <% if @h_res[:res][@list_sex[i]].size > 0 %>
+    <% if @h_res[:res][@list_sex[i]] and @h_res[:res][@list_sex[i]].size > 0 %>
      <%= render :partial => "home/correlation_results", :locals => {:h_correlation_res => @h_res, :sex => @list_sex[i]} %>
     <% else %>
     <div class='alert alert-warning mt-3'>No result</div>

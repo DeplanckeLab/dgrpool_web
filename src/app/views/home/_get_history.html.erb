@@ -15,12 +15,13 @@ $(".view-btn").click(function(){
  var i = this.id.split("_")[1]
  //refresh_post()
  var h = list_history[parseInt(i)]
-var data =[
-{name : 'md5', value : h.md5},
-{name : 'filename', value : h.filename},
-{name : 'phenotype_name', value : h.phenotype_name},
-{name : 'compare', value : '1'}]
-
+ var data = [
+  {name : 'md5', value : h.md5},
+  {name : 'filename', value : h.filename},
+  {name : 'phenotype_name', value : h.phenotype_name},
+  {name : 'compare', value : '1'}]
+ // clearInterval(repeat_refresh_gwas)
+ clearAllIntervals(setInterval_ids)
  refresh_post("comparison_results", "<%= raw compute_my_pheno_correlation_path() %>", data, "post", {loading:'fa-2x'})
 
  $("#parsing_info").addClass("hidden")

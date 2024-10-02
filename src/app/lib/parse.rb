@@ -160,7 +160,9 @@ module Parse
         if not_same_col_nber.size > 0
           errors.push "Not the same number of columns for DGRP #{not_same_col_nber.join(",")} compared to header (#{t_header.size} column(s))."
         end
-
+        if h_data.keys.size == 0
+          errors.push "No data in the input file"
+        end
       end
 
       matrix = []

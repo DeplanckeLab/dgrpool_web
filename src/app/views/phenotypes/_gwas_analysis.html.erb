@@ -42,17 +42,17 @@
 	  <%= raw shapiro_results(@shapiro[sex]) %>
 	</div>
 	<% end %>
-
+	
 	<div class='alert alert-success'>
           We tested for association of this phenotype with <%= @h_covariate_mapping.keys.size %> known covariates <%= display_reference_short2(s) %> using
 	  both ANOVA and Kruskal-Wallis association tests.
         </div>
-
+	
 	<%# if anova and anova.size > 0 %>    
 	<div class='alert alert-info mt-3'>      
 	  <!-- The following covariates (phenotypes from study <%= display_reference_short2(s) %>) were included in the GWAS model. -->
 	  <!-- A preliminary ANOVA association analysis was carried out to check if any of the covariates was associated with the phenotype, prior correction. -->
-<!--	  ANOVA and Kruskal-Wallis association tests were carried out to check if any of the covariates were associated with the phenotype, prior correction.-->
+	  <!--	  ANOVA and Kruskal-Wallis association tests were carried out to check if any of the covariates were associated with the phenotype, prior correction.-->
 	  
 	  <div class='row'>
 	    <div class='col-5'>
@@ -79,7 +79,7 @@
 	      <% else %>
               <i>No significant result.</i>
               <% end %>
-
+	      
 	    </div>
 	    
 	    <div class='col-5'>
@@ -94,34 +94,14 @@
 	  </div>
 	  <%# raw covariate_test_results(@kruskal[sex], @shapiro[sex], @h_covariate_mapping) %>
 	</div>
-	<!--
-	<%# elsif anova and anova.size == 0 %>
-	<div class='alert alert-success mt-3'>
-	  <%# if File.exist? (output_dir + h_files[:anova]) %>
-	  <div class='row'>
-	    <div class='col-5'>
-	      There is no covariate that is significantly associated with this phenotype.
-	    </div>
       </div>
-      <%# raw covariate_test_results(@kruskal[sex], @shapiro[sex], @h_covariate_mapping) %>
-	  <%# else %>
-	  <i>No covariate identification file found</i>
-	  <%# end %>
-	</div>
-	<%# else %>
-	<div class='alert alert-danger mt-3'>
-	  An error occured while evaluating covariates. 
-	</div>
-	<%# end %>
-      </div>
-      -->
     </div>
     
     <div class='row ms-0 me-0'>
       <div class='card col-md-6'>
 	<div class='card-body'>
 	  <div class='float-end'>
-	             <%= link_to raw("<i class='fa fa-download'></i> PNG"), get_file_study_path(@study, :namespace => download_namespace, :name => h_files[:qqplot]), {:target => '_blank', :class => 'btn btn-sm btn-secondary'} %>
+	    <%= link_to raw("<i class='fa fa-download'></i> PNG"), get_file_study_path(@study, :namespace => download_namespace, :name => h_files[:qqplot]), {:target => '_blank', :class => 'btn btn-sm btn-secondary'} %>
 	    <%= link_to raw("<i class='fa fa-download'></i> PDF"), get_file_study_path(@study, :namespace => download_namespace, :name => h_files[:qqplot].gsub(/png$/, "pdf")), {:target => '_blank', :class => 'btn btn-sm btn-secondary'} %>
 	  </div>
 	  <h3>QQplot
@@ -272,7 +252,7 @@
     <div class='alert alert-danger mt-3'>No results available yet for this dataset. Computing time takes usually approx. 1min 30s. Please wait. (If it takes more than 10mn without a change in the queue report below, please contact us, as it may have failed unexpectedly)
       <% data_dir = Pathname.new(APP_CONFIG[:data_dir])
 	 tmp_dir = data_dir + 'tmp'
-	 md5s =  Dir.entries(tmp_dir).map{|e| m = e.match(/(\w+)\.tmp/); ((m and m[1]) ? m[1] : nil)}.compact.select{|e| File.exist?(tmp_dir + e + 'output.json') and !File.exist?(tmp_dir + e + 'done')}.sort{|a, b| File.ctime(tmp_dir + (a + '.tmp')) <=> File.ctime(tmp_dir + (b + '.tmp'))} %>
+	 md5s =  Dir.entries(tmp_dir).map{|e| m = e.match(/(\w+)\.tmp/); ((m and m[1]) ? m[1] : nil)}.compact.select{|e| File.exist?(tmp_dir + e + 'output.json') and !File.exist?(tmp_dir + e + 'done') and File.exist?(tmp_dir + "#{e}.tmp")}.sort{|a, b| File.ctime(tmp_dir + (a + '.tmp')) <=> File.ctime(tmp_dir + (b + '.tmp'))} %>
       <% pos = (md5s.size >0 and md5s.index(md5)) ? md5s.index(md5) + 1 : nil %>
       <br/>
       <% if pos %>

@@ -192,7 +192,7 @@ module ApplicationHelper
     html = ''
     #link = ((curator?) ? edit_phenotype_path(p) : phenotype_path(p))
     link = phenotype_path(p)
-    title = p.description + " " + ((p.unit_id) ? "[#{@h_units[p.unit_id].label_html}]" : '')
+    title = p.description + " " + ((p.unit_id and @h_units[p.unit_id]) ? "[#{@h_units[p.unit_id].label_html}]" : '')
     if curator?
       html = link_to(raw(p.name), link, { "data-bs-toggle" => 'tooltip', "data-bs-placement" => 'bottom', "data-bs-html"=>'true', :title => title, #.gsub(/<\/?su[bp]>/, ''),
                                           :target => '_blank', :class => "pheno_link badge #{(p.obsolete == true) ? 'bg-secondary' : 'bg-info'} nodec"})

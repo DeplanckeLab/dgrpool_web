@@ -142,9 +142,17 @@ window.resizePlots = function() {
 	    var plotElement = plots[i];
             var plotData = plotElement.data;
             var plotLayout = plotElement.layout;
-  console.log("resize3" + plotElement.id)
+            console.log("resize3" + plotElement.id)
 	    console.log(plotData)
 	    Plotly.purge(plotElement)
 	    Plotly.newPlot(plotElement, plotData, plotLayout);
         }
     }
+
+window.clearAllIntervals = function(interval_ids) {
+    interval_ids.forEach((intervalId) => {
+        clearInterval(intervalId);
+    });
+    // Optionally, clear the array to remove stored interval IDs
+    interval_ids = [];
+}

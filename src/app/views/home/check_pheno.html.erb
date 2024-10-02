@@ -80,6 +80,7 @@
 
   document.addEventListener('DOMContentLoaded', function () {
 $("#restart-btn").click(function(){
+clearAllIntervals(setInterval_ids)
 refresh("input_card", "<%= raw(get_upload_form_home_index_path()) %>", {})
 $("#input_card").removeClass("hidden")
 $("#restart-btn").addClass("hidden")
