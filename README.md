@@ -1,5 +1,9 @@
 # DGRPool - Drosophila Genetic Reference Panel Phenotyping Web Application
 
+## Citation
+
+Please cite as: eLife2024;12:RP88981 DOI: https://doi.org/10.7554/eLife.88981.3
+
 ## Overview
 
 DGRPool is a web application designed to serve as a comprehensive repository for Drosophila Genetic Reference Panel (DGRP) phenotyping datasets. It not only provides a centralized hub for accessing existing literature on DGRP phenotyping data but also offers tools for conducting basic systems genetics-inspired analyses. The primary aim of DGRPool is to make DGRP phenotyping data findable, accessible, interoperable, and reusable (FAIR) to facilitate research in the field of Drosophila genetics.
