@@ -548,7 +548,7 @@ class StudiesController < ApplicationController
         end
 
         if !admin?
-          ["submitter_id", "validator_id", "pheno", "pheno_mean", "pheno_median", "pheno_sum"].each do |e|
+          ["submitter_id", "validator_id", "pheno", "pheno_median", "pheno_sum"].each do |e|
              study.delete(e)
           end
         end
