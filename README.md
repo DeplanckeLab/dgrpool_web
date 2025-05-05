@@ -3,7 +3,8 @@
 ## Citation
 
 Vincent Gardeux, Roel PJ Bevers, Fabrice PA David, Emily Rosschaert, Romain Rochepeau and Bart Deplancke, (2024) **DGRPool: A web tool leveraging harmonized Drosophila Genetic Reference Panel phenotyping data for the study of complex traits**, *eLife*, 12:RP88981
-[https://doi.org/10.7554/eLife.88981.3](https://doi.org/10.7554/eLife.88981.3) <br />
+[https://doi.org/10.7554/eLife.88981.3](https://doi.org/10.7554/eLife.88981.3)
+
 There is a specific GitHub page for the DGRPool manuscript if you want to download the source code for the GWAS analysis, or any of the code used for generating the figures of the paper: [https://github.com/DeplanckeLab/dgrpool](https://github.com/DeplanckeLab/dgrpool)<br />
 This GitHub page also contains reproducible code to fetch all data from DGRPool using the API.
 
