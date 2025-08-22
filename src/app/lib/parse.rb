@@ -135,9 +135,14 @@ module Parse
                 end
               end
               final_phenotypes.each do |p|
-                if new_h[p][i] and new_h[p][i].size > 1
-                  mean = Basic.mean new_h[p][i]
-                  new_h[p][i] = mean
+                if new_h[p][i]
+                  if new_h[p][i].size > 1
+                    #              logger.debug("test mean: " + new_h[p][i].to_json)
+                    mean = Basic.mean new_h[p][i]
+                    new_h[p][i] = mean
+                  else
+                    new_h[p][i] = new_h[p][i][0]
+                  end
                 end
               end
               
@@ -172,6 +177,8 @@ module Parse
           matrix.push [dgrp_line_name, s] + pheno_data #h_data[dgrp_line_name][s][0].to_s]
         end
       end
+
+      logger.debug(h_data.to_json)
       
       h_data = {
         :errors => errors,

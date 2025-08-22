@@ -25,7 +25,7 @@
     <tr>
       <td><%= p.name %></td>
       <td><%= (p.fbsn) ? link_to(p.fbsn, "https://flybase.org/reports/#{p.fbsn}.html", {:target => '_blank'}) : '' %></td>
-      <td><%= (p.bloomington_id) ? p.bloomington_id : 'NA' %></td>
+      <td><%= (p.bloomington_id) ? link_to(p.bloomington_id , "https://bdsc.indiana.edu/Home/Search?presearch=#{p.bloomington_id}", {:target => '_blank'}) : 'NA' %></td>
       <td><%= p.nber_studies %> (<%= (@nber_studies > 0) ? (p.nber_studies*100/@nber_studies) : 0 %>%)
 	<!--.map{|sid| "<span class='badge bg-info'>" + display_reference_short(@h_studies[sid]) + "</span>"}.join(" ") %>
 	  -->

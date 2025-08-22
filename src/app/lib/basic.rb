@@ -290,6 +290,7 @@ module Basic
                     ## check if the list if only composed of ints
                     #  final_list = list_val.compact
                     if k == :mean
+#                      logger.debug(list_val.to_json)
                       val = mean(list_val.compact)
                     elsif k == :median
                       val = median(list_val.compact)
