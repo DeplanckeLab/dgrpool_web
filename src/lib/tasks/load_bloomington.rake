@@ -8,6 +8,7 @@ task load_bloomington: :environment do
   file = Pathname.new(APP_CONFIG[:data_dir]) + 'dgrp_stock2.txt'
   
 
+  ## we should probably reset the bloomington_id to nil for all the DGRP lines in cases some lines are  not available anymore
   
   #DGRP    Stock
   #DGRP_208        25174
@@ -31,10 +32,10 @@ task load_bloomington: :environment do
       puts key
       if h[key] and t[0].to_i
         puts "Set #{key} => #{t[0]}"
-      #h[key].update({:bloomington_id => t[0].to_i})
+        h[key].update({:bloomington_id => t[0].to_i})
         #pputs 
-      else
-        h_dgrp = {
+      elsif t[0].to_i # if the line doesn't exist yet 
+         h_dgrp = {
           :name => key,
           :bloomington_id => t[0].to_i,
           :dgrp_status_id => 3,
@@ -43,7 +44,7 @@ task load_bloomington: :environment do
           :nber_phenotypes => 0          
         }
         d = DgrpLine.new(h_dgrp)
-        #d.save
+        d.save
         puts d.to_json
       end
     end  

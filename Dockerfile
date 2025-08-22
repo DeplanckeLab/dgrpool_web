@@ -81,6 +81,8 @@ RUN plink2 --version
 RUN mkdir -p /opt/mimemagic
 WORKDIR /opt/dgrpool
 ENV FREEDESKTOP_MIME_TYPES_PATH=/opt/mimemagic
+
+RUN echo "DUMMY"
 COPY src/Gemfile .
 RUN bundle install
 COPY src/. .
