@@ -6,11 +6,11 @@ class ApplicationController < ActionController::Base
   before_action :configure_permitted_parameters, if: :devise_controller?
   
   def admin_emails
-    return ['fabrice.david@epfl.ch','vincent.gardeux@epfl.ch']
+    return ENV['ADMIN_EMAILS'].split(/\s*[,;]\s*/)
   end
 
   def curator_emails
-    return ['romain.rochepeau@epfl.ch','gardeux.vincent@gmail.com', 'fab.dav@gmail.com', 'emily.rosschaert@student.kuleuven.be', 'roelbevers@gmail.com']
+    return ENV['CURATOR_EMAILS'].split(/\s*[,;]\s*/)
   end
 
 

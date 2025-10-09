@@ -21,7 +21,8 @@ task export: :environment do
   File.open(filename, 'w') do |f|
     f.write(["study_id", "study_reference", "authors", "title", "journal", "issue", "volume", "year", "doi", "nber_phenotypes", "comment", "description", "categories", "status", "flybase_ref"].join("\t") + "\n")
     Study.all.sort.each do |s|
-      f.write([s.id, "(" + s.authors + ", " + s.year.to_s + ")", JSON.parse(s.authors_json).map{|e| [e['fname'], e['lname']].join(" ") }.join(","), s.title, (j = s.journal) ? j.name : '', s.issue, s.volume, s.year, s.doi, s.phenotypes.select{|e| e.obsolete == false}.size, esc(s.comment), esc(s.description), s.categories.map{|e| e.name}.join(","), s.status.name, s.flybase_ref].join("\t") + "\n")
+      f.write([s.id, "(" + s.authors + ", " + s.year.to_s + ")", JSON.parse(s.authors_json).map{|e| [e['fname'], e['lname']].join(" ") }.join(","), s.title, (j = s.journal) ? j.name : '', s.issue,
+               s.volume, s.year, s.doi, s.phenotypes.select{|e| e.obsolete == false}.size, esc(s.comment), esc(s.description), s.categories.map{|e| e.name}.join(","), s.status.name, s.flybase_ref].join("\t") + "\n")
     end
   end
 
@@ -36,7 +37,7 @@ task export: :environment do
   filename = download_dir + 'dgrp_lines.tsv'
   File.open(filename, 'w') do |f|
     f.write(["dgrp", "nber_studies", "nber_phenotypes", "dgrp_status", "fbsn", "bloomington_id"].join("\t") + "\n")
-    DgrpLine.all.sort{|a, b| a.name.gsub(/[^\d]/, '').to_i <=> b.name.gsub(/[^\d]/, '').to_i}.each do |d|
+    DgrpLine.all.sort{|a, b| [a.name.first, a.name.gsub(/[^\d]/, '').to_i] <=> [b.name.first, b.name.gsub(/[^\d]/, '').to_i]}.each do |d|
       f.write([
                 d.name, d.nber_studies, d.nber_phenotypes, d.dgrp_status.name, d.fbsn, d.bloomington_id
               ].join("\t") + "\n")

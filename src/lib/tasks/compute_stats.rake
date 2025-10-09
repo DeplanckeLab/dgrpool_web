@@ -3,10 +3,15 @@ task compute_stats: :environment do
   puts 'Executing...'
 
 
-  data_dir = Pathname.new(APP_CONFIG[:data_dir])
+  data_dir = Pathname.new(APP_CONFIG[:data_dir]) + 'stats'
 
-  ## compute dgrp_lines stats
+  if File.exists data_dir + 'stats.json'
+    puts "File already exists, please archive in stats.X.json and run again"
+    exit
+  end
   
+  ## compute dgrp_lines stats
+
   dgrp_lines = DgrpLine.all
   
   h_studies = {}
