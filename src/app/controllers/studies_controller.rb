@@ -68,7 +68,7 @@ class StudiesController < ApplicationController
 
   def del_dataset
     @log = []
-    if curator?
+    if admin?
 
 #      h_all_dgrp_lines = {}
 #      DgrpLine.all.map{|d| h_all_dgrp_lines[d.id] = d}
