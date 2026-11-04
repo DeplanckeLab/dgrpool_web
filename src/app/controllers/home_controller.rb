@@ -88,6 +88,7 @@ class HomeController < ApplicationController
     @category_ids = @categories.sort!{|a, b| (b.nber_studies || 0) <=> (a.nber_studies || 0)}.map{|e| e.id}
     stats_file = Pathname.new(APP_CONFIG[:data_dir]) + 'stats.json'
     @h_stats = Basic.safe_parse_json(File.read(stats_file), {})
+    @latest_release = Release.by_version.first
   end
 
   def get_gwas_results

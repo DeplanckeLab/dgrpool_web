@@ -1,0 +1,73 @@
+<%= form_with(model: release) do |form| %>
+  <% if release.errors.any? %>
+    <div style="color: red">
+      <h2><%= pluralize(release.errors.count, "error") %> prohibited this release from being saved:</h2>
+
+      <ul>
+        <% release.errors.each do |error| %>
+          <li><%= error.full_message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="form-group row">
+    <%= label_tag "Name", nil, {:class => 'col-sm-2 col-form-label'} %>
+    <div class="col-sm-10">
+      <%= form.text_field :name, {:class => 'form-control', :placeholder => '0.0.1'} %>
+      <small class="text-muted">Version used as the folder name under downloads.</small>
+    </div>
+  </div>
+
+  <div class="form-group row">
+    <%= label_tag "Release date", nil, {:class => 'col-sm-2 col-form-label'} %>
+    <div class="col-sm-10">
+      <%= form.date_field :release_date, {:class => 'form-control'} %>
+    </div>
+  </div>
+
+  <div class="form-group row">
+    <%= label_tag "Description", nil, {:class => 'col-sm-2 col-form-label'} %>
+    <div class="col-sm-10">
+      <%= form.text_area :description, {:rows => 7, :class => 'form-control'} %>
+    </div>
+  </div>
+
+  <div class="form-group row">
+    <%= label_tag "GWAS command", nil, {:class => 'col-sm-2 col-form-label'} %>
+    <div class="col-sm-10">
+      <%= form.text_area :gwas_command, {:rows => 7, :class => 'form-control'} %>
+    </div>
+  </div>
+
+  <div class="form-group row">
+    <%= label_tag "GitHub release URL", nil, {:class => 'col-sm-2 col-form-label'} %>
+    <div class="col-sm-10">
+      <%= form.text_field :url, {:class => 'form-control', :placeholder => 'https://github.com/org/repo/releases/tag/v0.0.1'} %>
+    </div>
+  </div>
+
+  <div class="form-group row">
+    <%= label_tag "Downloads", nil, {:class => 'col-sm-2 col-form-label'} %>
+    <div class="col-sm-10">
+      <% if Download.none? %>
+        <p>No download filenames yet. <%= link_to "Add one", new_download_path %>.</p>
+      <% else %>
+        <%= form.collection_check_boxes :download_ids, Download.order(:id), :id, :filename do |builder| %>
+          <div class="form-check">
+            <%= builder.label :class => "form-check-label" do %>
+              <%= builder.check_box :class => "form-check-input" %>
+              <%= builder.object.filename %>
+              <span class="text-muted">- <%= builder.object.description %></span>
+            <% end %>
+          </div>
+        <% end %>
+        <small class="text-muted">A filename is offered for this release only when that file is present in its folder.</small>
+      <% end %>
+    </div>
+  </div>
+
+  <div>
+    <%= form.submit %>
+  </div>
+<% end %>

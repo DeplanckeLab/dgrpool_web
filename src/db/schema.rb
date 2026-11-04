@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2023_04_03_201955) do
+ActiveRecord::Schema[7.0].define(version: 2026_11_04_170600) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -85,6 +85,22 @@ ActiveRecord::Schema[7.0].define(version: 2023_04_03_201955) do
     t.text "url_mask"
   end
 
+  create_table "downloads", force: :cascade do |t|
+    t.text "filename", null: false
+    t.text "description", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["filename"], name: "index_downloads_on_filename", unique: true
+  end
+
+  create_table "downloads_releases", id: false, force: :cascade do |t|
+    t.bigint "download_id", null: false
+    t.bigint "release_id", null: false
+    t.index ["download_id", "release_id"], name: "index_downloads_releases_on_download_and_release", unique: true
+    t.index ["download_id"], name: "index_downloads_releases_on_download_id"
+    t.index ["release_id"], name: "index_downloads_releases_on_release_id"
+  end
+
   create_table "figure_types", id: :serial, force: :cascade do |t|
     t.text "name"
   end
@@ -98,6 +114,25 @@ ActiveRecord::Schema[7.0].define(version: 2023_04_03_201955) do
     t.text "phenotype_ids"
   end
 
+  create_table "flybase_alleles", id: :serial, force: :cascade do |t|
+    t.text "identifier"
+    t.text "symbol"
+    t.integer "gene_id"
+    t.text "phenotypes_json"
+    t.index ["gene_id"], name: "flybase_alleles_gene_id_idx"
+    t.index ["identifier"], name: "flybase_alleles_identifier_idx"
+  end
+
+  create_table "genes", id: :serial, force: :cascade do |t|
+    t.text "name"
+    t.text "full_name"
+    t.text "identifier"
+    t.boolean "in_vcf", default: false
+    t.text "synonyms"
+    t.text "summary_json"
+    t.index ["name"], name: "genes_name_idx"
+  end
+
   create_table "gwas_results", id: :serial, force: :cascade do |t|
     t.integer "snp_id"
     t.integer "phenotype_id"
@@ -107,10 +142,29 @@ ActiveRecord::Schema[7.0].define(version: 2023_04_03_201955) do
     t.index ["phenotype_id", "sex"], name: "gwas_results_phenotype_id_sex"
   end
 
+  create_table "human_orthologs", id: :serial, force: :cascade do |t|
+    t.integer "gene_id"
+    t.integer "hgnc_gene_id"
+    t.integer "omim_gene_id"
+    t.text "human_gene_name"
+    t.integer "diopt_score"
+    t.text "omim_phenotypes"
+    t.index ["gene_id"], name: "human_orthologs_gene_id_idx"
+  end
+
   create_table "journals", id: :serial, force: :cascade do |t|
     t.text "name"
     t.datetime "created_at", precision: nil
     t.datetime "updated_at", precision: nil
+  end
+
+  create_table "oma_orthologs", id: :serial, force: :cascade do |t|
+    t.integer "gene_id"
+    t.text "oma_group_id"
+    t.integer "organism_id"
+    t.text "ensembl_ids"
+    t.text "uniprot_ids"
+    t.index ["gene_id"], name: "oma_orthologs_gene_id_idx"
   end
 
   create_table "ontologies", id: :serial, force: :cascade do |t|
@@ -149,6 +203,14 @@ ActiveRecord::Schema[7.0].define(version: 2023_04_03_201955) do
     t.integer "phenotype_id"
   end
 
+  create_table "organisms", id: :serial, force: :cascade do |t|
+    t.text "name"
+    t.text "oma_identifier"
+    t.integer "tax_id"
+    t.text "genome_source"
+    t.text "version"
+  end
+
   create_table "phenotype_keywords", id: :serial, force: :cascade do |t|
     t.text "name"
     t.integer "user_id"
@@ -177,6 +239,17 @@ ActiveRecord::Schema[7.0].define(version: 2023_04_03_201955) do
     t.text "sex_by_dgrp"
   end
 
+  create_table "releases", force: :cascade do |t|
+    t.text "name", null: false
+    t.text "description"
+    t.text "url", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.text "gwas_command"
+    t.date "release_date"
+    t.index ["name"], name: "index_releases_on_name", unique: true
+  end
+
   create_table "sessions", force: :cascade do |t|
     t.string "session_id", null: false
     t.text "data"
@@ -184,6 +257,24 @@ ActiveRecord::Schema[7.0].define(version: 2023_04_03_201955) do
     t.datetime "updated_at", null: false
     t.index ["session_id"], name: "index_sessions_on_session_id", unique: true
     t.index ["updated_at"], name: "index_sessions_on_updated_at"
+  end
+
+  create_table "snp_genes", id: :serial, force: :cascade do |t|
+    t.integer "snp_id"
+    t.integer "gene_id"
+    t.integer "var_type_id"
+    t.boolean "affects_regulatory_region"
+    t.boolean "affects_tf_binding_site"
+    t.index ["gene_id"], name: "snp_genes_gene_id"
+    t.index ["snp_id"], name: "snp_genes_snp_id"
+  end
+
+  create_table "snp_impacts", id: :serial, force: :cascade do |t|
+    t.text "name"
+  end
+
+  create_table "snp_types", id: :serial, force: :cascade do |t|
+    t.text "name"
   end
 
   create_table "snps", id: :serial, force: :cascade do |t|
@@ -196,6 +287,9 @@ ActiveRecord::Schema[7.0].define(version: 2023_04_03_201955) do
     t.text "gene_annots_json"
     t.text "regulatory_annots_json"
     t.text "annots_json"
+    t.text "identifier_dm6"
+    t.text "chr_dm6"
+    t.integer "pos_dm6"
     t.index ["identifier"], name: "identifier_snps"
   end
 
@@ -291,11 +385,17 @@ ActiveRecord::Schema[7.0].define(version: 2023_04_03_201955) do
   add_foreign_key "dgrp_line_studies_phenotypes", "phenotypes", name: "dgrp_line_studies_phenotypes_phenotype_id_fkey"
   add_foreign_key "dgrp_lines", "dgrp_statuses", name: "dgrp_lines_dgrp_status_id_fkey"
   add_foreign_key "dgrp_lines", "users", name: "dgrp_lines_user_id_fkey"
+  add_foreign_key "downloads_releases", "downloads"
+  add_foreign_key "downloads_releases", "releases"
   add_foreign_key "figures", "figure_types", name: "figures_figure_type_id_fkey"
   add_foreign_key "figures", "studies", name: "figures_study_id_fkey"
   add_foreign_key "figures", "users", name: "figures_user_id_fkey"
+  add_foreign_key "flybase_alleles", "genes", name: "flybase_alleles_gene_id_fkey"
   add_foreign_key "gwas_results", "phenotypes", name: "gwas_results_phenotype_id_fkey"
   add_foreign_key "gwas_results", "snps", name: "gwas_results_snp_id_fkey"
+  add_foreign_key "human_orthologs", "genes", name: "human_orthologs_gene_id_fkey"
+  add_foreign_key "oma_orthologs", "genes", name: "oma_orthologs_gene_id_fkey"
+  add_foreign_key "oma_orthologs", "organisms", name: "oma_orthologs_organism_id_fkey"
   add_foreign_key "ontology_terms", "ontologies", name: "ontology_terms_ontology_id_fkey"
   add_foreign_key "ontology_terms_phenotypes", "ontology_terms", name: "ontology_terms_phenotypes_ontology_term_id_fkey"
   add_foreign_key "ontology_terms_phenotypes", "phenotypes", name: "ontology_terms_phenotypes_phenotype_id_fkey"
@@ -304,6 +404,9 @@ ActiveRecord::Schema[7.0].define(version: 2023_04_03_201955) do
   add_foreign_key "phenotypes", "summary_types", name: "phenotypes_summary_type_id_fkey"
   add_foreign_key "phenotypes", "units", name: "phenotypes_unit_id_fkey"
   add_foreign_key "phenotypes", "users", name: "phenotypes_user_id_fkey"
+  add_foreign_key "snp_genes", "genes", name: "snp_genes_gene_id_fkey"
+  add_foreign_key "snp_genes", "snps", name: "snp_genes_snp_id_fkey"
+  add_foreign_key "snp_genes", "var_types", name: "snp_genes_var_type_id_fkey"
   add_foreign_key "studies", "journals", name: "studies_journal_id_fkey"
   add_foreign_key "studies", "statuses", name: "studies_status_id_fkey"
   add_foreign_key "studies", "users", column: "submitter_id", name: "studies_submitter_id_fkey"

@@ -15,7 +15,15 @@
   <div class="col-md-6 mb-2">
     <div class="card h-100">
       <div class='card-body'>
-	<h3>DGRPool</h3>
+	<div class="d-flex justify-content-between align-items-baseline">
+	  <div>
+	    <h3 class="d-inline mb-0">DGRPool</h3>
+	    <% if @latest_release %>
+	      <%= link_to @latest_release.name, @latest_release, {:class => "badge text-bg-success text-decoration-none ms-2"} %>
+	    <% end %>
+	  </div>
+	  <%= link_to "All releases", releases_path %>
+	</div>
 	A database on studies about DGRP lines and phenotypes
       </div>
     </div>
@@ -147,15 +155,19 @@
       </div>
     </div>
 
-    <div class="card mb-2" style='height:35.5%'>
+    <div class="card mb-2">
       <div class='card-body'>
-        <h3>Downloads</h3>
-	<% dummy_study = Study.first %>
-        <%= link_to 'DGRP lines (TSV)', get_file_study_path(dummy_study, :namespace => 'downloads', :name => 'dgrp_lines.tsv'), {:class => 'btn btn-sm btn-secondary'} %>
-	<%= link_to 'Phenotypes (TSV)', get_file_study_path(dummy_study, :namespace => 'downloads', :name => 'phenotypes.tsv'), {:class => 'btn btn-sm btn-secondary'} %>
-	<%= link_to 'Studies (TSV)', get_file_study_path(dummy_study, :namespace => 'downloads', :name => 'studies.tsv'), {:class => 'btn btn-sm btn-secondary'} %>
-	<%= link_to "All phenotype mean (numerical) data by sex (TSV)", get_file_study_path(dummy_study, :namespace => "downloads", :name => 'all_phenotype_mean_data.tsv'), {:class => 'btn btn-sm btn-secondary'} %>
-	
+        <div>
+          <h3 class="d-inline mb-0">Downloads</h3>
+          <% if @latest_release %>
+            <%= link_to @latest_release.name, @latest_release, {:class => "badge text-bg-success text-decoration-none ms-2"} %>
+          <% end %>
+        </div>
+        <% if @latest_release %>
+          <div class="mt-2">
+            <%= render "releases/files", :release => @latest_release %>
+          </div>
+        <% end %>
       </div>
     </div>
   </div>

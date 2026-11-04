@@ -1,0 +1,36 @@
+<p style="color: green"><%= notice %></p>
+
+<% if admin? %>
+<div class='float-end'>
+  <%= link_to "New release", new_release_path, {:class => 'btn btn-primary'} %>
+</div>
+<% end %>
+
+<h1>Downloads</h1>
+
+<div id="releases" class="row row-cols-1 g-4">
+  <% @releases.each do |release| %>
+  <div class="col">
+    <div class="card">
+      <div class="card-body">
+        <h5 class="card-title">
+          <%= link_to release.name, release %>
+          <% if release.release_date.present? %>
+            <small class="text-muted"><%= release.release_date.strftime("%Y-%m-%d") %></small>
+          <% end %>
+        </h5>
+        <% if release.description.present? %>
+          <%= simple_format(release.description) %>
+        <% end %>
+        <p><%= link_to "GitHub release", release.url, {:target => "_blank"} %></p>
+        <%= render "files", :release => release %>
+      </div>
+      <% if admin? %>
+      <div class="card-footer">
+        <%= link_to "Edit", edit_release_path(release), {:class => 'btn btn-success'} %>
+      </div>
+      <% end %>
+    </div>
+  </div>
+  <% end %>
+</div>

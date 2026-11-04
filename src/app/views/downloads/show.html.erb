@@ -1,0 +1,25 @@
+<p style="color: green"><%= notice %></p>
+
+<h1><%= @download.filename %></h1>
+
+<p><%= @download.description %></p>
+
+<h2>Releases</h2>
+<ul>
+  <% @download.releases.sort_by { |release| Release.version_key(release.name) }.reverse.each do |release| %>
+  <li>
+    <%= link_to release.name, release %>
+    <% if release.file_present?(@download) %>
+      (file present)
+    <% else %>
+      (file missing)
+    <% end %>
+  </li>
+  <% end %>
+</ul>
+
+<div>
+  <%= link_to "Edit this download filename", edit_download_path(@download), {:class => 'btn btn-success'} %>
+  <%= link_to "Back to download filenames", downloads_path, {:class => 'btn btn-secondary'} %>
+  <%= button_to "Destroy this download filename", @download, :method => :delete, :class => "btn btn-danger mt-2" %>
+</div>

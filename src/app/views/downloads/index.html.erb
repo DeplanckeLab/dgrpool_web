@@ -1,0 +1,38 @@
+<p style="color: green"><%= notice %></p>
+
+<div class='float-end'>
+  <%= link_to "New download filename", new_download_path, {:class => 'btn btn-primary'} %>
+</div>
+
+<h1>Download filenames</h1>
+
+<p>These filenames can be attached to a release. Each release reads them from its own folder, and a file may be absent from some releases.</p>
+
+<table id='downloads'>
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Filename</th>
+      <th>Description</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <% @downloads.each do |download| %>
+    <tr>
+      <td><%= download.id %></td>
+      <td><%= download.filename %></td>
+      <td><%= download.description %></td>
+      <td><%= link_to 'Edit', edit_download_path(download), {:class => 'btn btn-success'} %></td>
+    </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<%= javascript_tag do %>
+
+document.addEventListener('DOMContentLoaded', function () {
+let table = new DataTable('#downloads', {pageLength:100})
+});
+
+<% end %>

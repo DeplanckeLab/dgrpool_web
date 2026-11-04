@@ -90,6 +90,12 @@ Rails.application.routes.draw do
       get :get_gwas_boxplot
     end
   end
+  resources :releases do
+    member do
+      get :file
+    end
+  end
+  resources :downloads
   resources :categories
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 

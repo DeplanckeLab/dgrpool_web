@@ -38,6 +38,9 @@
 	<li class="nav-item mr-4">
           <%= link_to 'Variants', variants_path(), {:data => {:turbo => 'false', :method => 'get'}, :class => 'nav-link' } %>
         </li>
+	<li class="nav-item mr-4">
+          <%= link_to 'Downloads', releases_path(), {:data => {:turbo => 'false', :method => 'get'}, :class => 'nav-link' } %>
+        </li>
 <!--        <% if current_user %>
         <li class="nav-item mr-4">
           <%= link_to "Submit new study", new_study_path(),  {:class => 'nav-link' } %> 
@@ -70,6 +73,12 @@
             </li>
 	    <li>
               <%= link_to raw('Units'), units_path(), {:data => {:turbo => 'false', :method => 'get'}, :class => 'dropdown-item'} %>
+            </li>
+	    <li>
+              <%= link_to raw('Releases'), releases_path(), {:data => {:turbo => 'false', :method => 'get'}, :class => 'dropdown-item'} %>
+            </li>
+	    <li>
+              <%= link_to raw('Download filenames'), downloads_path(), {:data => {:turbo => 'false', :method => 'get'}, :class => 'dropdown-item'} %>
             </li>
 	    <li>
 	      <%= link_to "Update export file for GWAS analysis", upd_export_home_index_path(), {:class => 'dropdown-item'} %>

@@ -1,0 +1,55 @@
+<p style="color: green"><%= notice %></p>
+
+<h1>Release <%= @release.name %></h1>
+
+<% if @release.release_date.present? %>
+  <p><%= @release.release_date.strftime("%Y-%m-%d") %></p>
+<% end %>
+
+<% if @release.description.present? %>
+  <%= simple_format(@release.description) %>
+<% end %>
+
+<p><%= link_to @release.url, @release.url, {:target => "_blank"} %></p>
+
+<% if @release.gwas_command.present? %>
+  <h2>GWAS command</h2>
+  <pre class="code-block"><code><%= @release.gwas_command %></code></pre>
+<% end %>
+
+<table class="table">
+  <thead>
+    <tr>
+      <th>Description</th>
+      <th>Filename</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <% @release.downloads.each do |download| %>
+    <% present = @release.file_present?(download) %>
+    <% next unless present || admin? %>
+    <tr>
+      <td><%= download.description %></td>
+      <td><%= download.filename %></td>
+      <td>
+        <% if present %>
+          <%= link_to "Download", file_release_path(@release, :name => download.filename), {:class => 'btn btn-sm btn-secondary'} %>
+        <% else %>
+          Missing
+        <% end %>
+      </td>
+    </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<div>
+  <% if admin? %>
+    <%= link_to "Edit this release", edit_release_path(@release), {:class => 'btn btn-success'} %>
+  <% end %>
+  <%= link_to "Back to downloads", releases_path, {:class => 'btn btn-secondary'} %>
+  <% if admin? %>
+    <%= button_to "Destroy this release", @release, :method => :delete, :class => "btn btn-danger mt-2" %>
+  <% end %>
+</div>
