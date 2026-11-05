@@ -90,7 +90,7 @@ Rails.application.routes.draw do
       get :get_gwas_boxplot
     end
   end
-  resources :releases do
+  resources :releases, :constraints => { :id => /\d+\.\d+\.\d+/ } do
     member do
       get :file
     end

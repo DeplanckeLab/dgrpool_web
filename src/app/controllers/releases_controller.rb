@@ -72,7 +72,7 @@ class ReleasesController < ApplicationController
 
   private
     def set_release
-      @release = Release.find(params[:id])
+      @release = Release.find_by!(:name => params[:id])
     end
 
     def release_params

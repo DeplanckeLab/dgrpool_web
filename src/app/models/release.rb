@@ -14,6 +14,10 @@ class Release < ApplicationRecord
     includes(:downloads).sort_by { |release| version_key(release.name) }.reverse
   end
 
+  def to_param
+    name
+  end
+
   def self.version_key(name)
     name.to_s.split(".").map(&:to_i)
   end
