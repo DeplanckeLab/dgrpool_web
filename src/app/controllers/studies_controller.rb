@@ -373,7 +373,7 @@ class StudiesController < ApplicationController
         end
         
         #update stats
-        cmd = "rails compute_penotype_stats & rails compute_stats"
+        cmd = "rails compute_phenotype_stats & rails compute_stats"
         `#{cmd}`
 
         #update export                                                                                                                                                                    
