@@ -400,10 +400,25 @@ class StudiesController < ApplicationController
     filepath = nil
     filename = nil
     
-    if namespace == 'studies' and @study and params[:name]
-      filepath = @file_dir + @study.id.to_s + (@study.id.to_s + "_" + params[:name])
-    elsif ['gwas', 'downloads', 'tmp'].include?(namespace) and params[:name]
-      filepath = @file_dir + params[:name]
+    name = params[:name].to_s
+    ## reject path traversal / absolute paths / null bytes in the requested name
+    if name.empty? or name.include?("\0") or name.start_with?('/') or name.split(/[\/\\]/).include?('..')
+      name = nil
+    end
+
+    if namespace == 'studies' and @study and name
+      base_dir = @file_dir + @study.id.to_s
+      filepath = base_dir + (@study.id.to_s + "_" + name)
+    elsif ['gwas', 'downloads', 'tmp'].include?(namespace) and name
+      base_dir = @file_dir
+      filepath = @file_dir + name
+    end
+
+    ## make sure the resolved path stays inside the allowed directory
+    if filepath
+      base = File.expand_path(base_dir.to_s)
+      full = File.expand_path(filepath.to_s)
+      filepath = nil unless full.start_with?(base + File::SEPARATOR)
     end
     #    ext =  filename.split(".").last                                                                                                                         
     
