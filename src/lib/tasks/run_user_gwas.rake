@@ -45,7 +45,7 @@ task run_gwas: :environment do
         #8. [Required] Minimum MAF
         #9. [Required] Filtering threshold for p-value
         #10. [Optional] Name of phenotype to load (if file contains multiple phenotypes)
-        cmd = "/usr/bin/Rscript ./lib/running_GWAS_user.R --require-pheno --require-covar #{tmp_file} #{plink_file} #{cov_file} #{annot_file} #{output_dir} 2 0.2 0.05 0.001 1> #{output_dir + "gwas_output.json"} 2> #{output_dir + "gwas_output.err"}"
+        cmd = "/usr/bin/Rscript ./lib/running_GWAS_user.R #{tmp_file} #{plink_file} #{cov_file} #{annot_file} #{output_dir} 2 0.2 0.01 0.001 1> #{output_dir + "gwas_output.json"} 2> #{output_dir + "gwas_output.err"}"
         puts "CMD: " + cmd
         `#{cmd}`
         
