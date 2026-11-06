@@ -77,15 +77,18 @@ class StudiesController < ApplicationController
         @h_pheno = Basic.safe_parse_json(@study.pheno_json, {})
         if params[:dataset] == 'summary'
           @h_pheno.delete('summary')
-        elsif  m = params[:dataset].match(/raw_(\d+)/)
+          ## summary phenotypes are created with dataset_id = nil (see parse_dataset)
+          phenotypes_to_del = Phenotype.where(:study_id => @study.id, :is_summary => true, :dataset_id => [nil, 0]).all
+        elsif  m = params[:dataset].to_s.match(/\Araw_(\d+)\z/)
           @raw_id = m[1]
-          @h_pheno['raw'].delete(@raw_id)
+          @h_pheno['raw'].delete(@raw_id) if @h_pheno['raw']
+          phenotypes_to_del = Phenotype.where(:study_id => @study.id, :is_summary => false, :dataset_id => @raw_id.to_i).all
+        else
+          render :plain => "Unknown dataset" and return
         end
 
         # get all dgrp_lines
         all_phenotypes = Phenotype.where(:study_id => @study.id).all
-        #phenotypes_to_keep =  Phenotype.where(:study_id => @study.id, :is_summary => (params[:dataset] == 'summary') ? false : true).all.reject{|e| @raw_id and @raw_id.to_i == e.dataset_id} #, :is_summary => ((params[:dataset] == 'summary') ? true : false), :dataset_id => @raw_id).all
-        phenotypes_to_del =  Phenotype.where(:study_id => @study.id, :is_summary => (params[:dataset] == 'summary') ? true : false, :dataset_id => @raw_id.to_i).all
         #.reject{|e| @raw_id and @raw_id.to_i == e.dataset_id}
         # phenotypes_to_del = all_phenotypes - phenotypes_to_keep
         phenotypes_to_keep = all_phenotypes - phenotypes_to_del
@@ -138,6 +141,9 @@ class StudiesController < ApplicationController
         ## replace values in h
        # logger.debug(@h_pheno.to_json)
         @study.update({:pheno_json => @h_pheno.to_json})
+
+        ## recompute sums so deleted phenotypes no longer appear in pheno_sum_json etc.
+        Basic.upd_sums(@study)
        # logger.debug @log.to_json
     end
     
@@ -213,7 +219,7 @@ class StudiesController < ApplicationController
       end
       
       new_phenotypes = h_pheno.keys - h_existing_pheno.keys
-      bad_new_phenotypes = Phenotype.where(:name => new_phenotypes).all.select{|e| e.study_id != @study.id or (params[:dataset] == 'summary' and e.is_summary == false) or (params[:dataset] != 'summary' and @raw_id != e.dataset_id)}.map{|e| e.name}
+      bad_new_phenotypes = Phenotype.where(:name => new_phenotypes).all.select{|e| e.study_id != @study.id or (params[:dataset] == 'summary' and e.is_summary == false) or (params[:dataset] != 'summary' and @raw_id.to_i != e.dataset_id)}.map{|e| e.name}
       removed_phenotypes = h_existing_pheno.keys - h_pheno.keys
 
       all_phenotypes = h_existing_pheno.keys | h_pheno.keys
@@ -257,10 +263,14 @@ class StudiesController < ApplicationController
           p.dgrp_line_studies.delete_all
           p.destroy
         end
-        ## delete dgrp line associations
-        removed_dgrp_line_studies = DgrpLineStudy.where(:id => DgrpLine.where(:name => removed_dgrp_lines).all.map{|e| e.id}).all
-        removed_dgrp_line_studies.map{|e| e.phenotypes.delete_all}
-        removed_dgrp_line_studies.destroy_all
+        ## delete dgrp line associations (only for this study, and only the links to this dataset's phenotypes)
+        removed_dgrp_line_ids = DgrpLine.where(:name => removed_dgrp_lines).pluck(:id)
+        dataset_phenotype_ids = Phenotype.where(:study_id => @study.id, :is_summary => (params[:dataset] == 'summary'), :dataset_id => @raw_id).pluck(:id)
+        DgrpLineStudy.where(:study_id => @study.id, :dgrp_line_id => removed_dgrp_line_ids).each do |dgrp_line_study|
+          dgrp_line_study.phenotypes.delete(dgrp_line_study.phenotypes.where(:id => dataset_phenotype_ids).to_a)
+          ## remove the line from the study only if no other dataset still uses it
+          dgrp_line_study.destroy if !dgrp_line_study.phenotypes.reload.exists?
+        end
                                      #.each do |d|
           #@study.dgrp_line_studies.delete(d)
       #  end
