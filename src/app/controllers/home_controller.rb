@@ -1,4 +1,5 @@
 class HomeController < ApplicationController
+  before_action :authorize_admin, only: %i[upd_export]
 
   def get_history
     render :partial => 'get_history'
@@ -108,6 +109,11 @@ class HomeController < ApplicationController
     phenoname = params[:phenotype_name]#.gsub(/[^a-zA-Z0-9]+/, '_')
    # s = params[:sex]
     @md5 = params[:md5]
+
+    ## validate inputs used to build file paths
+    if !valid_md5?(@md5) or !safe_path_component?(phenoname)
+      render :plain => "Invalid parameters", :status => :bad_request and return
+    end
     
     @h_impact = {
       'HIGH' => 'danger',
@@ -135,8 +141,8 @@ class HomeController < ApplicationController
     #s    h_sum = Basic.safe_parse_json(@study.pheno_sum_json, {})
 #    first_dgrp_line = h_sum.keys.first
 #    @list_sex = h_sum[first_dgrp_line]["sex"]
-    @list_sex = params[:list_sex].split(",")
-    @cur_sex = params[:sex] || @list_sex.first
+    @list_sex = params[:list_sex].to_s.split(",") & VALID_SEX
+    @cur_sex = (VALID_SEX.include?(params[:sex])) ? params[:sex] : @list_sex.first
 
     @h_covariate_mapping = {
       "wolba" => 2347,
@@ -186,7 +192,7 @@ class HomeController < ApplicationController
       @times = []
       @times.push [Time.now, 0]
       if File.exist? @tmp_dir + @h_files[s][:annot]
-        @h_nber_res[s] = `zless #{@tmp_dir + @h_files[s][:annot]} | wc -l`.to_i - 1
+        @h_nber_res[s] = count_gz_data_lines(@tmp_dir + @h_files[s][:annot])
         Zlib::GzipReader.open(@tmp_dir + @h_files[s][:annot]) {|gz|
           i=0
           gz.each_line do |l|
@@ -329,7 +335,11 @@ class HomeController < ApplicationController
 
     @h_correlation_res = {}
     
-    if params[:md5] 
+    if params[:md5] and !valid_md5?(params[:md5])
+      render :plain => "Invalid parameters", :status => :bad_request and return
+    end
+
+    if params[:md5]
       h_res_file = Pathname.new(APP_CONFIG[:data_dir]) + "tmp" + params[:md5] + 'h_correlation_res.json'
       if File.exist? h_res_file
         tmp_correlation_res = Basic.safe_parse_json(File.read(h_res_file), {})
@@ -484,8 +494,9 @@ class HomeController < ApplicationController
     elsif params[:md5]
       @h_phenotypes = {}
       Phenotype.all.map{|p| @h_phenotypes[p.id] = p}
-      
-      gwas_output_file = @h_correlation_res[:output_dir] + "gwas_output.json"
+
+      ## rebuild the path from the validated md5 instead of trusting output_dir stored in the JSON
+      gwas_output_file = tmp_dir + params[:md5] + "gwas_output.json"
       gwas_output = {}
       if File.exist? gwas_output_file
         gwas_output = Basic.safe_parse_json(File.read(gwas_output_file), {})

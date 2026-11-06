@@ -1,4 +1,5 @@
 class FlybaseAllelesController < ApplicationController
+  before_action :authorize_admin, only: %i[new create edit update destroy]
   before_action :set_flybase_allele, only: %i[ show edit update destroy ]
 
   # GET /flybase_alleles or /flybase_alleles.json

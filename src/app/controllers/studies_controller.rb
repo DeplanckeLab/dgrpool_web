@@ -436,7 +436,10 @@ class StudiesController < ApplicationController
     if filepath and File.exist? filepath
       #          fname = (params[:type] == 'archive') ? (params[:key] + ".tgz") : [@project.key, step_name,  run_id, filename].compact.join("_")           
       fname = filepath.basename.to_s
-      send_file filepath.to_s, type: params[:content_type] || 'text', #'application/octet-stream',
+      ## only allow safe content types, so a stored file can never be served as HTML/JS
+      content_type = (params[:content_type] == 'application/octet-stream') ? 'application/octet-stream' : 'text/plain'
+      response.headers['X-Content-Type-Options'] = 'nosniff'
+      send_file filepath.to_s, type: content_type,
                 x_sendfile: true, buffer_size: 512, disposition: (!params[:display]) ? ("attachment; filename=" + fname) : ''
     #      Basic.add_history("Download #{params[:p]}", @project, current_user, {:admin_only => true}) if params[:dl] == "1"
     else
@@ -647,14 +650,16 @@ class StudiesController < ApplicationController
   def create
     @study = Study.new(study_params)
     @study.status_id = 1
+    @study.validator_id = nil if !admin?
     doi = nil
-    if m =  @study.doi.strip.match(/(10\.\d{4,9}\/[\-._;()\/\:a-zA-Z0-9]+)$/)
+    if m =  @study.doi.to_s.strip.match(/(10\.\d{4,9}\/[\-._;()\/\:a-zA-Z0-9]+)$/)
       doi = m[1]
     end
     h = CustomFetch.doi_info(doi)
     existing_study = Study.where(:doi => doi).first
-    h[:submitter_id] = current_user.id if current_user
-    
+    ## submitter is the logged-in user, unless an admin explicitly chose one
+    h[:submitter_id] = current_user.id if current_user and !(admin? and @study.submitter_id)
+
     respond_to do |format|
       if doi and !existing_study and h[:first_author] and @study.save
        # format.html { redirect_to study_url(@study), notice: "Study was successfully created." }
@@ -747,6 +752,9 @@ class StudiesController < ApplicationController
 
     # Only allow a list of trusted parameters through.
     def study_params
-      params.fetch(:study).permit(:title, :authors_json, :abstract, :journal_id, :pmid, :doi, :first_author, :status_id, :submitter_id, :validator_id, :volume, :issue, :comment, :description, :repository_identifiers)
+      p = params.fetch(:study).permit(:title, :authors_json, :abstract, :journal_id, :pmid, :doi, :first_author, :status_id, :submitter_id, :validator_id, :volume, :issue, :comment, :description, :repository_identifiers)
+      ## only admins can choose the submitter
+      p.delete(:submitter_id) if !admin?
+      p
     end
 end

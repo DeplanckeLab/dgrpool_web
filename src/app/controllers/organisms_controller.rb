@@ -1,4 +1,5 @@
 class OrganismsController < ApplicationController
+  before_action :authorize_admin, only: %i[new create edit update destroy]
   before_action :set_organism, only: %i[ show edit update destroy ]
 
   # GET /organisms or /organisms.json

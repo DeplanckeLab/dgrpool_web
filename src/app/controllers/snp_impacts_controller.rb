@@ -1,4 +1,5 @@
 class SnpImpactsController < ApplicationController
+  before_action :authorize_admin, only: %i[new create edit update destroy]
   before_action :set_snp_impact, only: %i[ show edit update destroy ]
 
   # GET /snp_impacts or /snp_impacts.json

@@ -1,4 +1,5 @@
 class VarTypesController < ApplicationController
+  before_action :authorize_admin, only: %i[new create edit update destroy]
   before_action :set_var_type, only: %i[ show edit update destroy ]
 
   # GET /var_types or /var_types.json

@@ -74,6 +74,25 @@ class ApplicationController < ActionController::Base
      session[:filter_variant_impact]||=''
   end
 
+  ## user result directories in data/tmp are named by a SHA-256 hex digest (see Basic.compute_correlation)
+  def valid_md5?(s)
+    s.is_a?(String) and s.match?(/\A\h{64}\z/)
+  end
+
+  ## a single path component: no separators, no "..", no null byte
+  def safe_path_component?(s)
+    s.is_a?(String) and s != '' and s != '.' and s != '..' and !s.match?(/[\/\\\0]/)
+  end
+
+  VALID_SEX = ['F', 'M', 'NA'].freeze
+
+  ## count data lines (all lines minus header) of a gzipped file without using the shell
+  def count_gz_data_lines(file)
+    n = 0
+    Zlib::GzipReader.open(file) { |gz| gz.each_line { n += 1 } }
+    n - 1
+  end
+
   def plain_text_file?(content)
     sample = content[0, 1024]
     non_text_bytes = sample.each_byte.count { |byte| byte < 9 || (byte > 13 && byte < 32) || byte > 126 }

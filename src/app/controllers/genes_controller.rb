@@ -1,4 +1,5 @@
 class GenesController < ApplicationController
+  before_action :authorize_admin, only: %i[new create edit update destroy]
   before_action :set_gene, only: %i[ show edit update destroy ]
   
   def autocomplete

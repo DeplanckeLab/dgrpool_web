@@ -1,4 +1,5 @@
 class FiguresController < ApplicationController
+  before_action :authorize_admin, only: %i[new create edit update destroy]
   before_action :set_figure, only: %i[ show edit update destroy ]
 
   # GET /figures or /figures.json

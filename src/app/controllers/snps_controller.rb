@@ -92,7 +92,7 @@ class SnpsController < ApplicationController
     location_ranges = []
     snp_names = []
     free_text.gsub(/\[.+?\]/, "").split(/\s*[\, ]\s*/).map{|e|
-      if e.match(/^\d?\w\:\d+\-\d+$/)
+      if e.match(/\A\d?\w\:\d+\-\d+\z/)
         location_ranges.push e
       else
         snp_names.push e
@@ -112,10 +112,14 @@ class SnpsController < ApplicationController
     location_ranges.each do |location_range|
       t = location_range.split(":")
       t2 = t[1].split("-")
+      chr = t[0]
+      pos_start = t2[0].to_i
+      pos_end = t2[1].to_i
+      ## bound parameters: never interpolate user input into SQL
       if session[:vs_settings][:assembly] == 'dm3'
-        @snps |= Snp.where("chr = '#{t[0]}' and pos <= #{t2[1]} and pos >= #{t2[0]}").all
+        @snps |= Snp.where("chr = ? and pos <= ? and pos >= ?", chr, pos_end, pos_start).all
       else
-        @snps |= Snp.where("chr_dm6 = '#{t[0]}' and pos_dm6 <= #{t2[1]} and pos_dm6 >= #{t2[0]}").all
+        @snps |= Snp.where("chr_dm6 = ? and pos_dm6 <= ? and pos_dm6 >= ?", chr, pos_end, pos_start).all
       end
     end
 

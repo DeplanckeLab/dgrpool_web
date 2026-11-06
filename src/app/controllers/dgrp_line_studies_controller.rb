@@ -1,4 +1,5 @@
 class DgrpLineStudiesController < ApplicationController
+  before_action :authorize_admin, only: %i[new create edit update destroy]
   before_action :set_dgrp_line_study, only: %i[ show edit update destroy ]
 
   # GET /dgrp_line_studies or /dgrp_line_studies.json

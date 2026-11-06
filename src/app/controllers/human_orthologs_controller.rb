@@ -1,4 +1,5 @@
 class HumanOrthologsController < ApplicationController
+  before_action :authorize_admin, only: %i[new create edit update destroy]
   before_action :set_human_ortholog, only: %i[ show edit update destroy ]
 
   # GET /human_orthologs or /human_orthologs.json

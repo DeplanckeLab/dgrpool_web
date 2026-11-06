@@ -76,7 +76,7 @@ class PhenotypesController < ApplicationController
       @h_pheno_sum = Basic.safe_parse_json(@study.pheno_sum_json, {})
       dgrp_lines = @h_pheno_sum.keys
       first_dgrp_line =  dgrp_lines.first
-    elsif params[:phenotype_name] and params[:md5] 
+    elsif params[:phenotype_name] and valid_md5?(params[:md5])
       tmp_dir = Pathname.new(APP_CONFIG[:data_dir]) + 'tmp' + params[:md5]
       dataset_sum_file = tmp_dir + 'dataset_sum.json'
       phenotype_key = params[:phenotype_name]
@@ -291,7 +291,7 @@ class PhenotypesController < ApplicationController
       if File.exist?(@gwas_dir + @h_files[s][:annot])
         #logger.debug("zless #{@gwas_dir + @h_files[s][:annot]} | wc -l")
         #logger.debug(`zless #{@gwas_dir + @h_files[s][:annot]} 2>&1`)
-        @h_nber_res[s] = `zless #{@gwas_dir + @h_files[s][:annot]} | wc -l`.to_i - 1 
+        @h_nber_res[s] = count_gz_data_lines(@gwas_dir + @h_files[s][:annot])
      
         Zlib::GzipReader.open(@gwas_dir + @h_files[s][:annot]) {|gz|
           i=0

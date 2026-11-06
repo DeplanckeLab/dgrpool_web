@@ -1,4 +1,5 @@
 class GwasResultsController < ApplicationController
+  before_action :authorize_admin, only: %i[new create edit update destroy]
   before_action :set_gwas_result, only: %i[ show edit update destroy ]
 
   def set_search_session
