@@ -1,6 +1,6 @@
-<%= form_with(model: dgrp_line) do |form| %>
+<%= form_with(model: dgrp_line, data: { turbo: false }) do |form| %>
   <% if dgrp_line.errors.any? %>
-    <div style="color: red">
+    <div class="alert alert-danger">
       <h2><%= pluralize(dgrp_line.errors.count, "error") %> prohibited this dgrp_line from being saved:</h2>
 
       <ul>
@@ -11,7 +11,27 @@
     </div>
   <% end %>
 
+  <div class="mb-3">
+    <%= form.label :name, "Name", class: "form-label" %>
+    <%= form.text_field :name, required: true, placeholder: "e.g. DGRP_021", class: "form-control" %>
+  </div>
+
+  <div class="mb-3">
+    <%= form.label :fbsn, "Flybase ID", class: "form-label" %>
+    <%= form.text_field :fbsn, placeholder: "e.g. FBsn0000001", class: "form-control" %>
+  </div>
+
+  <div class="mb-3">
+    <%= form.label :bloomington_id, "Bloomington ID", class: "form-label" %>
+    <%= form.number_field :bloomington_id, class: "form-control" %>
+  </div>
+
+  <div class="mb-3">
+    <%= form.label :dgrp_status_id, "Status", class: "form-label" %>
+    <%= form.collection_select :dgrp_status_id, DgrpStatus.order(:id), :id, :label, { include_blank: true }, { class: "form-select" } %>
+  </div>
+
   <div>
-    <%= form.submit %>
+    <%= form.submit class: "btn btn-primary" %>
   </div>
 <% end %>

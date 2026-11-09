@@ -1,11 +1,5 @@
 <p style="color: green"><%= notice %></p>
 
-<% if curator? %>
-<div class='float-end'>
-  <%= link_to "New DGRP line", new_dgrp_line_path, :class=> 'btn btn-primary' %>
-</div>
-<% end %>
-
 <h1>DGRP lines</h1>
 
 <table id='dgrp_lines' class="table-striped" width='100%'> <!-- class="table" data-controller="datatable">-->
@@ -26,7 +20,7 @@
       <td><%= p.name %></td>
       <td><%= (p.fbsn) ? link_to(p.fbsn, "https://flybase.org/reports/#{p.fbsn}.html", {:target => '_blank'}) : '' %></td>
       <td><%= (p.bloomington_id) ? link_to(p.bloomington_id , "https://bdsc.indiana.edu/Home/Search?presearch=#{p.bloomington_id}", {:target => '_blank'}) : 'NA' %></td>
-      <td><%= p.nber_studies %> (<%= (@nber_studies > 0) ? (p.nber_studies*100/@nber_studies) : 0 %>%)
+      <td><%= p.nber_studies.to_i %> (<%= (@nber_studies > 0) ? (p.nber_studies.to_i*100/@nber_studies) : 0 %>%)
 	<!--.map{|sid| "<span class='badge bg-info'>" + display_reference_short(@h_studies[sid]) + "</span>"}.join(" ") %>
 	  -->
       </td>

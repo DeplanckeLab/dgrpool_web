@@ -63,30 +63,10 @@ class DgrpLinesController < ApplicationController
      
   end
   
-  # GET /dgrp_lines/new
-  def new
-    @dgrp_line = DgrpLine.new
-  end
-
   # GET /dgrp_lines/1/edit
   def edit
     if !curator?
       redirect_to unauthorized_path
-    end
-  end
-
-  # POST /dgrp_lines or /dgrp_lines.json
-  def create
-    @dgrp_line = DgrpLine.new(dgrp_line_params)
-
-    respond_to do |format|
-      if curator? and @dgrp_line.save
-        format.html { redirect_to dgrp_line_url(@dgrp_line), notice: "Dgrp line was successfully created." }
-        format.json { render :show, status: :created, location: @dgrp_line }
-      else
-        format.html { render :new, status: :unprocessable_entity }
-        format.json { render json: @dgrp_line.errors, status: :unprocessable_entity }
-      end
     end
   end
 
@@ -125,6 +105,6 @@ class DgrpLinesController < ApplicationController
 
     # Only allow a list of trusted parameters through.
     def dgrp_line_params
-      params.fetch(:dgrp_line, {})
+      params.require(:dgrp_line).permit(:name, :fbsn, :bloomington_id, :dgrp_status_id)
     end
 end

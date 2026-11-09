@@ -44,7 +44,7 @@ Rails.application.routes.draw do
   resources :figure_types
   resources :dgrp_statuses
   resources :dgrp_line_studies
-  resources :dgrp_lines
+  resources :dgrp_lines, except: %i[ new create ]
   resources :journals
   resources :statuses
   resources :studies do

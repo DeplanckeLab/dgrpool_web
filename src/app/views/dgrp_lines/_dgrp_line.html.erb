@@ -1,20 +1,21 @@
 <div id="<%= dom_id dgrp_line %>">
+  <% dgrp_status_name = @h_dgrp_statuses[dgrp_line.dgrp_status_id]&.name %>
 
-  <% if @h_dgrp_statuses[dgrp_line.dgrp_status_id].name == 'unavailable' %>
+  <% if dgrp_status_name == 'unavailable' %>
   <div class='alert alert-danger'>
     This line is NOT available in Bloomington for purchase.
   </div>
   <div class='alert alert-danger'>
     This line was NOT part of the 205 lines genotyped using WGS, so GWAS studies CANNOT be applied to this fly.
   </div>
-  <% elsif  @h_dgrp_statuses[dgrp_line.dgrp_status_id].name == 'available' %>
+  <% elsif  dgrp_status_name == 'available' %>
   <div class='alert alert-success'>
     This line is available in Bloomington for purchase (follow "available" link below)
   </div>
   <div class='alert alert-success'>
     This line was part of the 205 lines genotyped using WGS, so GWAS studies can be applied to this fly.
   </div>
-  <% elsif @h_dgrp_statuses[dgrp_line.dgrp_status_id].name == 'genotyped' %>
+  <% elsif dgrp_status_name == 'genotyped' %>
   <div class='alert alert-danger'>
     This line is NOT available in Bloomington for purchase.
   </div>
