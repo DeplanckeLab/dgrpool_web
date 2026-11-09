@@ -5,11 +5,6 @@ task compute_stats: :environment do
 
   data_dir = Pathname.new(APP_CONFIG[:data_dir]) + 'stats'
 
-  if File.exists data_dir + 'stats.json'
-    puts "File already exists, please archive in stats.X.json and run again"
-    exit
-  end
-  
   ## compute dgrp_lines stats
 
   dgrp_lines = DgrpLine.all
@@ -234,8 +229,19 @@ task compute_stats: :environment do
   
   puts h_stats[:sex].to_json
 
-  File.open(h_stats_file, 'w') do |f|
+  ## write to a temp file then rename: the home page reads stats.json on every request,
+  ## so it must never see a partially written file
+  tmp_file = data_dir + "stats.json.tmp.#{Process.pid}"
+  File.open(tmp_file, 'w') do |f|
     f.write h_stats.to_json
+  end
+  File.rename(tmp_file, h_stats_file)
+
+  ## keep one archive per day (the last run of the day wins), only when stats changed
+  ## since the most recent archive
+  last_archive = Dir.glob((data_dir + 'stats.[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9].json').to_s).max
+  if !last_archive or File.read(last_archive) != File.read(h_stats_file)
+    FileUtils.cp(h_stats_file, data_dir + "stats.#{Date.today.strftime('%Y-%m-%d')}.json")
   end
 
 end

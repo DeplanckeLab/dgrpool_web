@@ -234,7 +234,8 @@ var data = []
 <% ['integrated', 'all'].each do |k| %>
 var trace = {
     x: <%= raw @category_ids.map{|cid| @h_categories[cid].name}.to_json %>,
-    y: <%= raw @category_ids.map{|cid| (k == 'all') ? (@h_stats['by_category'][cid.to_s][k] - @h_stats['by_category'][cid.to_s]['integrated']) : @h_stats['by_category'][cid.to_s][k] }.to_json %>,
+    <%# categories created after the last compute_stats run are missing from stats.json: count them as 0 %>
+    y: <%= raw @category_ids.map{|cid| c = @h_stats.dig('by_category', cid.to_s) || {}; (k == 'all') ? ((c['all'] || 0) - (c['integrated'] || 0)) : (c[k] || 0) }.to_json %>,
     name: '<%= (@h_statuses[k]) ? @h_statuses[k].label.capitalize : k.capitalize %> studies',
     type: 'bar'
   };
