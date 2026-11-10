@@ -60,7 +60,7 @@
 	</table>
 	<br/>
 	<ul>
-		<li>First column should be titled <b>DGRP</b>, and contain DGRP line ids in DGRP_XXX or line_XXX format. <b>Note:</b> each DGRP line should appear only once (summary data per line, not raw data per fly)</li>
+		<li>First column should be titled <b>DGRP</b>, and contain DGRP line ids in DGRP_XXX or line_XXX format (DGRP2), or RP_XXXX format (DGRP3). <b>Note:</b> DGRP3 (RP_XXXX) lines are used for correlations but excluded from the GWAS, which relies on DGRP2 genotypes. <b>Note:</b> each DGRP line should appear only once (summary data per line, not raw data per fly)</li>
 		<li>Second column is optional. If set, it should be titled <b>sex</b>, and values should be one of the following: [F, M, NA]</li>
 		<li>Then there can be any number of phenotyping columns with any phenotype name as title (please avoid exotic characters), with corresponding values for each DGRP</li>
 		<li>Missing values should be 'NA' or left empty.</li>

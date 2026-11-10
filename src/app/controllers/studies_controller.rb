@@ -182,12 +182,7 @@ class StudiesController < ApplicationController
       
       @h_data = @h_res[:h_data]
 
-      tmp_dgrp_lines = @h_data.keys
-      tmp_dgrp_lines.map{|e|
-        if m = e.match(/^\s*\w*_?(\d+)\s*$/)
-          "DGRP_" + ("0" * (3-m[1].size)) + m[1]
-        end
-      }
+      tmp_dgrp_lines = @h_data.keys ## already normalized (DGRP_NNN / RP_NNNN) by Parse.parse_tsv
       
       new_dgrp_lines = tmp_dgrp_lines - ((@h_existing_data) ? @h_existing_data.keys : [])
       existing_dgrp_lines = DgrpLine.where(:name => new_dgrp_lines).all

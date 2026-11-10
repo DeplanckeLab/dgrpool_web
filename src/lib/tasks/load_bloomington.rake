@@ -24,10 +24,8 @@ task load_bloomington: :environment do
       t = l.split(/\s+/)
       #      key = t[1].gsub(/DGRP-/, "DGRP_").gsub(/RP-/, "DGRP-3-")
       #       new_name = key.gsub(/DGRP-3-/, "RP_")
-      key =  key = t[1].gsub(/DGRP-/, "DGRP_").gsub(/RP-/, "RP_")
-      if m = key.match(/DGRP_(.+)/)
-        key = "DGRP_" + ('0' * (3-m[1].size))  + m[1]
-      end
+      key = DgrpLine.normalize_name(t[1])
+      next if !key ## not a DGRP2/DGRP3 line name
 
       puts key
       if h[key] and t[0].to_i

@@ -10,11 +10,10 @@ task load_dgrp_statuses: :environment do
   File.open(file, "r") do |f|
     while(l = f.gets) do
       v = l.chomp#.split(" ").first
-      dgrp_number = v.gsub(/line_/, '')
-      identifier = "DGRP_" + ("0" * (3-dgrp_number.size)) + dgrp_number
+      identifier = DgrpLine.normalize_name(v)
       puts identifier
       d = DgrpLine.find_by_name(identifier)
-      d.update(:dgrp_status_id => 2)
+      d.update(:dgrp_status_id => 2) if d
     end
   end
 
@@ -23,12 +22,10 @@ task load_dgrp_statuses: :environment do
     while(l = f.gets) do
       v = l.chomp
       puts v
-      dgrp_number = v.gsub(/DGRP-/, '')
-      puts dgrp_number
-      identifier = "DGRP_" + ("0" * (3-dgrp_number.size)) + dgrp_number
+      identifier = DgrpLine.normalize_name(v)
       puts identifier
       d = DgrpLine.find_by_name(identifier)
-      d.update(:dgrp_status_id => 1)
+      d.update(:dgrp_status_id => 1) if d
     end
   end
 

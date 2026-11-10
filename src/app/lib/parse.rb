@@ -52,13 +52,12 @@ module Parse
           t = l.split("\t", -1).map{|e| e.strip}
           t.insert(1, "NA") if add_sex == true
           h_sex[t[1]] = 1
-          nber = t[0].gsub(/[^\d]|-/, '')
+          dgrp_line_name = DgrpLine.normalize_name(t[0])
           if t.size < 3
             not_enough_cols.push j+2
           elsif !['M', 'F', 'NA'].include? t[1]
             invalid_sex.push j+2 #errors.push "sex column should contains only "                                                                                           
-          elsif nber != '' and 3-nber.size >= 0
-            dgrp_line_name = "DGRP_" + ("0" * (3-nber.size)) + nber
+          elsif dgrp_line_name
             t[0] = dgrp_line_name
             if h_data[dgrp_line_name] and h_data[dgrp_line_name]['sex'].include? t[1]
               h_duplicated_dgrp_lines[dgrp_line_name + "/" + t[1]] = 1
@@ -219,6 +218,7 @@ module Parse
       if errors.size == 0
         h_header = {}
         bad_nber_cols = []
+        invalid_dgrp = []
         phenotypes = (2 .. t_header.size).map{|i| h_header[t_header[i]] = i}
         bad_len_phenotypes = []
         bad_char_phenotypes = []
@@ -234,9 +234,9 @@ module Parse
           t = l.split("\t", -1).map{|e| e.strip} ## -1 to keep trailing empty fields
           if t.size == 1 and t[0] == ''
             ## ignore blank line
+          elsif !(dgrp_line_name = DgrpLine.normalize_name(t[0]))
+            invalid_dgrp.push(j+2)
           elsif t.size == t_header.size
-            nber = t[0].gsub(/[^\d]|-/, '')
-            dgrp_line_name = "DGRP_" + ("0" * (3-nber.size)) + nber
             h_data[dgrp_line_name] ||= {'sex' => []}            
             (2 .. t.size-1).to_a.each do |i|
               if ['', 'na', 'NA'].include? t[i]
@@ -256,6 +256,9 @@ module Parse
             bad_nber_cols.push(j)
             #   logger.debug(l.to_json)
           end
+        end
+        if invalid_dgrp.size > 0
+          errors.push "Invalid DGRP line name (expected DGRP_XXX or RP_XXXX) on lines #{invalid_dgrp.join(", ")}"
         end
         if bad_nber_cols.size > 0
           errors.push "Bad number of cols for lines # #{bad_nber_cols.join(",")}"

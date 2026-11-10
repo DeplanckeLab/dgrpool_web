@@ -18,7 +18,7 @@ class HomeController < ApplicationController
 #json.dgrp_status (ds = dgrp_line.dgrp_status) ? ds.name : nil
 #json.url dgrp_line_url(dgrp_line, format: :json)
       :dgrp_line => [[:id, :integer, "The DGRP line ID"],
-                     [:name, :text, "The name of the DGRP line (<i>e.g.</i> DGRP_398)"],
+                     [:name, :text, "The name of the DGRP line (<i>e.g.</i> DGRP_398 or RP_0001)"],
                      [:nber_studies, :integer, "Number of associated studies"],
                      [:nber_phenotypes, :integer, "Number of associated phenotypes"],
                      [:fbsn, :text, "FlyBase identifier"],
@@ -387,21 +387,13 @@ class HomeController < ApplicationController
             @h_sex_color.each_key do |sex|
               if @h_res[:dgrp_lines_by_sex] and @h_res[:dgrp_lines_by_sex][sex]
                 @h_res[:dgrp_lines_by_sex][sex].each do |e|
-                if (m = e.match(/^\s*\w*?_?0*(\d+)\s*$/))            
-                  tmp_dgrp_lines_by_sex[sex].push ("DGRP_" + ("0" * (3-m[1].size)) + m[1])
-                else
-                  tmp_dgrp_lines_by_sex[sex].push e
-                end
+                  tmp_dgrp_lines_by_sex[sex].push(DgrpLine.normalize_name(e) || e)
                 end
               end
             end
             if @h_res[:dgrp_lines]
               @h_res[:dgrp_lines].each do |e|
-                if (m = e.match(/^\s*\w*?_?0*(\d+)\s*$/))
-                  tmp_dgrp_lines.push ("DGRP_" + ("0" * (3-m[1].size)) + m[1])
-                else
-                  tmp_dgrp_lines.push e
-                end
+                tmp_dgrp_lines.push(DgrpLine.normalize_name(e) || e)
               end
             end
             

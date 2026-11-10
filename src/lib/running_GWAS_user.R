@@ -151,12 +151,12 @@ for(s in results$which_sex) {
 	dgrp_name <- gsub(dgrp_name, pattern = "DGRP_", replacement = "line_")
 	dgrp_name <- gsub(dgrp_name, pattern = "line_0", replacement = "line_")
 	dgrp_name <- gsub(dgrp_name, pattern = "line_0", replacement = "line_")
-	results$results[[s]][["nb_used_dgrps"]] <- length(dgrp_name)
 	
 	## Generating phenotype file for PLINK
 	plink.file_content <- data.frame(FID = dgrp_name, IID = dgrp_name)
 	plink.file_content[phenotype_name] <- phenotype
-	plink.file_content <- subset(plink.file_content, IID %in% dgrp_lines_genotyped) ## Restrict to genotyped samples
+	plink.file_content <- subset(plink.file_content, IID %in% dgrp_lines_genotyped) ## Restrict to genotyped samples (drops DGRP3 RP_ lines)
+	results$results[[s]][["nb_used_dgrps"]] <- nrow(plink.file_content)
 	results$results[[s]][["plink_phenotype_file"]] <- paste0(results$output_folder, phenotype_name, ".pheno.plink2.tsv")
 	fwrite(x = format(plink.file_content, nsmall = 1), file = results$results[[s]][["plink_phenotype_file"]], sep = "\t", quote = F, row.names = F, col.names = T, scipen=50)
 	
