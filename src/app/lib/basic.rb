@@ -200,6 +200,36 @@ module Basic
       
     end
 
+    ## sex_by_dgrp = {dgrp_line => [sexes with a value]} for each numeric phenotype of the study,
+    ## derived from pheno_sum_json (call after upd_sums). Returns the number of phenotypes changed.
+    def upd_sex_by_dgrp study
+      h_pheno_sum = Basic.safe_parse_json(study.pheno_sum_json, {}) || {}
+      h_sex = {}
+      h_pheno_sum.each_key do |dgrp_line|
+        sex_list = h_pheno_sum[dgrp_line]['sex'] || []
+        h_pheno_sum[dgrp_line].keys.reject{|e| e == 'sex'}.each do |p|
+          next if !h_pheno_sum[dgrp_line][p]
+          h_sex[p] ||= {}
+          h_sex[p][dgrp_line] ||= []
+          h_pheno_sum[dgrp_line][p].each_index do |i|
+            v = h_pheno_sum[dgrp_line][p][i]
+            h_sex[p][dgrp_line].push sex_list[i] if v and v[0] and sex_list[i]
+          end
+        end
+      end
+
+      nber_changed = 0
+      ## pheno_sum_json covers every dataset of the study; update_column avoids a useless Solr reindex
+      Phenotype.where(:id => h_sex.keys.map(&:to_i), :study_id => study.id).each do |phenotype|
+        json = h_sex[phenotype.id.to_s].to_json
+        if phenotype.sex_by_dgrp != json
+          phenotype.update_column(:sex_by_dgrp, json)
+          nber_changed += 1
+        end
+      end
+      return nber_changed
+    end
+
     def upd_phenotype_name h_pheno, prev_name, new_name
 
       if h_pheno

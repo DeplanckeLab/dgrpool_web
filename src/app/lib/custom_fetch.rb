@@ -102,6 +102,7 @@ class CustomFetch
 #        title.gsub(/[^ ]<i>/, " <i>")
         title.gsub!(/\s*<i>/, " <i>")
         title.gsub!(/<\/i>\s+/, "<i> ")
+        published_at = (m['journal-issue'] and e = m['journal-issue']['published-print'] and e2 = e["date-parts"] and d = e2[0]) ? Time.new(d[0], d[1] || 1, d[2] || 1) : ((m['issued'] and  e3 = m['issued']["date-parts"] and d2 = e3[0]) ? Time.new(d2[0], d2[1] || 1, d2[2] || 1) : nil)
         h_article = {
           :doi => doi,
           :title => title,
@@ -112,9 +113,10 @@ class CustomFetch
           :journal_id => (j) ? j.id : nil,
           :volume => m['volume'],
           :issue => m['issue'],
-          :year => (m['issued']) ? m['issued']['date-parts'][0][0] : nil,#                                                                                                                                                        
-          #          :published_online_at => (m['journal-issue'] and e = m['journal-issue']['published-online'] and e2 = e["date-parts"] and d = e2[0]) ? Time.new(d[0], d[1] || 1, d[2] || 1) : nil,                             
-          :published_at => (m['journal-issue'] and e = m['journal-issue']['published-print'] and e2 = e["date-parts"] and d = e2[0]) ? Time.new(d[0], d[1] || 1, d[2] || 1) : ((m['issued'] and  e3 = m['issued']["date-parts"] and d2 = e3[0]) ? Time.new(d2[0], d2[1] || 1, d2[2] || 1) : nil)
+          # year follows published_at (print date of the journal issue, falling back to Crossref 'issued')
+          :year => (published_at) ? published_at.year : nil,
+          #          :published_online_at => (m['journal-issue'] and e = m['journal-issue']['published-online'] and e2 = e["date-parts"] and d = e2[0]) ? Time.new(d[0], d[1] || 1, d[2] || 1) : nil,
+          :published_at => published_at
           #            :url => m["URL"]                                                                                                                                                                                           
         }
         if m['issued'] and  e3 = m['issued']["date-parts"] and d2 = e3[0]

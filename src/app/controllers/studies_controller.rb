@@ -300,8 +300,7 @@ class StudiesController < ApplicationController
         ## add new dgrp_lines
 
         h_phenotypes={}
-        h_phenotypes2 = {}
-        Phenotype.where(:name => h_pheno.keys, :study_id => @study.id, :dataset_id => @raw_id).all.map{|e| h_phenotypes[e.name] = e; h_phenotypes2[e.id] = e}
+        Phenotype.where(:name => h_pheno.keys, :study_id => @study.id, :dataset_id => @raw_id).all.map{|e| h_phenotypes[e.name] = e}
         
         new_dgrp_lines.each do |dgrp_line_name|
           dgrp_line = DgrpLine.where(:name => dgrp_line_name).first
@@ -356,26 +355,7 @@ class StudiesController < ApplicationController
         Basic.upd_sums(@study)
 
         #update sex_by_dgrp
-        h_pheno_sum = Basic.safe_parse_json(@study.pheno_sum_json, {})
-        h_sex = {}
-        if h_pheno_sum
-          h_pheno_sum.each_key do |dgrp_line|
-            #  h_tmp[dgrp_line] ||= []
-            #     h_tmp[dgrp_line] |= h_pheno[dgrp_line]['sex']
-            h_pheno_sum[dgrp_line].keys.reject{|e| e == 'sex'}.each do |p|
-              if h_pheno_sum[dgrp_line][p]
-                h_pheno_sum[dgrp_line][p].each_index do |i|
-                  h_sex[p] ||= {}
-                  h_sex[p][dgrp_line] ||= []
-                  h_sex[p][dgrp_line].push h_pheno[dgrp_line]['sex'][i] if h_pheno[dgrp_line] and h_pheno[dgrp_line][p] and h_pheno[dgrp_line][p][i] and h_pheno[dgrp_line][p][i][0]
-                end
-              end
-            end
-          end
-        end
-        h_sex.each_key do |p|
-          h_phenotypes2[p.to_i].update_attribute(:sex_by_dgrp, h_sex[p].to_json)
-        end
+        Basic.upd_sex_by_dgrp(@study)
         
         #update stats
         cmd = "rails compute_phenotype_stats & rails compute_stats"
