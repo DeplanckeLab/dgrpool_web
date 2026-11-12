@@ -29,8 +29,14 @@ RUN apk add  R \
 
 RUN echo 'toto'
 
+# Pin CRAN to the 2024-08-12 snapshot (date of the original build) so that
+# all R packages and their dependencies get the same versions as before.
+# Set it as default repo too, so BiocManager uses it for CRAN dependencies.
+ENV CRAN_SNAPSHOT="https://packagemanager.posit.co/cran/2024-08-12"
+RUN echo "options(repos = c(CRAN = '${CRAN_SNAPSHOT}'))" >> "$(R RHOME)/etc/Rprofile.site"
+
 # Install lattice from CRAN
-RUN Rscript -e "install.packages('lattice', repos='https://cloud.r-project.org')"
+RUN Rscript -e "install.packages('lattice', repos='${CRAN_SNAPSHOT}')"
 
 # Install MASS and Matrix from CRAN archive
 RUN Rscript -e "install.packages('https://cran.r-project.org/src/contrib/Archive/MASS/MASS_7.3-55.tar.gz', repos=NULL, type='source')"
@@ -39,19 +45,19 @@ RUN Rscript -e "install.packages('https://cran.r-project.org/src/contrib/Archive
 # Install MatrixModels from CRAN archive
 RUN Rscript -e "install.packages('https://cran.r-project.org/src/contrib/Archive/MatrixModels/MatrixModels_0.4-1.tar.gz', repos=NULL, type='source')"
 
-RUN Rscript -e "install.packages(c('quantreg', 'data.table', 'jsonlite', 'car', 'rstatix'), repos='http://stat.ethz.ch/CRAN/');"
+RUN Rscript -e "install.packages(c('quantreg', 'data.table', 'jsonlite', 'car', 'rstatix'), repos='${CRAN_SNAPSHOT}');"
 
 # Install BiocManager if not already installed
-RUN Rscript -e "if (!requireNamespace('BiocManager', quietly = TRUE)) install.packages('BiocManager', repos='https://cloud.r-project.org')"
+RUN Rscript -e "if (!requireNamespace('BiocManager', quietly = TRUE)) install.packages('BiocManager', repos='${CRAN_SNAPSHOT}')"
 
 # Install ramwas using BiocManager
 RUN Rscript -e "BiocManager::install('ramwas')"
 
 # Install R.utils package
-RUN Rscript -e "install.packages('R.utils', repos='https://cloud.r-project.org')"
+RUN Rscript -e "install.packages('R.utils', repos='${CRAN_SNAPSHOT}')"
 
 # Install the Cairo package in R
-RUN R -e "install.packages('Cairo', repos='http://cran.r-project.org')"
+RUN R -e "install.packages('Cairo', repos='${CRAN_SNAPSHOT}')"
 
 # Verify R installation
 RUN R --version
@@ -61,7 +67,8 @@ RUN Rscript --version
 
 # Set the PLINK2 version and download URL
 #ENV PLINK2_VERSION="2.00a3.3LM"
-ENV PLINK2_URL="https://s3.amazonaws.com/plink2-assets/plink2_linux_x86_64_latest.zip"
+# Pinned build closest to the original one (v2.00a6LM, 6 Aug 2024, not archived)
+ENV PLINK2_URL="https://s3.amazonaws.com/plink2-assets/alpha5/plink2_linux_x86_64_20240818.zip"
 
 # Create a directory for plink2
 RUN mkdir -p /opt/plink2
@@ -83,7 +90,8 @@ WORKDIR /opt/dgrpool
 ENV FREEDESKTOP_MIME_TYPES_PATH=/opt/mimemagic
 
 RUN echo "DUMMY"
-COPY src/Gemfile .
+# Copy the lockfile too, so the image gets exactly the gem versions the app expects
+COPY src/Gemfile src/Gemfile.lock ./
 RUN bundle install
 COPY src/. .
 CMD ["rm ./tmp/pids/server.pid"]

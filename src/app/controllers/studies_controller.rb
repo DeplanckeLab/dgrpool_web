@@ -441,7 +441,7 @@ class StudiesController < ApplicationController
     if admin?
       @studies = Study.all
     else
-      @studies = Study.joins(:status).where(:status => {:name => ['submitted', 'accepted', 'integrated']})
+      @studies = Study.joins(:status).where(:status => {:name => ['submitted', 'accepted', 'integrated', 'rejected']})
     end
 
     @phenotypes = Phenotype.all

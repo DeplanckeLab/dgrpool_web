@@ -32,17 +32,49 @@ class CustomFetch
       
     end
 
+      # capitalize each part of an all-caps name: SMITH-JONES -> Smith-Jones, O’BRIEN -> O’Brien, DE LA CRUZ -> De La Cruz
+      def title_case s
+        s.downcase.gsub(/(\A|[\s\-'’])(\p{Ll})/) { $1 + $2.upcase }
+      end
+
+      # only all-caps family names have their case guessed (mixed-case names like Machado are kept as is)
+      def normalize_family family
+        return family if !family.is_a?(String)
+        family = family.strip
+        if family.upcase == family
+          family = title_case(family)
+          family = family.sub(/\AMc(\p{Ll})/) { "Mc" + $1.upcase } # MCDONALD -> McDonald (not Mac: Mackay, Macedo)
+        end
+        family
+      end
+
+      def normalize_given given
+        return given if !given.is_a?(String)
+        given = given.strip
+        # bare initials written "F. C." ("F C", "FC", "F.C." -> "F. C."): single letters, dotted tokens,
+        # or 2-3 capitals without vowel (so that short names like "AL" or "JO" are not taken as initials)
+        given = given.split(" ").map{ |t|
+          (t =~ /\A\p{Lu}\z/ or t =~ /\A(?:\p{Lu}\.)+\p{Lu}?\z/ or t =~ /\A[B-DF-HJ-NP-TV-XZ]{2,3}\z/) ? t.delete(".").chars.map{|c| c + "."}.join(" ") : t
+        }.join(" ")
+        # remaining all-caps given name (JEAN-PIERRE -> Jean-Pierre)
+        given.split(" ").map{ |t| (t.upcase == t and t =~ /\p{Lu}{2}/ and t !~ /\./) ? title_case(t) : t }.join(" ")
+      end
+
+      def initials given
+        given ? given.gsub(/\p{Ll}+/, "") : nil
+      end
+
       def format_author e
+        h_author = nil
         if e['family']
-          fname = (e['family'].upcase == e['family']) ? e['family'].downcase.split(" ").map{|e| e.capitalize}.join(" ") : e['family']
-          if m = fname.match(/^(O\'|Ma?c|Fitz)(.+)/) #or  m = fname.match(/^(Fitz)(.+)/) or  m = fname.match(/^(Ma?c)(.+)/)                                                                                         
-            fname = m[1] + m[2].capitalize
-          end
+          # Crossref JSON is already UTF-8: do not re-encode (it turned e.g. "Barrón" into "BarrÃ³n")
+          fname = normalize_family(e['family'])
+          given = normalize_given(e['given'])
 
           h_author = {
-            'initials' => e['given'] ? e['given'].force_encoding(Encoding::ISO_8859_1).encode(Encoding::UTF_8).gsub(/[a-z]+/, "") : nil,
-            'fname' => e['given'] ? e['given'].force_encoding(Encoding::ISO_8859_1).encode(Encoding::UTF_8) : nil,
-            'lname' => fname.force_encoding(Encoding::ISO_8859_1).encode(Encoding::UTF_8), #(e['family'].upcase == e['family']) ? e['family'].downcase.capitalize : e['family'],
+            'initials' => initials(given),
+            'fname' => given,
+            'lname' => fname,
             'aff_ids' => []
           }
         end
@@ -55,7 +87,7 @@ class CustomFetch
  #     puts "toto"
       cmd = "wget -qO - 'http://api.crossref.org/works/#{doi}'"
   #    puts cmd
-      data_json = `#{cmd}`
+      data_json = `#{cmd}`.force_encoding(Encoding::UTF_8)
       h_json = Basic.safe_parse_json(data_json, {})
 #      puts h_json.to_json                                                                                                                                                                                                
       m = h_json["message"]
