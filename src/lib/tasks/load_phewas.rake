@@ -60,12 +60,18 @@ task load_phewas: :environment do
         #        puts tmp.to_json
         h_snps = {}
         Snp.where(:identifier => tmp.map{|e| e[:identifier]}).all.map{|s| h_snps[s.identifier] = s.id}
+        # DGRP3: variants absent from the snps table are skipped (they used to be saved with snp_id = nil)
+        missing = tmp.select{|e| !h_snps[e[:identifier]]}
+        puts "  WARNING: #{missing.size} variants not in snps table, skipped (e.g. #{missing.first[:identifier]})" if missing.size > 0
+        seen_snp_ids = {} # DGRP3
         
         #          puts h_gwas_result.to_json
         #          exit
         tmp.each do |h_gwas_result|
           h_gwas_result[:snp_id] = h_snps[h_gwas_result[:identifier]]
           h_gwas_result.delete(:identifier)
+          next if !h_gwas_result[:snp_id] # DGRP3
+          seen_snp_ids[h_gwas_result[:snp_id]] = true # DGRP3
           #  gwas_result = GwasResult.where(h_gwas_result).first
           gwas_result = h_gwas_results[h_gwas_result[:snp_id]]
           if !gwas_result           
@@ -88,6 +94,12 @@ task load_phewas: :environment do
           #     end
           #   end
           #          puts sites.to_json
+        end
+        # DGRP3: delete results of this phenotype/sex that are not in the new file anymore (e.g. old dm3 rows, rows with snp_id = nil)
+        stale_ids = h_gwas_results.keys.select{|id| !seen_snp_ids[id]}
+        if stale_ids.size > 0
+          GwasResult.where(:phenotype_id => p.id, :sex => s, :snp_id => stale_ids).delete_all
+          puts "  removed #{stale_ids.size} stale results"
         end
         #   end
         #        exit

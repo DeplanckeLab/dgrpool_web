@@ -75,7 +75,7 @@ results$min_maf <- as.numeric(args[8])
 # and -9 is a real value (b1.4 refuses -9 when other values in [-10, -8] are present, and otherwise drops it as missing)
 # --no-psam-pheno: with --bfile, the .fam's phenotype column (-9 = missing) would otherwise be loaded as a constant
 # phenotype 'PHENO1' once -9 is no longer read as missing, and --glm stops on it
-results$gwas_options <- paste0("--glm hide-covar omit-ref --no-input-missing-phenotype --no-psam-pheno --quantile-normalize --variance-standardize --geno ", results$genotype_ratio, " --maf ", results$min_maf) # --geno 0.2 --maf 0.01
+results$gwas_options <- paste0("--glm hide-covar omit-ref --no-input-missing-phenotype --no-psam-pheno --quantile-normalize --variance-standardize --geno ", results$genotype_ratio, " --maf ", results$min_maf, " --require-pheno --require-covar") # DGRP3: --require-pheno/--require-covar so that MAF and missingness are computed on the phenotyped lines only (416 genotyped lines, most not phenotyped)
 
 results$filtering_pval <- as.numeric(args[9])
 
@@ -333,8 +333,7 @@ for(s in results$which_sex) {
 					## Manhattan plot
 					results$results[[s]][["manhattan_plot"]] <- paste0(results$output_folder, phenotype_name, ".manhattan.png")
 					results$results[[s]][["manhattan_plot_pdf"]] <- paste0(results$output_folder, phenotype_name, ".manhattan.pdf")
-					chroms <- factor(plink_results$`#CHROM`)
-					levels(chroms) <- c("2L", "2R", "3L", "3R", "X", "4")
+					chroms <- factor(plink_results$`#CHROM`, levels = 1:6, labels = c("2L", "2R", "3L", "3R", "X", "4")) # DGRP3: explicit levels (renaming levels() shifts labels if a chromosome has no tested variant)
 					m <- manPlotPrepare(pvalues = plink_results$P, chr=chroms, pos = plink_results$POS)
 					png(results$results[[s]][["manhattan_plot"]], height = 500, width = 500)
 					manPlotFast(man = m, lwd = 1, colorSet = c("black", "darkgrey"))

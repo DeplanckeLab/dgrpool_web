@@ -31,9 +31,10 @@ task run_gwas: :environment do
       #     end
       #   end
       if File.exist? tmp_file
-        plink_file = data_dir + 'dgrp2.filtered.fastlmm'
-        cov_file = data_dir + "dgrp.cov.tsv"
-        annot_file = data_dir + "dgrp.fb557.annot.txt.gz"
+        # DGRP3: DGRP2+DGRP3 call set on dm6 (416 lines), its covariates and annotation
+        plink_file = data_dir + 'dgrp3.gwas' # DGRP3: was 'dgrp2.filtered.fastlmm'
+        cov_file = data_dir + "dgrp3.cov.tsv" # DGRP3: was "dgrp.cov.tsv"
+        annot_file = data_dir + "dgrp3.annot.txt.gz" # DGRP3: was "dgrp.fb557.annot.txt.gz"
         File.delete(output_dir + "done") if File.exist?(output_dir + "done")
         #      1. [Required] Path to phenotype file
         #      2. [Required] Path to PLINK genotype file prefix (bed)
@@ -45,7 +46,8 @@ task run_gwas: :environment do
         #8. [Required] Minimum MAF
         #9. [Required] Filtering threshold for p-value
         #10. [Optional] Name of phenotype to load (if file contains multiple phenotypes)
-        cmd = "/usr/bin/Rscript ./lib/running_GWAS_user.R #{tmp_file} #{plink_file} #{cov_file} #{annot_file} #{output_dir} 2 0.2 0.01 0.001 1> #{output_dir + "gwas_output.json"} 2> #{output_dir + "gwas_output.err"}"
+        # DGRP3: MAF 0.05 (was 0.01). The new bed is not pre-filtered, so --maf now really applies; 0.05 matches the precomputed GWAS.
+        cmd = "/usr/bin/Rscript ./lib/running_GWAS_user.R #{tmp_file} #{plink_file} #{cov_file} #{annot_file} #{output_dir} 2 0.2 0.05 0.001 1> #{output_dir + "gwas_output.json"} 2> #{output_dir + "gwas_output.err"}"
         puts "CMD: " + cmd
         `#{cmd}`
         
