@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2026_11_11_120000) do
+ActiveRecord::Schema[7.0].define(version: 2026_11_18_120000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -75,6 +75,8 @@ ActiveRecord::Schema[7.0].define(version: 2026_11_11_120000) do
     t.integer "dgrp_status_id"
     t.text "fbsn"
     t.integer "bloomington_id"
+    t.integer "geno_index"
+    t.index ["geno_index"], name: "index_dgrp_lines_on_geno_index", unique: true
   end
 
   create_table "dgrp_statuses", id: :serial, force: :cascade do |t|

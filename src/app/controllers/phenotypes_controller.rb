@@ -89,11 +89,12 @@ class PhenotypesController < ApplicationController
     
     if @snp
       
-      @dgrps = DgrpLine.where(:dgrp_status_id => [1,2]).all.sort{|a, b| a.name <=> b.name}
+      # geno_string character i <-> line with geno_index i (set by rake load_dgrp_statuses), not "status 1/2 sorted by name"
+      @dgrps = DgrpLine.by_geno_index
       @geno_table = @snp.geno_string.split("")
       @geno_table.each_index do |i|
         t = @geno_table[i]
-        if t!='.'
+        if t!='.' and @dgrps[i]
           @h_res[t]||=[]
           @h_res[t].push @dgrps[i]
         end

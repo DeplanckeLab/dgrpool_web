@@ -32,4 +32,18 @@ class DgrpLine < ApplicationRecord
     name.to_s.start_with?('RP_')
   end
 
+  ## Lines indexed by their position in snps.geno_string: result[i] is the line of character i (nil if unknown).
+  ## geno_index is set by 'rake load_dgrp_statuses' from line 1 of the genoString file, so it does not depend on
+  ## the statuses (which can be edited in the UI) nor on the alphabetical order of the names.
+  def self.by_geno_index
+    lines = []
+    where.not(:geno_index => nil).each{|d| lines[d.geno_index] = d}
+    lines
+  end
+
+  ## Parses line 1 of a genoString file ("#line_21,line_26,...,RP-0002,...") into canonical names (nil for invalid names)
+  def self.parse_geno_header(header_line)
+    header_line.to_s.chomp.sub(/\A#/, '').split(",").map{|v| normalize_name(v)}
+  end
+
 end
