@@ -2,9 +2,6 @@ require_relative "boot"
 
 require "rails/all"
 
-# Require the middleware file                         
-require_relative 'middleware/compression_middleware'
-
 # Require the gems listed in Gemfile, including any gems
 # you've limited to :test, :development, or :production.
 Bundler.require(*Rails.groups)
@@ -21,8 +18,9 @@ module Dgrpool
     #
     # config.time_zone = "Central Time (US & Canada)"
     
-    # Add the middleware to the middleware stack                                  
-    config.middleware.use CompressionMiddleware
+    # gzip responses (only for clients sending Accept-Encoding: gzip). Replaces the custom CompressionMiddleware,
+    # which broke with Rack 3 (lowercase headers: the stale content-length made browsers drop the CSS/JS).
+    config.middleware.use Rack::Deflater
 
     config.autoload_paths << "#{Rails.root}/extras"
     config.eager_load_paths << Rails.root.join("extras")
