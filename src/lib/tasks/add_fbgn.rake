@@ -3,7 +3,7 @@ task add_fbgn: :environment do
   puts 'Executing...'
 
   
-  annot_file = Pathname.new(APP_CONFIG[:data_dir]) + 'dgrp.fb557.annot.txt.gz'
+  annot_file = Pathname.new(APP_CONFIG[:data_dir]) + 'dgrp3.annot.txt.gz' # DGRP3: was 'dgrp.fb557.annot.txt.gz' (dm6, SnpEff 5.4 / FlyBase r6.64)
 
   puts "Load snps..."
 #  h_snps = {}
