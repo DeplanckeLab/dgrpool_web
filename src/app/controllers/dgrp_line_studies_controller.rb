@@ -29,8 +29,8 @@ class DgrpLineStudiesController < ApplicationController
         format.html { redirect_to dgrp_line_study_url(@dgrp_line_study), notice: "Dgrp line study was successfully created." }
         format.json { render :show, status: :created, location: @dgrp_line_study }
       else
-        format.html { render :new, status: :unprocessable_entity }
-        format.json { render json: @dgrp_line_study.errors, status: :unprocessable_entity }
+        format.html { render :new, status: :unprocessable_content }
+        format.json { render json: @dgrp_line_study.errors, status: :unprocessable_content }
       end
     end
   end
@@ -42,8 +42,8 @@ class DgrpLineStudiesController < ApplicationController
         format.html { redirect_to dgrp_line_study_url(@dgrp_line_study), notice: "Dgrp line study was successfully updated." }
         format.json { render :show, status: :ok, location: @dgrp_line_study }
       else
-        format.html { render :edit, status: :unprocessable_entity }
-        format.json { render json: @dgrp_line_study.errors, status: :unprocessable_entity }
+        format.html { render :edit, status: :unprocessable_content }
+        format.json { render json: @dgrp_line_study.errors, status: :unprocessable_content }
       end
     end
   end

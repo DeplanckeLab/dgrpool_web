@@ -285,8 +285,8 @@ class SnpsController < ApplicationController
         format.html { redirect_to snp_url(@snp), notice: "Snp was successfully created." }
         format.json { render :show, status: :created, location: @snp }
       else
-        format.html { render :new, status: :unprocessable_entity }
-        format.json { render json: @snp.errors, status: :unprocessable_entity }
+        format.html { render :new, status: :unprocessable_content }
+        format.json { render json: @snp.errors, status: :unprocessable_content }
       end
     end
   end
@@ -298,8 +298,8 @@ class SnpsController < ApplicationController
         format.html { redirect_to snp_url(@snp), notice: "Snp was successfully updated." }
         format.json { render :show, status: :ok, location: @snp }
       else
-        format.html { render :edit, status: :unprocessable_entity }
-        format.json { render json: @snp.errors, status: :unprocessable_entity }
+        format.html { render :edit, status: :unprocessable_content }
+        format.json { render json: @snp.errors, status: :unprocessable_content }
       end
     end
   end

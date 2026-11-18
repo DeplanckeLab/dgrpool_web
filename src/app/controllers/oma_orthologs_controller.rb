@@ -29,8 +29,8 @@ class OmaOrthologsController < ApplicationController
         format.html { redirect_to oma_ortholog_url(@oma_ortholog), notice: "Oma ortholog was successfully created." }
         format.json { render :show, status: :created, location: @oma_ortholog }
       else
-        format.html { render :new, status: :unprocessable_entity }
-        format.json { render json: @oma_ortholog.errors, status: :unprocessable_entity }
+        format.html { render :new, status: :unprocessable_content }
+        format.json { render json: @oma_ortholog.errors, status: :unprocessable_content }
       end
     end
   end
@@ -42,8 +42,8 @@ class OmaOrthologsController < ApplicationController
         format.html { redirect_to oma_ortholog_url(@oma_ortholog), notice: "Oma ortholog was successfully updated." }
         format.json { render :show, status: :ok, location: @oma_ortholog }
       else
-        format.html { render :edit, status: :unprocessable_entity }
-        format.json { render json: @oma_ortholog.errors, status: :unprocessable_entity }
+        format.html { render :edit, status: :unprocessable_content }
+        format.json { render json: @oma_ortholog.errors, status: :unprocessable_content }
       end
     end
   end

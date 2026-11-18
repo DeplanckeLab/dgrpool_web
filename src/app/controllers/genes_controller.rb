@@ -234,8 +234,8 @@ class GenesController < ApplicationController
         format.html { redirect_to gene_url(@gene), notice: "Gene was successfully created." }
         format.json { render :show, status: :created, location: @gene }
       else
-        format.html { render :new, status: :unprocessable_entity }
-        format.json { render json: @gene.errors, status: :unprocessable_entity }
+        format.html { render :new, status: :unprocessable_content }
+        format.json { render json: @gene.errors, status: :unprocessable_content }
       end
     end
   end
@@ -247,8 +247,8 @@ class GenesController < ApplicationController
         format.html { redirect_to gene_url(@gene), notice: "Gene was successfully updated." }
         format.json { render :show, status: :ok, location: @gene }
       else
-        format.html { render :edit, status: :unprocessable_entity }
-        format.json { render json: @gene.errors, status: :unprocessable_entity }
+        format.html { render :edit, status: :unprocessable_content }
+        format.json { render json: @gene.errors, status: :unprocessable_content }
       end
     end
   end

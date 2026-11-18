@@ -70,7 +70,12 @@ if(!file.exists(results$output_folder)) dir.create(results$output_folder, mode =
 results$nb_threads <- as.numeric(args[6])
 results$genotype_ratio <- as.numeric(args[7])
 results$min_maf <- as.numeric(args[8])
-results$gwas_options <- paste0("--glm hide-covar --quantile-normalize --variance-standardize --geno ", results$genotype_ratio, " --maf ", results$min_maf) # --geno 0.2 --maf 0.01
+# 2026-11-18 (plink2 v2.0.0-b.1.4): 'omit-ref' so that BETA is always for ALT (by default --glm reports it for the minor
+# allele, A1, which the result files don't keep); --no-input-missing-phenotype because missing values are written as NA
+# and -9 is a real value (b1.4 refuses -9 when other values in [-10, -8] are present, and otherwise drops it as missing)
+# --no-psam-pheno: with --bfile, the .fam's phenotype column (-9 = missing) would otherwise be loaded as a constant
+# phenotype 'PHENO1' once -9 is no longer read as missing, and --glm stops on it
+results$gwas_options <- paste0("--glm hide-covar omit-ref --no-input-missing-phenotype --no-psam-pheno --quantile-normalize --variance-standardize --geno ", results$genotype_ratio, " --maf ", results$min_maf) # --geno 0.2 --maf 0.01
 
 results$filtering_pval <- as.numeric(args[9])
 

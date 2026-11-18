@@ -3,30 +3,31 @@ class CustomFetch
     
     def fetch_pubmed(pmid)
       
-      require 'hpricot'
+      # 2026-11-18: Nokogiri instead of hpricot (abandoned, does not build on Ruby >= 3.2), and URI.open (Kernel#open
+      # no longer opens URLs since Ruby 3.0). PubMed XML element names are case-sensitive with Nokogiri.
       require 'open-uri'
-      
-      doc = open("https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pubmed&id=#{pmid}&retmode=xml") { |f| Hpricot(f) }
-      p_article = doc.at("pubmedarticle")
+
+      doc = URI.open("https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pubmed&id=#{pmid}&retmode=xml") { |f| Nokogiri::XML(f) }
+      p_article = doc.at("PubmedArticle")
       results = nil
       if p_article
-        citation= p_article.at("medlinecitation")
-        article = citation.at("article")
+        citation= p_article.at("MedlineCitation")
+        article = citation.at("Article")
         results = {}
-        pubdate = article.at("journal").at("journalissue").at("pubdate")
+        pubdate = article.at("Journal").at("JournalIssue").at("PubDate")
         results[:year]=''
-        if pubdate.at("year")
-          results[:year]=pubdate.at("year").innerHTML
-        elsif pubdate.at("medlinedate")
-          results[:year]=pubdate.at("medlinedate").innerHTML.split(" ").first
+        if pubdate.at("Year")
+          results[:year]=pubdate.at("Year").inner_html
+        elsif pubdate.at("MedlineDate")
+          results[:year]=pubdate.at("MedlineDate").inner_html.split(" ").first
         end
-        results[:title]=article.at("articletitle").innerHTML
-        authors = article.at("authorlist").search("author")
+        results[:title]=article.at("ArticleTitle").inner_html
+        authors = article.at("AuthorList").search("Author")
         first_author = authors.first
-        results[:authors]= first_author.at("lastname").innerHTML + " " + ((first_author.at("initials")) ?  first_author.at("initials").innerHTML : '')
+        results[:authors]= first_author.at("LastName").inner_html + " " + ((first_author.at("Initials")) ?  first_author.at("Initials").inner_html : '')
         results[:authors]+= " et al." if authors.size > 1
-        abstract = article.at("abstract")
-        results[:abstract]=abstract.at("abstracttext").innerHTML if abstract
+        abstract = article.at("Abstract")
+        results[:abstract]=abstract.at("AbstractText").inner_html if abstract
       end
       return results
       

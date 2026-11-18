@@ -29,8 +29,8 @@ class HumanOrthologsController < ApplicationController
         format.html { redirect_to human_ortholog_url(@human_ortholog), notice: "Human ortholog was successfully created." }
         format.json { render :show, status: :created, location: @human_ortholog }
       else
-        format.html { render :new, status: :unprocessable_entity }
-        format.json { render json: @human_ortholog.errors, status: :unprocessable_entity }
+        format.html { render :new, status: :unprocessable_content }
+        format.json { render json: @human_ortholog.errors, status: :unprocessable_content }
       end
     end
   end
@@ -42,8 +42,8 @@ class HumanOrthologsController < ApplicationController
         format.html { redirect_to human_ortholog_url(@human_ortholog), notice: "Human ortholog was successfully updated." }
         format.json { render :show, status: :ok, location: @human_ortholog }
       else
-        format.html { render :edit, status: :unprocessable_entity }
-        format.json { render json: @human_ortholog.errors, status: :unprocessable_entity }
+        format.html { render :edit, status: :unprocessable_content }
+        format.json { render json: @human_ortholog.errors, status: :unprocessable_content }
       end
     end
   end

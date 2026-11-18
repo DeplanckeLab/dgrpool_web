@@ -203,8 +203,8 @@ class GwasResultsController < ApplicationController
         format.html { redirect_to gwas_result_url(@gwas_result), notice: "Gwas result was successfully created." }
         format.json { render :show, status: :created, location: @gwas_result }
       else
-        format.html { render :new, status: :unprocessable_entity }
-        format.json { render json: @gwas_result.errors, status: :unprocessable_entity }
+        format.html { render :new, status: :unprocessable_content }
+        format.json { render json: @gwas_result.errors, status: :unprocessable_content }
       end
     end
   end
@@ -216,8 +216,8 @@ class GwasResultsController < ApplicationController
         format.html { redirect_to gwas_result_url(@gwas_result), notice: "Gwas result was successfully updated." }
         format.json { render :show, status: :ok, location: @gwas_result }
       else
-        format.html { render :edit, status: :unprocessable_entity }
-        format.json { render json: @gwas_result.errors, status: :unprocessable_entity }
+        format.html { render :edit, status: :unprocessable_content }
+        format.json { render json: @gwas_result.errors, status: :unprocessable_content }
       end
     end
   end

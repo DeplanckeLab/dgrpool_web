@@ -29,8 +29,8 @@ class VarTypesController < ApplicationController
         format.html { redirect_to var_type_url(@var_type), notice: "Var type was successfully created." }
         format.json { render :show, status: :created, location: @var_type }
       else
-        format.html { render :new, status: :unprocessable_entity }
-        format.json { render json: @var_type.errors, status: :unprocessable_entity }
+        format.html { render :new, status: :unprocessable_content }
+        format.json { render json: @var_type.errors, status: :unprocessable_content }
       end
     end
   end
@@ -42,8 +42,8 @@ class VarTypesController < ApplicationController
         format.html { redirect_to var_type_url(@var_type), notice: "Var type was successfully updated." }
         format.json { render :show, status: :ok, location: @var_type }
       else
-        format.html { render :edit, status: :unprocessable_entity }
-        format.json { render json: @var_type.errors, status: :unprocessable_entity }
+        format.html { render :edit, status: :unprocessable_content }
+        format.json { render json: @var_type.errors, status: :unprocessable_content }
       end
     end
   end
