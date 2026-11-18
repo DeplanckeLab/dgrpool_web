@@ -819,6 +819,7 @@ class PhenotypesController < ApplicationController
   def update
     data_dir = Pathname.new(APP_CONFIG[:data_dir])
     prev_name = @phenotype.name
+    prev_numeric = @phenotype.is_numeric
 
     already_existing_in_dataset = false
     existing =  Phenotype.where(:name => params[:phenotype][:name], :study_id => @phenotype.study_id, :dataset_id => @phenotype.dataset_id).all
@@ -875,7 +876,9 @@ class PhenotypesController < ApplicationController
           FileUtils.move(data_dir + tmp_filename, filepath)
           
         end
-        Basic.upd_sums(@phenotype.study)
+        # The study's summary columns (pheno_sum/mean/median) depend only on the phenotype names and is_numeric:
+        # recomputing them on every save (e.g. a description change) takes minutes on large studies.
+        Basic.upd_sums(@phenotype.study) if prev_name != @phenotype.name or prev_numeric != @phenotype.is_numeric
         
         format.html { redirect_to phenotype_url(@phenotype), notice: "Phenotype was successfully updated." }
         format.json { render :show, status: :ok, location: @phenotype }
