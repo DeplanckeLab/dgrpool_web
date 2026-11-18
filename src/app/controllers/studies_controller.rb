@@ -644,19 +644,19 @@ class StudiesController < ApplicationController
          }
     #    format.json { render :show, status: :created, location: @study }
       elsif existing_study
-        format.html { #render :new, status: :unprocessable_entity
+        format.html { #render :new, status: :unprocessable_content
           render :plain => "<span class='text-warning'>This reference already exists (<a href='" + study_path(existing_study) + "' target='_blank'>see here</a>)!</span>"
         }
       elsif doi
-          format.html { #render :new, status: :unprocessable_entity              
+          format.html { #render :new, status: :unprocessable_content              
           render :plain => "<span class='text-danger'>DOI #{doi} is not a valid reference!</span>"
         }
       else
-        format.html { #render :new, status: :unprocessable_entity  
+        format.html { #render :new, status: :unprocessable_content  
           render :plain => "<span class='text-danger'>Not a valid reference!</span>"
         }
 
-#        format.json { render json: @study.errors, status: :unprocessable_entity }
+#        format.json { render json: @study.errors, status: :unprocessable_content }
       end
     end
   end
@@ -700,8 +700,8 @@ class StudiesController < ApplicationController
         format.html { redirect_to study_url(@study), notice: "Study was successfully updated." }
         format.json { render :show, status: :ok, location: @study }
       else
-        format.html { render :edit, notice: "Format #{format_ok}", status: :unprocessable_entity }
-        format.json { render json: @study.errors, status: :unprocessable_entity }
+        format.html { render :edit, notice: "Format #{format_ok}", status: :unprocessable_content }
+        format.json { render json: @study.errors, status: :unprocessable_content }
       end
     end
   end

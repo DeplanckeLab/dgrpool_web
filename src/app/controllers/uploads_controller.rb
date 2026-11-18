@@ -29,8 +29,8 @@ class UploadsController < ApplicationController
         format.html { redirect_to upload_url(@upload), notice: "Upload was successfully created." }
         format.json { render :show, status: :created, location: @upload }
       else
-        format.html { render :new, status: :unprocessable_entity }
-        format.json { render json: @upload.errors, status: :unprocessable_entity }
+        format.html { render :new, status: :unprocessable_content }
+        format.json { render json: @upload.errors, status: :unprocessable_content }
       end
     end
   end
@@ -42,8 +42,8 @@ class UploadsController < ApplicationController
         format.html { redirect_to upload_url(@upload), notice: "Upload was successfully updated." }
         format.json { render :show, status: :ok, location: @upload }
       else
-        format.html { render :edit, status: :unprocessable_entity }
-        format.json { render json: @upload.errors, status: :unprocessable_entity }
+        format.html { render :edit, status: :unprocessable_content }
+        format.json { render json: @upload.errors, status: :unprocessable_content }
       end
     end
   end

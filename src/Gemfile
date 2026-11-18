@@ -1,16 +1,16 @@
 source "https://rubygems.org"
 git_source(:github) { |repo| "https://github.com/#{repo}.git" }
 
-ruby "3.1.2"
+ruby "4.0.9"
 
 # Bundle edge Rails instead: gem "rails", github: "rails/rails", branch: "main"
-gem "rails", "~> 7.0.4"
+gem "rails", "~> 8.1.4"
 
 # The original asset pipeline for Rails [https://github.com/rails/sprockets-rails]
 gem "sprockets-rails"
 
 # Use the Puma web server [https://github.com/puma/puma]
-gem "puma", "~> 5.0"
+gem "puma", ">= 8.1"
 
 # Bundle and transpile JavaScript [https://github.com/rails/jsbundling-rails]
 gem "jsbundling-rails"
@@ -52,10 +52,9 @@ gem "pg"
 gem "devise"
 gem "font_awesome5_rails"
 gem 'ajax-datatables-rails'
-gem 'hpricot'
 gem 'open-uri'
 gem 'roo'
-gem 'iconv'
+gem 'matrix' # needed by Roo's to_matrix (lib/tasks/load_data.rake); a bundled gem since Ruby 3.1
 gem 'sunspot_rails'
 gem 'sunspot_solr'
 gem 'os'
@@ -65,7 +64,7 @@ gem 'progress_bar'
 
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
-  gem "debug", platforms: %i[ mri mingw x64_mingw ]
+  gem "debug", platforms: %i[ mri windows ]
 end
 
 group :development do
@@ -82,6 +81,5 @@ end
 group :test do
   # Use system testing [https://guides.rubyonrails.org/testing.html#system-testing]
   gem "capybara"
-  gem "selenium-webdriver"
-  gem "webdrivers"
+  gem "selenium-webdriver" # webdrivers removed: selenium-webdriver >= 4.11 finds the drivers itself
 end

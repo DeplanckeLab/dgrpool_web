@@ -29,8 +29,8 @@ class SnpTypesController < ApplicationController
         format.html { redirect_to snp_type_url(@snp_type), notice: "Snp type was successfully created." }
         format.json { render :show, status: :created, location: @snp_type }
       else
-        format.html { render :new, status: :unprocessable_entity }
-        format.json { render json: @snp_type.errors, status: :unprocessable_entity }
+        format.html { render :new, status: :unprocessable_content }
+        format.json { render json: @snp_type.errors, status: :unprocessable_content }
       end
     end
   end
@@ -42,8 +42,8 @@ class SnpTypesController < ApplicationController
         format.html { redirect_to snp_type_url(@snp_type), notice: "Snp type was successfully updated." }
         format.json { render :show, status: :ok, location: @snp_type }
       else
-        format.html { render :edit, status: :unprocessable_entity }
-        format.json { render json: @snp_type.errors, status: :unprocessable_entity }
+        format.html { render :edit, status: :unprocessable_content }
+        format.json { render json: @snp_type.errors, status: :unprocessable_content }
       end
     end
   end

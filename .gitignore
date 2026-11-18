@@ -25,7 +25,7 @@ public/assets
 */node_modules
 .env.prod
 .env.dev
-src/Gemfile.lock
+# src/Gemfile.lock is committed (2026-11-18): it pins the gem versions that the Dockerfile installs
 src/package-lock.json
 
 **/*.pid

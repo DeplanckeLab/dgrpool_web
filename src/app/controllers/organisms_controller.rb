@@ -29,8 +29,8 @@ class OrganismsController < ApplicationController
         format.html { redirect_to organism_url(@organism), notice: "Organism was successfully created." }
         format.json { render :show, status: :created, location: @organism }
       else
-        format.html { render :new, status: :unprocessable_entity }
-        format.json { render json: @organism.errors, status: :unprocessable_entity }
+        format.html { render :new, status: :unprocessable_content }
+        format.json { render json: @organism.errors, status: :unprocessable_content }
       end
     end
   end
@@ -42,8 +42,8 @@ class OrganismsController < ApplicationController
         format.html { redirect_to organism_url(@organism), notice: "Organism was successfully updated." }
         format.json { render :show, status: :ok, location: @organism }
       else
-        format.html { render :edit, status: :unprocessable_entity }
-        format.json { render json: @organism.errors, status: :unprocessable_entity }
+        format.html { render :edit, status: :unprocessable_content }
+        format.json { render json: @organism.errors, status: :unprocessable_content }
       end
     end
   end

@@ -809,8 +809,8 @@ class PhenotypesController < ApplicationController
         format.html { redirect_to phenotype_url(@phenotype), notice: "Phenotype was successfully created." }
         format.json { render :show, status: :created, location: @phenotype }
       else
-        format.html { render :new, status: :unprocessable_entity }
-        format.json { render json: @phenotype.errors, status: :unprocessable_entity }
+        format.html { render :new, status: :unprocessable_content }
+        format.json { render json: @phenotype.errors, status: :unprocessable_content }
       end
     end
   end
@@ -880,8 +880,8 @@ class PhenotypesController < ApplicationController
         format.html { redirect_to phenotype_url(@phenotype), notice: "Phenotype was successfully updated." }
         format.json { render :show, status: :ok, location: @phenotype }
       else
-        format.html { render :edit, status: :unprocessable_entity }
-        format.json { render json: @phenotype.errors, status: :unprocessable_entity }
+        format.html { render :edit, status: :unprocessable_content }
+        format.json { render json: @phenotype.errors, status: :unprocessable_content }
       end
     end
   end

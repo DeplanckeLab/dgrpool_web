@@ -28,8 +28,8 @@ class DgrpStatusesController < ApplicationController
         format.html { redirect_to dgrp_status_url(@dgrp_status), notice: "Dgrp status was successfully created." }
         format.json { render :show, status: :created, location: @dgrp_status }
       else
-        format.html { render :new, status: :unprocessable_entity }
-        format.json { render json: @dgrp_status.errors, status: :unprocessable_entity }
+        format.html { render :new, status: :unprocessable_content }
+        format.json { render json: @dgrp_status.errors, status: :unprocessable_content }
       end
     end
   end
@@ -41,8 +41,8 @@ class DgrpStatusesController < ApplicationController
         format.html { redirect_to dgrp_status_url(@dgrp_status), notice: "Dgrp status was successfully updated." }
         format.json { render :show, status: :ok, location: @dgrp_status }
       else
-        format.html { render :edit, status: :unprocessable_entity }
-        format.json { render json: @dgrp_status.errors, status: :unprocessable_entity }
+        format.html { render :edit, status: :unprocessable_content }
+        format.json { render json: @dgrp_status.errors, status: :unprocessable_content }
       end
     end
   end

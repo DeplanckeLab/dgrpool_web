@@ -77,8 +77,8 @@ class DgrpLinesController < ApplicationController
         format.html { redirect_to dgrp_line_url(@dgrp_line), notice: "Dgrp line was successfully updated." }
         format.json { render :show, status: :ok, location: @dgrp_line }
       else
-        format.html { render :edit, status: :unprocessable_entity }
-        format.json { render json: @dgrp_line.errors, status: :unprocessable_entity }
+        format.html { render :edit, status: :unprocessable_content }
+        format.json { render json: @dgrp_line.errors, status: :unprocessable_content }
       end
     end
   end

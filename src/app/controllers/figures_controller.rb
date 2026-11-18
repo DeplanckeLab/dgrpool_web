@@ -29,8 +29,8 @@ class FiguresController < ApplicationController
         format.html { redirect_to figure_url(@figure), notice: "Figure was successfully created." }
         format.json { render :show, status: :created, location: @figure }
       else
-        format.html { render :new, status: :unprocessable_entity }
-        format.json { render json: @figure.errors, status: :unprocessable_entity }
+        format.html { render :new, status: :unprocessable_content }
+        format.json { render json: @figure.errors, status: :unprocessable_content }
       end
     end
   end
@@ -42,8 +42,8 @@ class FiguresController < ApplicationController
         format.html { redirect_to figure_url(@figure), notice: "Figure was successfully updated." }
         format.json { render :show, status: :ok, location: @figure }
       else
-        format.html { render :edit, status: :unprocessable_entity }
-        format.json { render json: @figure.errors, status: :unprocessable_entity }
+        format.html { render :edit, status: :unprocessable_content }
+        format.json { render json: @figure.errors, status: :unprocessable_content }
       end
     end
   end

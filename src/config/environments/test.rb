@@ -28,7 +28,7 @@ Rails.application.configure do
   config.cache_store = :null_store
 
   # Raise exceptions instead of rendering exception templates.
-  config.action_dispatch.show_exceptions = false
+  config.action_dispatch.show_exceptions = :none # Rails 7.2+: true/false no longer accepted (false = raise)
 
   # Disable request forgery protection in test environment.
   config.action_controller.allow_forgery_protection = false

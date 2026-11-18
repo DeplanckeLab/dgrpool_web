@@ -29,8 +29,8 @@ class SnpGenesController < ApplicationController
         format.html { redirect_to snp_gene_url(@snp_gene), notice: "Snp gene was successfully created." }
         format.json { render :show, status: :created, location: @snp_gene }
       else
-        format.html { render :new, status: :unprocessable_entity }
-        format.json { render json: @snp_gene.errors, status: :unprocessable_entity }
+        format.html { render :new, status: :unprocessable_content }
+        format.json { render json: @snp_gene.errors, status: :unprocessable_content }
       end
     end
   end
@@ -42,8 +42,8 @@ class SnpGenesController < ApplicationController
         format.html { redirect_to snp_gene_url(@snp_gene), notice: "Snp gene was successfully updated." }
         format.json { render :show, status: :ok, location: @snp_gene }
       else
-        format.html { render :edit, status: :unprocessable_entity }
-        format.json { render json: @snp_gene.errors, status: :unprocessable_entity }
+        format.html { render :edit, status: :unprocessable_content }
+        format.json { render json: @snp_gene.errors, status: :unprocessable_content }
       end
     end
   end

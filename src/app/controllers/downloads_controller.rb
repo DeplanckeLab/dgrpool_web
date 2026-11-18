@@ -29,8 +29,8 @@ class DownloadsController < ApplicationController
         format.html { redirect_to download_url(@download), notice: "Download was successfully created." }
         format.json { render :show, status: :created, location: @download }
       else
-        format.html { render :new, status: :unprocessable_entity }
-        format.json { render json: @download.errors, status: :unprocessable_entity }
+        format.html { render :new, status: :unprocessable_content }
+        format.json { render json: @download.errors, status: :unprocessable_content }
       end
     end
   end
@@ -42,8 +42,8 @@ class DownloadsController < ApplicationController
         format.html { redirect_to download_url(@download), notice: "Download was successfully updated." }
         format.json { render :show, status: :ok, location: @download }
       else
-        format.html { render :edit, status: :unprocessable_entity }
-        format.json { render json: @download.errors, status: :unprocessable_entity }
+        format.html { render :edit, status: :unprocessable_content }
+        format.json { render json: @download.errors, status: :unprocessable_content }
       end
     end
   end

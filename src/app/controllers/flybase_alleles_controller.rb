@@ -29,8 +29,8 @@ class FlybaseAllelesController < ApplicationController
         format.html { redirect_to flybase_allele_url(@flybase_allele), notice: "Flybase allele was successfully created." }
         format.json { render :show, status: :created, location: @flybase_allele }
       else
-        format.html { render :new, status: :unprocessable_entity }
-        format.json { render json: @flybase_allele.errors, status: :unprocessable_entity }
+        format.html { render :new, status: :unprocessable_content }
+        format.json { render json: @flybase_allele.errors, status: :unprocessable_content }
       end
     end
   end
@@ -42,8 +42,8 @@ class FlybaseAllelesController < ApplicationController
         format.html { redirect_to flybase_allele_url(@flybase_allele), notice: "Flybase allele was successfully updated." }
         format.json { render :show, status: :ok, location: @flybase_allele }
       else
-        format.html { render :edit, status: :unprocessable_entity }
-        format.json { render json: @flybase_allele.errors, status: :unprocessable_entity }
+        format.html { render :edit, status: :unprocessable_content }
+        format.json { render json: @flybase_allele.errors, status: :unprocessable_content }
       end
     end
   end

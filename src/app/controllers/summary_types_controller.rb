@@ -29,8 +29,8 @@ class SummaryTypesController < ApplicationController
         format.html { redirect_to summary_type_url(@summary_type), notice: "Summary type was successfully created." }
         format.json { render :show, status: :created, location: @summary_type }
       else
-        format.html { render :new, status: :unprocessable_entity }
-        format.json { render json: @summary_type.errors, status: :unprocessable_entity }
+        format.html { render :new, status: :unprocessable_content }
+        format.json { render json: @summary_type.errors, status: :unprocessable_content }
       end
     end
   end
@@ -42,8 +42,8 @@ class SummaryTypesController < ApplicationController
         format.html { redirect_to summary_type_url(@summary_type), notice: "Summary type was successfully updated." }
         format.json { render :show, status: :ok, location: @summary_type }
       else
-        format.html { render :edit, status: :unprocessable_entity }
-        format.json { render json: @summary_type.errors, status: :unprocessable_entity }
+        format.html { render :edit, status: :unprocessable_content }
+        format.json { render json: @summary_type.errors, status: :unprocessable_content }
       end
     end
   end
