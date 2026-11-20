@@ -21,7 +21,7 @@ if [ "$RAILS_ENV" = "production" ]; then
 
     # One-shot JS/CSS build (no --watch), then precompile into public/assets.
     # SKIP_*_BUILD stops assets:precompile from calling the --watch npm scripts, which never exit.
-    ./node_modules/.bin/esbuild app/javascript/*.* --bundle --outdir=app/assets/builds || exit 1
+    ./node_modules/.bin/esbuild app/javascript/*.* --bundle --minify --outdir=app/assets/builds || exit 1
     ./node_modules/.bin/sass ./app/assets/stylesheets/application.bootstrap.scss:./app/assets/builds/application.css --no-source-map --load-path=node_modules || exit 1
     SKIP_JS_BUILD=1 SKIP_CSS_BUILD=1 ./bin/rails assets:precompile || exit 1
 fi
