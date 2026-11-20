@@ -1,10 +1,12 @@
-<table id='phenotypes' class='table-striped'> <!-- class="table" data-controller="datatable">-->
+<%# Rows are loaded page by page from table_data (DataTables server-side processing): searching, sorting and
+    paging are done in SQL by PhenotypesController#table_data. %>
+<table id='phenotypes' class='table-striped' width='100%'>
   <thead>
     <tr>
       <% if curator? %>
       <th>ID</th>
       <% end %>
-      <th>Name</th> 
+      <th>Name</th>
       <th>Study</th>
       <th>Description</th>
       <th>Source type</th>
@@ -12,62 +14,37 @@
       <th># DGRP lines</th>
       <th># female</th>
       <th># male</th>
-      <th># unclassified sex</th>      
+      <th># unclassified sex</th>
       <th></th>
     </tr>
   </thead>
   <tbody>
-    <% @phenotypes.each do |p| %>
-    <tr>
-      <% if curator? %>
-      <td><%= p.id %></td>
-      <% end %>
-      <td><%= p.name %></td>
-      <td>
-	<!--<span class='badge bg-info'><%= (@h_studies[p.study_id]) ? display_reference_short(@h_studies[p.study_id]) : 'NA' %></span></td>-->
-      <%= display_reference_short2(@h_studies[p.study_id]) %>
-      </td>
-      <td><small><%= raw p.description %> <%= (p.unit_id) ? "[#{@h_units[p.unit_id].label_html}]" : '' %></small></td>
-      <td><%= raw display_source_type(p, @h_summary_types) %></td>
-      <td><%= raw display_value_type(p) %></td>
-      <td><%= p.nber_dgrp_lines %></td>
-      <td><%= p.nber_sex_female %></td>
-      <td><%= p.nber_sex_male %></td>
-      <td><%= p.nber_sex_na %></td>
-      <td>
-        <div style='white-space:nowrap'>
-	  <%= link_to "Show", phenotype_path(p), :data => {:turbo => 'false', :method => 'get'}, :class => 'btn btn-sm btn-primary' %>
-          <%= link_to "GWAS", gwas_analysis_phenotype_path(p), :data => {:turbo => 'false', :method => 'get'}, :class => 'btn btn-sm btn-primary' %>
-	  <%= link_to "Correlation", compute_correlation_phenotype_path(p), {:data => {:turbo => 'false', :method => 'get'}, :class => 'btn btn-sm btn-primary'} %>
-
-          <% if curator? %>
-        <%= link_to "Edit", edit_phenotype_path(p), :data => {:turbo => 'false', :method => 'get'}, :class => 'btn btn-sm btn-success' %>
-        <% end %>
-        </div>
-      </td>
-
-    </tr>
-    <% end %>
   </tbody>
 </table>
 
+<% columns = (curator? ? ['id'] : []) + %w[name study description source_type value_type nber_dgrp_lines nber_sex_female nber_sex_male nber_sex_na] %>
 <%= javascript_tag do %>
 
-
   document.addEventListener('DOMContentLoaded', function () {
-  // let table = new DataTable('#phenotypes', {pageLength:100})
-  $("#phenotypes").DataTable({pageLength:100})
-$("#only_integrated_studies").click(function(){
-//console.log($(this).prop("checked"))
-if ($(this).prop("checked") == true){
-location.href='<%= raw phenotypes_path(:only_curated_studies=>1) %>' 
-}else{
-location.href='<%= raw phenotypes_path(:only_curated_studies=>0) %>'
-}
-})
+    $("#phenotypes").DataTable({
+      serverSide: true,
+      processing: true,
+      searchDelay: 400,
+      pageLength: 100,
+      ajax: {
+        url: '<%= raw table_data_phenotypes_path(:only_curated_studies => params[:only_curated_studies], :no_obsolete => params[:no_obsolete], :all => params[:all]) %>'
+      },
+      columns: <%= raw (columns.map { |c| {:data => c} } + [{:data => 'actions', :orderable => false, :searchable => false}]).to_json %>,
+      drawCallback: function () { initTooltips() }
+    })
 
-initTooltips()
-});
-
+    $("#only_integrated_studies").click(function(){
+      if ($(this).prop("checked") == true){
+        location.href='<%= raw phenotypes_path(:only_curated_studies=>1) %>'
+      }else{
+        location.href='<%= raw phenotypes_path(:only_curated_studies=>0) %>'
+      }
+    })
+  });
 
 <% end %>

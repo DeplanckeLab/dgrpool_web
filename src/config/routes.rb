@@ -88,6 +88,7 @@ Rails.application.routes.draw do
     collection do
       get :autocomplete
       get :get_gwas_boxplot
+      get :table_data
     end
   end
   resources :releases, :constraints => { :id => /\d+\.\d+\.\d+/ } do

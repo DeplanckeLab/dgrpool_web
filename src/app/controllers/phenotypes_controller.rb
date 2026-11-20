@@ -532,49 +532,92 @@ class PhenotypesController < ApplicationController
 
   
   # GET /phenotypes or /phenotypes.json
+  # The HTML table is filled page by page by #table_data (DataTables server-side processing); the JSON lists them all.
   def index
 
-    params[:only_curated_studies]||="1" if request.format.symbol == :html  
-
-    h_where = {}
-
-    @phenotypes = []
-    if params[:all] == '1' or curator?
-      @phenotypes = Phenotype.all
+    if request.format.json?
+      @phenotypes = phenotypes_for_index.includes(:summary_type, :unit)
     else
-      if params[:only_curated_studies] == "1"
-        h_where[:study] = {:status_id => 4}
-      end
-      if params[:no_obsolete] == "1"
-        h_where[:obsolete] = false
-      end
-      @phenotypes = Phenotype.joins(:study).where(h_where).all
+      params[:only_curated_studies] ||= "1"
     end
-    #      Phenotype.joins(:study).where(:study => {:status_id => 4}).all :
-    #                     ((params[:no_obsolete] == "1") ?  
-    #                    ((params[:only_curated_studies] != '1' or params[:all] == '1') ? Phenotype.all : Phenotype.joins(:study).where(:study => {:status_id => 4}).all) :
-    #                        ((params[:only_curated_studies] != '1' or params[:all] == '1') ? Phenotype.where(:obsolete => false).all : Phenotype.joins(:study).where(:obsolete => false, :study => {:status_id => 4}).all)
-    
-    #                     @phenotypes = 
-    
-    @h_summary_types = {}
-    SummaryType.all.map{|st| @h_summary_types[st.id] = st}
-    @h_studies = {}
-    Study.without_pheno_data.map{|s| @h_studies[s.id] = s}
-    @h_units = {}
-    Unit.all.map{|u| @h_units[u.id] = u}
-    #    @h_nber_dgrp_line_studies ={}
-    
-    #    DgrpLineStudy.select("dgrp_line_study_id, phenotype_id").joins("join dgrp_line_studies_phenotypes on (dgrp_line_studies.id = dgrp_line_study_id)").all.map{|e| @h_nber_dgrp_line_studies[e[:phenotype_id]]||=0; @h_nber_dgrp_line_studies[e[:phenotype_id]]+=1}
+  end
 
-#      respond_to do |format|
-#        format.html {
-#          render }
-#        format.json { render :json => @phenotypes }
-#      end
-      
-      
-      
+  # GET /phenotypes/table_data: one page of the phenotypes table, searched and sorted in SQL. Parameters are the ones
+  # sent by DataTables (draw, start, length, search[value], order[0][column|dir], columns[i][data]), plus the index
+  # filters (only_curated_studies, no_obsolete, all).
+  def table_data
+    base = phenotypes_for_index
+    rows = base.joins("LEFT JOIN units ON units.id = phenotypes.unit_id")
+             .joins("LEFT JOIN summary_types ON summary_types.id = phenotypes.summary_type_id")
+
+    # same matching as the former client-side search: every word must appear in one of the displayed texts
+    search_text = "concat_ws(' ', #{'phenotypes.id, ' if curator?}phenotypes.name, phenotypes.description, units.label, " \
+                  "studies.authors, studies.year, " \
+                  "CASE WHEN phenotypes.is_summary THEN 'Summary ' || coalesce(summary_types.name, 'na') " \
+                  "ELSE 'By sample Dataset ' || coalesce(phenotypes.dataset_id::text, '') END, " \
+                  "CASE WHEN phenotypes.is_numeric THEN 'Numeric' ELSE 'Text' END, " \
+                  "CASE WHEN phenotypes.is_continuous THEN 'Continuous' ELSE 'Discrete' END)"
+    params.dig(:search, :value).to_s.split.first(10).each do |word|
+      rows = rows.where("#{search_text} ILIKE ?", "%#{Phenotype.sanitize_sql_like(word)}%")
+    end
+
+    h_order_columns = {
+      'id' => ['phenotypes.id'],
+      'name' => ['phenotypes.name'],
+      'study' => ['studies.authors', 'studies.year'],
+      'description' => ['phenotypes.description'],
+      'source_type' => ['phenotypes.is_summary', 'summary_types.name', 'phenotypes.dataset_id'],
+      'value_type' => ['phenotypes.is_numeric', 'phenotypes.is_continuous'],
+      'nber_dgrp_lines' => ['phenotypes.nber_dgrp_lines'],
+      'nber_sex_female' => ['phenotypes.nber_sex_female'],
+      'nber_sex_male' => ['phenotypes.nber_sex_male'],
+      'nber_sex_na' => ['phenotypes.nber_sex_na']
+    }
+    order = params.dig(:order, '0') || {}
+    column_name = params.dig(:columns, order[:column].to_s, :data)
+    dir = (order[:dir] == 'desc') ? 'DESC' : 'ASC'
+    order_sql = (h_order_columns[column_name] || h_order_columns['name']).map { |c| "#{c} #{dir}" }
+    order_sql.push 'phenotypes.id ASC' # stable pages
+
+    start = [params[:start].to_i, 0].max
+    length = params[:length].to_i.clamp(1, 1000)
+    phenotypes = rows.order(Arel.sql(order_sql.join(', '))).offset(start).limit(length).to_a
+
+    h_studies = {}
+    Study.without_pheno_data.where(:id => phenotypes.map(&:study_id).uniq).each { |st| h_studies[st.id] = st }
+    h_units = {}
+    Unit.where(:id => phenotypes.map(&:unit_id).compact.uniq).each { |u| h_units[u.id] = u }
+    h_summary_types = {}
+    SummaryType.all.each { |st| h_summary_types[st.id] = st }
+
+    data = phenotypes.map do |p|
+      buttons = [
+        helpers.link_to("Show", phenotype_path(p), :data => {:turbo => 'false', :method => 'get'}, :class => 'btn btn-sm btn-primary'),
+        helpers.link_to("GWAS", gwas_analysis_phenotype_path(p), :data => {:turbo => 'false', :method => 'get'}, :class => 'btn btn-sm btn-primary'),
+        helpers.link_to("Correlation", compute_correlation_phenotype_path(p), :data => {:turbo => 'false', :method => 'get'}, :class => 'btn btn-sm btn-primary')
+      ]
+      buttons.push helpers.link_to("Edit", edit_phenotype_path(p), :data => {:turbo => 'false', :method => 'get'}, :class => 'btn btn-sm btn-success') if curator?
+      {
+        :id => p.id,
+        :name => ERB::Util.html_escape(p.name),
+        :study => helpers.display_reference_short2(h_studies[p.study_id]),
+        :description => "<small>#{p.description} #{(u = h_units[p.unit_id]) ? "[#{u.label_html}]" : ''}</small>",
+        :source_type => helpers.display_source_type(p, h_summary_types),
+        :value_type => helpers.display_value_type(p),
+        :nber_dgrp_lines => p.nber_dgrp_lines,
+        :nber_sex_female => p.nber_sex_female,
+        :nber_sex_male => p.nber_sex_male,
+        :nber_sex_na => p.nber_sex_na,
+        :actions => "<div style='white-space:nowrap'>#{buttons.join(" ")}</div>"
+      }
+    end
+
+    render :json => {
+      :draw => params[:draw].to_i,
+      :recordsTotal => base.count,
+      :recordsFiltered => rows.count,
+      :data => data
+    }
   end
   
   
@@ -910,6 +953,18 @@ class PhenotypesController < ApplicationController
   end
   
   private
+
+    # Phenotypes listed by #index and #table_data. Studies are joined (LEFT JOIN, as curators see every phenotype),
+    # so that the table can search and sort on them.
+    def phenotypes_for_index
+      phenotypes = Phenotype.joins("LEFT JOIN studies ON studies.id = phenotypes.study_id")
+      if !(params[:all] == '1' or curator?)
+        phenotypes = phenotypes.where("studies.status_id = 4") if params[:only_curated_studies] == "1"
+        phenotypes = phenotypes.where(:obsolete => false) if params[:no_obsolete] == "1"
+      end
+      phenotypes
+    end
+
   # Use callbacks to share common setup or constraints between actions.
   def set_phenotype
       @phenotype = Phenotype.find(params[:id])
