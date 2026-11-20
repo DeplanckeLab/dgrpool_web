@@ -14,7 +14,32 @@
     <%= stylesheet_link_tag "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css" %>
     <%= javascript_include_tag "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/js/all.min.js" %>
     <script src="https://cdn.plot.ly/plotly-2.16.1.min.js"></script>
-    
+    <script>
+      /* Small screens: plots are created with fixed desktop widths (400-800px).
+         On phones, shrink any plot wider than its container to fit (square plots keep
+         their aspect ratio). Desktop rendering is untouched. The ordered per-line plots
+         are deliberately wide and scroll horizontally inside their card, so skip them. */
+      (function () {
+        if (!window.Plotly) return;
+        var newPlot = Plotly.newPlot;
+        var mq = window.matchMedia('(max-width: 767.98px)');
+        Plotly.newPlot = function (gd, data, layout, config) {
+          try {
+            var el = (typeof gd === 'string') ? document.getElementById(gd) : gd;
+            if (mq.matches && el && layout && !/^ordered_/.test(el.id || '')) {
+              var avail = el.clientWidth || el.parentElement && el.parentElement.clientWidth || 0;
+              avail = Math.min(avail || 9999, document.documentElement.clientWidth - 24);
+              if (!layout.width || layout.width > avail) {
+                if (layout.width && layout.height && layout.width === layout.height) layout.height = avail;
+                layout.width = avail;
+              }
+            }
+          } catch (e) {}
+          return newPlot.apply(this, arguments);
+        };
+      })();
+    </script>
+
     <script>
       /*    window.onload = function(){
        function loadjscssfile(filename, filetype) {
@@ -87,6 +112,29 @@
     <%= javascript_tag do %>
 
     document.addEventListener('DOMContentLoaded', function () {
+
+    /* Small screens: any table wider than its container gets wrapped in a horizontally
+       scrolling box, so it never widens the whole page. Re-run when AJAX content arrives. */
+    var mqSmall = window.matchMedia('(max-width: 767.98px)');
+    function fitWideTables() {
+      if (!mqSmall.matches) return;
+      document.querySelectorAll('table').forEach(function (t) {
+        var p = t.parentElement;
+        if (!p || t.closest('.dataTables_wrapper, .table-scroll')) return;
+        if (t.offsetWidth > p.clientWidth + 1) {
+          var w = document.createElement('div');
+          w.className = 'table-scroll';
+          p.insertBefore(w, t);
+          w.appendChild(t);
+        }
+      });
+    }
+    if (mqSmall.matches) {
+      fitWideTables();
+      var fitTimer;
+      new MutationObserver(function () { clearTimeout(fitTimer); fitTimer = setTimeout(fitWideTables, 250); })
+        .observe(document.body, {childList: true, subtree: true});
+    }
 
     $("#ontop_popup_window3").draggable()
     

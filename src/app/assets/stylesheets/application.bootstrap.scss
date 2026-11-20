@@ -8,7 +8,11 @@ $lightgreen: #90EE90;
 @import 'jquery-ui';
 //@import 'tooltipster.bundle.min';
 
-body {margin:150px; margin-top:60px; margin-bottom:60px}
+/* Page gutters: full 150px side margins only on wide screens (unchanged desktop look);
+   tighter on tablets, and edge-to-edge (12px, matching .row gutters) on phones. */
+body {margin:0; padding:70px 12px 12px}
+@include media-breakpoint-up(md) { body {padding:0; margin:60px 40px} }
+@include media-breakpoint-up(xl) { body {margin:60px 150px} }
 
 .desc_table tr td {padding:5px}
 .navbar-nav {background-color:rgba(var(--bs-light-rgb), var(--bs-bg-opacity))}
@@ -88,7 +92,10 @@ body {margin:150px; margin-top:60px; margin-bottom:60px}
   border-color: #007bff;
 }
 
-#main_footer {position:fixed;bottom:0; width:100%; left:0; margin:0}
+/* Footer: fixed on desktop; in normal flow on phones so it doesn't hide content */
+#main_footer {margin:24px -12px -12px; font-size:.875rem}
+@include media-breakpoint-up(md) { #main_footer {font-size:inherit} }
+@include media-breakpoint-up(md) { #main_footer {position:fixed; bottom:0; width:100%; left:0; margin:0} }
 //#navbarSupportedContent.show ul {background-color:white}
 
 #ontop_popup_window {
@@ -168,3 +175,60 @@ pre.code-block {
 #container_ordered_barplot .card-body {overflow-y:scroll}
 #container_ordered_boxplot .card-body {overflow-y:scroll}
 #container_ordered_plot .card-body {overflow-y:scroll}
+
+/* ---------- Small screens / smartphones ---------- */
+
+/* Collapsed navbar: menu panel scrolls if taller than the screen */
+#header_nav .navbar-brand {padding-top:0; padding-bottom:0}
+#header_nav .navbar-collapse {max-height:calc(100vh - 60px); overflow-y:auto}
+@include media-breakpoint-up(xl) { #header_nav .navbar-collapse {max-height:none; overflow:visible} }
+
+/* Wide tables (DataTables, API docs, results) scroll horizontally inside their box
+   instead of stretching the whole page */
+div.dataTables_wrapper {overflow-x:auto; -webkit-overflow-scrolling:touch}
+.table-scroll {overflow-x:auto; -webkit-overflow-scrolling:touch}
+img, svg, video {max-width:100%}
+pre {white-space:pre-wrap; word-break:break-word}
+
+@include media-breakpoint-down(md) {
+  h1, .h1 {font-size:1.6rem}
+  h2, .h2 {font-size:1.4rem}
+  h3, .h3 {font-size:1.25rem}
+  .card-body {padding:.75rem}
+  .container {padding-left:0; padding-right:0}
+
+  /* long identifiers / URLs / DOIs must wrap rather than widen the page
+     (tables are excluded: they scroll horizontally instead) */
+  .card-body, .alert {overflow-wrap:break-word}
+
+  /* inline fixed widths (e.g. style="width:400px") never exceed the screen */
+  input, select, textarea, .form-control, .form-select {max-width:100%}
+  input[type=file] {width:100%}
+
+  /* DataTables controls: stack and use full width */
+  div.dataTables_wrapper div.dataTables_length,
+  div.dataTables_wrapper div.dataTables_filter,
+  div.dataTables_wrapper div.dataTables_info,
+  div.dataTables_wrapper div.dataTables_paginate {text-align:left !important; justify-content:flex-start !important}
+  div.dataTables_wrapper div.dataTables_filter input {width:auto; max-width:60vw}
+  div.dataTables_wrapper div.dataTables_paginate ul.pagination {flex-wrap:wrap; justify-content:flex-start !important}
+
+  /* Plotly: never wider than the screen; ordered plots scroll in their card */
+  .js-plotly-plot, .plot-container {max-width:100%}
+  #container_ordered_barplot .card-body,
+  #container_ordered_boxplot .card-body,
+  #container_ordered_plot .card-body {overflow-x:auto}
+
+  /* Popup windows (positioned by JS with desktop offsets): fill the screen */
+  #ontop_popup_window, #ontop_popup_window2, #ontop_popup_window3 {
+    left:6px !important; right:6px !important; top:64px !important;
+    width:auto !important; margin:0; padding:12px;
+    max-height:calc(100vh - 76px); overflow:auto;
+  }
+  #ontop_popup_container, #ontop_popup_container2, #ontop_popup_container3 {max-width:100%; overflow:auto}
+
+  .float-end {max-width:100%}
+}
+
+/* fixed-fraction card heights only make sense when columns sit side by side */
+@include media-breakpoint-up(md) { .h-md-30 {height:30%} }

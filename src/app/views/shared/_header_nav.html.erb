@@ -1,18 +1,12 @@
-<nav id='header_nav' class="navbar navbar-expand-sm fixed-top navbar-light bg-light">
-  <div id='page_title' class='ms-3'>
-    <a class="navbar-brand" href="<%= root_path %>" data-turbo="false"> <%= image_tag "LogoHDFinal.png", height: 35%> <small style='color:grey;font-style:italic'></small></a>
-  </div>
-  <div style='position:fixed; top:10px;right:10px'>
-    <!--    <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-	    <span class="navbar-toggler-icon"></span>
-    </button>
-    -->
+<nav id='header_nav' class="navbar navbar-expand-xl fixed-top navbar-light bg-light">
+  <div class="container-fluid">
+    <a id='page_title' class="navbar-brand ms-1 ms-md-3" href="<%= root_path %>" data-turbo="false"><%= image_tag "LogoHDFinal.png", height: 35, alt: 'DGRPool' %></a>
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
-    
+
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
-      <ul id='main-nav' class="navbar-nav mr-auto" data-turbolinks="false">
+      <ul id='main-nav' class="navbar-nav ms-auto" data-turbolinks="false">
 	<li class="nav-item mr-4">
           <%= link_to raw("<i class='fa fa-home'></i>"), root_path(), {:data => {:turbo => 'false', :method => 'get'}, :class => 'nav-link' } %>
         </li>
@@ -52,7 +46,7 @@
           <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
             <i class='fa fa-cog'></i> Admin tools
           </a>
-          <ul class="dropdown-menu">
+          <ul class="dropdown-menu dropdown-menu-end">
 	    <li>
               <%= link_to raw('DGRP statuses'), dgrp_statuses_path(), {:data => {:turbo => 'false', :method => 'get'}, :class => 'dropdown-item'} %>
             </li>
@@ -98,10 +92,10 @@
         <% end %>
 
 	 <li class="nav-item  dropdown">
-          <a class="nav-link dropdown-toggle" style='margin-right:70px' href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+          <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
             <i class='fa fa-tools'></i> Tools
           </a>
-          <ul class="dropdown-menu">
+          <ul class="dropdown-menu dropdown-menu-end">
 	    <li>
               <%= link_to raw('Check your phenotype<br/><small>Correlation & GWAS</small>'), check_pheno_path(), {:target => '_blank', :data => {:turbo => 'false', :method => 'get'}, :class => 'dropdown-item'} %>
             </li>
