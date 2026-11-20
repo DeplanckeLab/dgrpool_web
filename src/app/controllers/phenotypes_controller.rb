@@ -152,7 +152,7 @@ class PhenotypesController < ApplicationController
     @h_phenotypes = {}
     Phenotype.all.map{|p| @h_phenotypes[p.id] = p}
     @h_studies = {}
-    Study.all.map{|s| @h_studies[s.id] = s}
+    Study.without_pheno_data.map{|s| @h_studies[s.id] = s}
     @h_sex = {'F' => 'female', 'M' => 'male', 'NA' => 'unclassified'}
     
     t_header = ["DGRP", 'sex', @phenotype.name] #.join("\t") + "\n"
@@ -437,6 +437,11 @@ class PhenotypesController < ApplicationController
 #      end
     end
 
+    # @h_snps is embedded in the page as JS (annotation pop-ups of the table rows): keep only the SNPs of the displayed
+    # rows (<= 1000 per sex). With all significant hits it reached ~25 MB per copy for phenotypes with ~80k hits.
+    displayed_snp_ids = @h_gwas_results.values.flatten(1).map { |t| t[2] }.to_set
+    @h_snps.select! { |snp_id, _| displayed_snp_ids.include?(snp_id) }
+
     if params[:nolayout]=="1"
       render :partial => 'all_gwas_analysis', :locals => {:phenotype => @phenotype, :h_output => @h_output, :h_files => @h_files, :anova => @anova, :h_gwas_results => @h_gwas_results, :output_dir => @gwas_dir, :download_namespace => 'gwas', :md5 => nil}
     else
@@ -493,7 +498,7 @@ class PhenotypesController < ApplicationController
     i=0
     #Organism.where(:id => exps.map{|e| e.project_id}.uniq).all.map{|p| h_projects[p.id] = p}                                    
     h_studies = {}
-    Study.where(:id => phenotypes.map{|p| p.study_id}.uniq).all.map{|e| h_studies[e.id] = e}
+    Study.without_pheno_data.where(:id => phenotypes.map{|p| p.study_id}.uniq).all.map{|e| h_studies[e.id] = e}
     
   
     phenotypes.each do |p|
@@ -555,7 +560,7 @@ class PhenotypesController < ApplicationController
     @h_summary_types = {}
     SummaryType.all.map{|st| @h_summary_types[st.id] = st}
     @h_studies = {}
-    Study.all.map{|s| @h_studies[s.id] = s}
+    Study.without_pheno_data.map{|s| @h_studies[s.id] = s}
     @h_units = {}
     Unit.all.map{|u| @h_units[u.id] = u}
     #    @h_nber_dgrp_line_studies ={}

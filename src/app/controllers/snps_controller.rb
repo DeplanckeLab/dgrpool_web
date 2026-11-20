@@ -59,7 +59,7 @@ class SnpsController < ApplicationController
     @h_phenotypes = {}
     Phenotype.where(:id => @gwas_results.map{|e| e.phenotype_id}).all.map{|p| @h_phenotypes[p.id] = p}
     @h_studies = {}
-    Study.where(:id => @h_phenotypes.values.map{|e| e.study_id}).all.map{|s| @h_studies[s.id] = s}
+    Study.without_pheno_data.where(:id => @h_phenotypes.values.map{|e| e.study_id}).all.map{|s| @h_studies[s.id] = s}
     
     @flybase_alleles = []
     flybase_alleles = FlybaseAllele.where(:gene_id => @h_genes.keys).all
@@ -145,7 +145,7 @@ class SnpsController < ApplicationController
       
       @gwas_results = GwasResult.where(:snp_id => @h_snps.keys).all
       Phenotype.where(:id => @gwas_results.map{|e| e.phenotype_id}).all.map{|p| @h_phenotypes[p.id] = p}
-      Study.where(:id => @h_phenotypes.values.map{|e| e.study_id}).all.map{|s| @h_studies[s.id] = s}
+      Study.without_pheno_data.where(:id => @h_phenotypes.values.map{|e| e.study_id}).all.map{|s| @h_studies[s.id] = s}
     end
     
   end
@@ -235,7 +235,7 @@ class SnpsController < ApplicationController
    # @study = @phenotype.study
     @gwas_results = GwasResult.where(:snp_id => @snp.id).all
     @h_studies = {}
-    Study.all.map{|s| @h_studies[s.id] = s}
+    Study.without_pheno_data.map{|s| @h_studies[s.id] = s}
     @h_phenotypes = {}
     @h_statuses = {}
     @h_units = {}

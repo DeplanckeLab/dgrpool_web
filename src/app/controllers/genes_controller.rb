@@ -109,7 +109,7 @@ class GenesController < ApplicationController
     @h_phenotypes = {}
     Phenotype.where(:id => @gwas_results.map{|e| e.phenotype_id}).all.map{|p| @h_phenotypes[p.id] = p}
     @h_studies = {}
-    Study.where(:id => @h_phenotypes.values.map{|e| e.study_id}).all.map{|s| @h_studies[s.id] = s}
+    Study.without_pheno_data.where(:id => @h_phenotypes.values.map{|e| e.study_id}).all.map{|s| @h_studies[s.id] = s}
     
     @flybase_alleles = []
     flybase_alleles = FlybaseAllele.where(:gene_id => @h_genes.keys).all

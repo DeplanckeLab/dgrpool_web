@@ -443,6 +443,8 @@ class StudiesController < ApplicationController
     else
       @studies = Study.joins(:status).where(:status => {:name => ['submitted', 'accepted', 'integrated', 'rejected']})
     end
+    # only the admin JSON export includes the phenotype data
+    @studies = @studies.without_pheno_data unless admin? and request.format.json?
 
     @phenotypes = Phenotype.all
     @h_phenotypes_by_study_id = {}

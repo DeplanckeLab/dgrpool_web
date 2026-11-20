@@ -11,8 +11,9 @@
     <%# stylesheet_link_tag "https://cdn.datatables.net/1.12.1/css/dataTables.bootstrap5.min.css" %>
     <%# javascript_include_tag "https://cdn.datatables.net/1.12.1/js/jquery.dataTables.min.js" %>
     <%# javascript_include_tag "https://cdn.datatables.net/1.12.1/js/dataTables.bootstrap5.min.js" %>
+    <%# Font Awesome as web fonts (CSS) only: the JS version (all.min.js, ~550 kB gzipped) rendered the same icons
+        as SVG but blocked page load and re-scanned the DOM, which was slow on large tables %>
     <%= stylesheet_link_tag "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css" %>
-    <%= javascript_include_tag "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/js/all.min.js" %>
     <script src="https://cdn.plot.ly/plotly-2.16.1.min.js"></script>
     <script>
       /* Small screens: plots are created with fixed desktop widths (400-800px).

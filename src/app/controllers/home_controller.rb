@@ -313,7 +313,11 @@ class HomeController < ApplicationController
 
      @h_genes = {}
      @genes.map{|g| @h_genes[g.id] = g}
-     
+
+    # @h_snps is embedded in the page as JS: keep only the SNPs of the displayed rows (see PhenotypesController#gwas_analysis)
+    displayed_snp_ids = @h_gwas_results.values.flatten(1).map { |t| t[2] }.to_set
+    @h_snps.select! { |snp_id, _| displayed_snp_ids.include?(snp_id) }
+
     render :partial => 'phenotypes/all_gwas_analysis', :locals => {:phenotype => nil, :h_output => @h_output, :h_files => @h_files, :anova => @anova, :h_gwas_results => @h_gwas_results, :output_dir => @tmp_dir, :download_namespace => 'tmp', :md5 => @md5}
     
   end
