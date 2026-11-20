@@ -1,22 +1,23 @@
 <div class="container">
+  <%# DGRP3: variants are dm6 (FlyBase r6.64) only, the dm3/dm6 assembly switch was removed %>
+  <% if params[:assembly] == 'dm3' %>
+  <div class='alert alert-warning'>
+    DGRPool now uses the DGRP2+DGRP3 variants on the <b>dm6</b> genome (FlyBase r6.64): dm3 identifiers and coordinates are not supported anymore.
+    The search below uses dm6. To convert dm3 coordinates, you can use the <a href='https://flybase.org/convert/coordinates' target='_blank'>FlyBase coordinates converter</a>.
+  </div>
+  <% end %>
   <div class='row justify-content-md-center'>
-    <div class='col-md-4  mb-2'>
-      <div class="input-group btn-group" role="group" aria-label="Search">
-      <div class='mt-2 me-3'>Assembly</div>
-      <% l = ['dm3', 'dm6'] %>
-      <%= select_tag 'assembly', options_for_select(l, session[:vs_settings][:assembly]), :class => 'form-control' %>
-      </div>
-    </div>
     <div class='col-md-7  mb-2'>
       <div class="input-group btn-group" role="group" aria-label="Search">
-        <%= text_field_tag 'variant_free_text', session[:vs_settings][:free_text] || '', {:size => 30, :class => "form-control", :placeholder => "Search"} %>
+        <%= text_field_tag 'variant_free_text', session[:vs_settings][:free_text] || '', {:size => 30, :class => "form-control", :placeholder => "Search (dm6)"} %>
         <button id='variant_search-btn' type="button" class="btn btn-primary"><i class="fas fa-search"></i> Search</button>
       </div>
       <br/>
       <div id='variant_search-message' class='search_helper'><i>i.e.</i>
-	<%= link_to "3R_1007_SNP", snps_path(:assembly => 'dm3', :q => '3R_1007_SNP') %>
+	<%= link_to "2L_19427575_SNP", snps_path(:q => '2L_19427575_SNP') %>
 	<i>or</i>
-	<%= link_to "2R:4600000-4620000", snps_path(:assembly => 'dm3', :q => '2R:4600000-4620000').gsub('%3A', ':') %>
+	<%= link_to "2R:4600000-4620000", snps_path(:q => '2R:4600000-4620000').gsub('%3A', ':') %>
+	<small><i>(dm6 coordinates)</i></small>
       </div>
     </div>
   </div>
@@ -55,9 +56,6 @@ $(".variant_search_view_btn").click(function(){
  $("#variant_free_text").val('<%= params[:q] %>')
 <% end %>
 
-<% if params[:assembly] %>
- $("#assembly").val('<%= params[:assembly] %>')
-<% end %>
 
 function variant_search(p, h) {
  if (p.length > 0 && p[0].name == 'auto'){ // refresh without input if auto
@@ -73,7 +71,6 @@ function variant_search(p, h) {
    p.push({name : "workspace_key", value : "<%= workspace_key %>"})
  <% end %>
 
- p.push({name: 'assembly', value: $("#assembly").val()})
  
  console.log("do_search")
  if ($("#variant_free_text").val() != ''){
@@ -89,12 +86,6 @@ function variant_init_search(){
   $("#variant_page").val(1)
 }
 
-$("#assembly").change(function(){
-  variant_init_search()
-  var p = [{name : 'free_text', value : $("#variant_free_text").val()}]
-  var h = {loading:'fa-2x'}
-  variant_search(p, h)
-})
  
 $("#variant_search-btn").click(function(){
   variant_init_search()

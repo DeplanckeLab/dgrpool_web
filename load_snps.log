@@ -1,0 +1,14 @@
+nohup: ignoring input
+time="2026-11-19T12:25:59+01:00" level=warning msg="/srv/dgrpool/docker-compose.yaml: `version` is obsolete"
+Executing...
+RESET=1: deleting gwas_results, snp_genes and snps (kept if the load fails)...
+500000 variants read
+1000000 variants read
+1500000 variants read
+2000000 variants read
+2500000 variants read
+3000000 variants read
+3500000 variants read
+4000000 variants read
+4500000 variants read
+Done: 4724310 variants loaded

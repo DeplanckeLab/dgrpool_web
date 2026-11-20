@@ -9,7 +9,7 @@ class HomeController < ApplicationController
 
     @links = [
       ["Gene-centric page", "https://dgrpool.epfl.ch/genes?q=[GENE_SYMBOL|GENE_NAME|FLYBASE_IDENTIFIER]", ["https://dgrpool.epfl.ch/genes?q=Arfip", "https://dgrpool.epfl.ch/genes?q=Arfaptin", "https://dgrpool.epfl.ch/genes?q=FBgn0037884"]],
-      ["Variant-centric page", "https://dgrpool.epfl.ch/variants?q=[VARIANT_IDENTIFIER|RANGE]&assembly=[dm3|dm6]", ["https://dgrpool.epfl.ch/variants?q=3R_1007_SNP&assembly=dm3", "https://dgrpool.epfl.ch/variants?q=2R:4600000-4620000&assembly=dm3"]]
+      ["Variant-centric page (dm6 identifiers and coordinates)", "https://dgrpool.epfl.ch/variants?q=[VARIANT_IDENTIFIER|RANGE]", ["https://dgrpool.epfl.ch/variants?q=2L_19427575_SNP", "https://dgrpool.epfl.ch/variants?q=2R:4600000-4620000"]]
     ]
     
     @fields = {      
@@ -87,8 +87,9 @@ class HomeController < ApplicationController
     @h_statuses = {}
     Status.all.map{|s| @h_statuses[s.name] = s}
     @category_ids = @categories.sort!{|a, b| (b.nber_studies || 0) <=> (a.nber_studies || 0)}.map{|e| e.id}
-    stats_file = Pathname.new(APP_CONFIG[:data_dir]) + 'stats.json'
-    @h_stats = Basic.safe_parse_json(File.read(stats_file), {})
+    ## written by 'rails compute_stats' in <data_dir>/stats/ (with the daily archives); <data_dir>/stats.json is the legacy location
+    stats_file = [Pathname.new(APP_CONFIG[:data_dir]) + 'stats' + 'stats.json', Pathname.new(APP_CONFIG[:data_dir]) + 'stats.json'].find{|f| File.exist?(f)}
+    @h_stats = (stats_file) ? Basic.safe_parse_json(File.read(stats_file), {}) : {}
     @latest_release = Release.by_version.first
   end
 
@@ -114,6 +115,9 @@ class HomeController < ApplicationController
     if !valid_md5?(@md5) or !safe_path_component?(phenoname)
       render :plain => "Invalid parameters", :status => :bad_request and return
     end
+
+    ## DGRP3: results computed on DGRP2/dm3 are recomputed on DGRP3 (the page then shows the queue position)
+    Basic.requeue_legacy_user_gwas(Pathname.new(APP_CONFIG[:data_dir]) + 'tmp' + @md5)
     
     @h_impact = {
       'HIGH' => 'danger',
@@ -237,13 +241,13 @@ class HomeController < ApplicationController
       @times.push([tmp = Time.now, tmp-@times.last[0]])
 
      @h_gwas_results[s].select!{|e|
-       snp_genes = h_snp_genes[@h_all_snps[e[2]].id]
+       snp_genes = (snp = @h_all_snps[e[2]]) ? h_snp_genes[snp.id] : nil # DGRP3: a variant missing from snps must not break the page
        
         (session[:filter_gene_name] == '' or (snp_genes and snp_genes.map{|e| e.gene_id}.include? filter_gene_id)) and
           (session[:filter_binding_site] == '' or (@h_snps[e[2]] and @h_snps[e[2]]['binding_site_annot'] and ["TF_binding_site", "regulatory_region"].map{|k| (@h_snps[e[2]]['binding_site_annot'][k]) ? @h_snps[e[2]]['binding_site_annot'][k].keys : []}.flatten.uniq.include? session[:filter_binding_site])) and
           (session[:filter_involved_binding_site] == '0' or (@h_snps[e[2]] and @h_snps[e[2]]['binding_site_annot'] and ["TF_binding_site", "regulatory_region"].map{|k| (@h_snps[e[2]]['binding_site_annot'][k]) ? @h_snps[e[2]]['binding_site_annot'][k].keys : []}.flatten.uniq.size > 0)) and
           (session[:filter_by_pos] == '' or (e2 = session[:filter_by_pos].split(":") and e3 = e2[1].split("-") and e2[0] == e[0] and e[1].to_i >= e3[0].to_i and e[1].to_i <= e3[1].to_i)) and
-          (session[:filter_variant_impact] == '' or (snp_genes and snp_genes.map{|e2| @h_var_types[e2.var_type_id].impact}.include? session[:filter_variant_impact]))
+          (session[:filter_variant_impact] == '' or (snp_genes and snp_genes.map{|e2| @h_var_types[e2.var_type_id] and @h_var_types[e2.var_type_id].impact}.include? session[:filter_variant_impact]))
       }
       @times.push([tmp = Time.now, tmp-@times.last[0]])
 
@@ -476,6 +480,7 @@ class HomeController < ApplicationController
       #  f.write(@content)
       #end
       
+      Basic.requeue_legacy_user_gwas(@h_correlation_res[:output_dir]) # DGRP3: same file uploaded again: recompute a DGRP2/dm3 GWAS
       gwas_output_file = @h_correlation_res[:output_dir] + "gwas_output.json"
       gwas_output = {}
       if File.exist? gwas_output_file
@@ -488,6 +493,7 @@ class HomeController < ApplicationController
       Phenotype.all.map{|p| @h_phenotypes[p.id] = p}
 
       ## rebuild the path from the validated md5 instead of trusting output_dir stored in the JSON
+      Basic.requeue_legacy_user_gwas(tmp_dir + params[:md5]) # DGRP3: recompute a DGRP2/dm3 GWAS
       gwas_output_file = tmp_dir + params[:md5] + "gwas_output.json"
       gwas_output = {}
       if File.exist? gwas_output_file

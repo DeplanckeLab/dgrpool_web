@@ -15,14 +15,24 @@
     <% if File.exist?(output_dir + h_files[:annot]) %>
     <%# sex %>
     <%#  @h_files[sex][:qqplot] %>
+    <%# DGRP3: genotypes of the DGRP2+DGRP3 call set (DGRP_xxx and RP_xxxx lines), dm6 coordinates %>
+    <% used_lines = gwas_used_lines(output_dir + h_files[:plink2]) %>
     <div class='alert alert-info mt-3'>
-      GWAS results were computed on dm3 genome.
+      GWAS results were computed on the <b>dm6</b> genome (FlyBase r6.64), using the DGRP2+DGRP3 genotypes (<%= nb_genotyped_lines %> genotyped lines).
+      <% if used_lines %>
+      <b><%= used_lines[:total] %></b> phenotyped and genotyped lines were used<% if used_lines[:rp] > 0 %>, of which <b><%= used_lines[:rp] %></b> DGRP3 (RP_xxxx) lines<% end %>.
+      <% end %>
     </div>
     <% if File.exist?(output_dir + h_files[:dgrp2]) or File.exist?(output_dir + h_files[:plink2]) %>
     <div class='alert alert-info mt-3'>
-      If you want to make an independent analysis with <a href='http://dgrp2.gnets.ncsu.edu/'>DGRP2</a> or <a href='https://www.cog-genomics.org/plink/2.0/'>PLINK2</a>, you can find here prepared input files for this phenotype:
-      <%= link_to raw("<i class='fa fa-download'></i> DGRP2 results"), get_file_study_path(@study, :namespace => download_namespace, :name => h_files[:dgrp2]), {:target => '_blank', :class => 'btn btn-sm btn-secondary'} %>
-      <%= link_to raw("<i class='fa fa-download'></i> PLINK2 results"), get_file_study_path(@study, :namespace => download_namespace, :name => h_files[:plink2]), {:target => '_blank', :class => 'btn btn-sm btn-secondary'} %>
+      If you want to make an independent analysis with <a href='https://www.cog-genomics.org/plink/2.0/'>PLINK2</a> or <a href='http://dgrp2.gnets.ncsu.edu/'>DGRP2</a>, you can find here prepared input files for this phenotype:
+      <% if File.exist?(output_dir + h_files[:plink2]) %>
+      <%= link_to raw("<i class='fa fa-download'></i> PLINK2 input"), get_file_study_path(@study, :namespace => download_namespace, :name => h_files[:plink2]), {:target => '_blank', :class => 'btn btn-sm btn-secondary'} %>
+      <% end %>
+      <% if File.exist?(output_dir + h_files[:dgrp2]) %>
+      <%= link_to raw("<i class='fa fa-download'></i> DGRP2 input"), get_file_study_path(@study, :namespace => download_namespace, :name => h_files[:dgrp2]), {:target => '_blank', :class => 'btn btn-sm btn-secondary'} %>
+      <% end %>
+      <br/><small>Note: the DGRP2 web tool only knows the 205 DGRP2 lines, DGRP3 (RP_xxxx) lines are ignored there.</small>
     </div>
     <% end %>
 
@@ -102,7 +112,10 @@
 	<div class='card-body'>
 	  <div class='float-end'>
 	    <%= link_to raw("<i class='fa fa-download'></i> PNG"), get_file_study_path(@study, :namespace => download_namespace, :name => h_files[:qqplot]), {:target => '_blank', :class => 'btn btn-sm btn-secondary'} %>
+	    <%# DGRP3: the precomputed results have no PDF version of the plots %>
+	    <% if File.exist?(output_dir + h_files[:qqplot].gsub(/png$/, "pdf")) %>
 	    <%= link_to raw("<i class='fa fa-download'></i> PDF"), get_file_study_path(@study, :namespace => download_namespace, :name => h_files[:qqplot].gsub(/png$/, "pdf")), {:target => '_blank', :class => 'btn btn-sm btn-secondary'} %>
+	    <% end %>
 	  </div>
 	  <h3>QQplot
 	    <% if filter_text != '' %>
@@ -116,7 +129,9 @@
 	<div class='card-body'>
 	  <div class='float-end'>
 	    <%= link_to raw("<i class='fa fa-download'></i> PNG"), get_file_study_path(@study, :namespace => download_namespace, :name => h_files[:manhattan]), {:target => '_blank', :class => 'btn btn-sm btn-secondary'} %>
+            <% if File.exist?(output_dir + h_files[:manhattan].gsub(/png$/, "pdf")) %>
             <%= link_to raw("<i class='fa fa-download'></i> PDF"), get_file_study_path(@study, :namespace => download_namespace, :name => h_files[:manhattan].gsub(/png$/, "pdf")), {:target => '_blank', :class => 'btn btn-sm btn-secondary'} %>
+            <% end %>
           </div>
 	  <h3>Manhattan plot
 	    <% if filter_text != '' %>
@@ -177,7 +192,7 @@
 	      <!--	  #CHROM  POS     ID      REF     ALT     BETA    P       FDR_BH -->
 	      <th>Chromosome</th>
 	      <th>Position</th>
-	      <th>ID</th>
+	      <th>ID (dm6)</th>
 	      <th>Reference</th>
 	      <th>Variant</th>
 	      <th>p-value</th>
@@ -192,9 +207,7 @@
 	     <tr>
 	      <td><%= t[0] %></td>
 	      <td><%= t[1] %></td>
-	      <td><span class='nowrap'><%= t[2] %> [dm3]</span>
-		<span class='nowrap'><%= link_to @h_all_snps[t[2]].identifier_dm6, "http://flybase.org/jbrowse/?data=data%2Fjson%2Fdmel&loc=#{t[0]}%3A#{t[1].to_i-50}..#{t[1].to_i+50}&tracks=Gene_span%2CGene%2Cdgrp_r6%2Csequence_variant&highlight=", :target => '_blank' %> [dm6]</span>
-	      </td>
+	      <td><%= raw display_snp_identifier(t[2]) %></td>
               <td><small>
 		  <%= display_variant(t[3]) %>
 	      </small></td>

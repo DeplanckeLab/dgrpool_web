@@ -113,6 +113,27 @@ module ApplicationHelper
     
   end
   
+  ## DGRP3: variant identifiers are dm6 (CHR_POS_TYPE, FlyBase r6.64), so they link directly to the FlyBase (dm6) JBrowse
+  def display_snp_identifier identifier
+    t = identifier.to_s.split("_")
+    return h(identifier) if t.size < 2 or t[1].to_i == 0
+    url = "https://flybase.org/jbrowse/?data=data%2Fjson%2Fdmel&loc=#{ERB::Util.url_encode(t[0])}%3A#{[t[1].to_i-50, 1].max}..#{t[1].to_i+50}&tracks=Gene_span%2CGene%2Cdgrp_r6%2Csequence_variant&highlight="
+    "<span class='nowrap'>" + link_to(identifier, url, :target => '_blank') + "</span>"
+  end
+
+  ## Number of lines in the genotype set (snps.geno_string), i.e. lines with a geno_index (416 for DGRP3)
+  def nb_genotyped_lines
+    @nb_genotyped_lines ||= DgrpLine.where.not(:geno_index => nil).count
+  end
+
+  ## Number of lines (and of DGRP3 RP_xxxx lines) used by a GWAS, from its PLINK2 phenotype file
+  ## (written by running_GWAS_user.R after restricting to the genotyped lines)
+  def gwas_used_lines plink2_file
+    return nil if !File.exist?(plink2_file)
+    names = File.readlines(plink2_file).drop(1).map{|l| l.split("\t")[1]}.compact
+    {:total => names.size, :rp => names.count{|n| n.start_with?("RP_")}}
+  end
+
   def display_variant val
     res = ''
     if val.size > 10 

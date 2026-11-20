@@ -55,7 +55,15 @@
       <div class='card-body'>
         <h3>Stats</h3>
 	<ul>
-	  <li><%= @h_stats["dgrp_lines"]["nber"] %> DGRP lines</li>
+	  <% h_lines = @h_stats["dgrp_lines"] || {} %>
+	  <% if h_lines["nber_rp"] %>
+	  <li><%= h_lines["nber"] %> lines (<%= h_lines["nber"] - h_lines["nber_rp"] %> DGRP, <%= h_lines["nber_rp"] %> RP)</li>
+	  <ul>
+	    <li><%= h_lines["nber_genotyped"] %> genotyped lines used in GWAS (<%= h_lines["nber_genotyped"] - h_lines["nber_genotyped_rp"] %> DGRP, <%= h_lines["nber_genotyped_rp"] %> RP)</li>
+	  </ul>
+	  <% else %>
+	  <li><%= h_lines["nber"] %> DGRP lines</li>
+	  <% end %>
 	  <li><%= @h_stats["all_studies"]["nber_all"] %> studies</li>
 	  <ul>
 	    <li><%= @h_stats["all_studies"]["nber_submitted"] %> <%= @h_statuses['submitted'].label.downcase %> studies</li>

@@ -4,6 +4,7 @@ task compute_stats: :environment do
 
 
   data_dir = Pathname.new(APP_CONFIG[:data_dir]) + 'stats'
+  FileUtils.mkdir_p(data_dir)
 
   ## compute dgrp_lines stats
 
@@ -215,7 +216,14 @@ task compute_stats: :environment do
     :nber_phenotypes_na => Phenotype.joins(:study).where("studies.status_id = 4 and obsolete is false and nber_sex_na > 0").count
   }
   
-  h_stats[:dgrp_lines] = {:nber =>  DgrpLine.count}
+  ## DGRP3: lines are DGRP_xxx or RP_xxxx; only those with a geno_index are genotyped (usable in GWAS)
+  rp_lines = DgrpLine.where("name like 'RP%'")
+  h_stats[:dgrp_lines] = {
+    :nber => DgrpLine.count,
+    :nber_rp => rp_lines.count,
+    :nber_genotyped => DgrpLine.where.not(:geno_index => nil).count,
+    :nber_genotyped_rp => rp_lines.where.not(:geno_index => nil).count
+  }
   h_stats[:categories] = {:nber => Category.count}
   h_stats[:phenotypes] = {:nber_validated => Phenotype.where(:obsolete => false).count}
   h_stats[:by_category] = {}

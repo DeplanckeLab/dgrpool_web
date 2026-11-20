@@ -15,7 +15,7 @@
 
 $("#download_all_btn").click(function(){
 var q = $("#variant_free_text").val()
-var link = "<%= raw get_search_snps_path() %>?q=" + q + "&assembly=" + $("#assembly").val()
+var link = "<%= raw get_search_snps_path() %>?q=" + encodeURIComponent(q)
 //console.log(link)
 //console.log(q.replace(" ", "_"))
 window.download_from_link(link, 'gwas_results_snps_' + q.replace(" ", "_") + ".tsv")

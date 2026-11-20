@@ -63,7 +63,7 @@ class PhenotypesController < ApplicationController
     @h_res = {}
     @h_dgrp_lines = {}
     
-    h_legend = {'0' => "Reference (#{helpers.display_variant(@snp.ref)})", '2' => "Variant (#{helpers.display_variant(@snp.alt)})"}
+    h_legend = (@snp) ? {'0' => "Reference (#{helpers.display_variant(@snp.ref)})", '2' => "Variant (#{helpers.display_variant(@snp.alt)})"} : {}
     
     phenotype_key = nil
     @phenotype_name = ''
@@ -116,6 +116,7 @@ class PhenotypesController < ApplicationController
               dgrp_lines.map{|d| @h_dgrp_lines[d] = @h_pheno_sum[d][phenotype_key][sex_i]}
              # logger.debug("H_DGRP_LINES: " + sex_i.to_s + ": " + @h_pheno_sum["2765"].to_json)
               ['0', '2'].each do |k|
+                next if !@h_res[k] # DGRP3: no line with this genotype among the genotyped lines
                 trace = {
                   :y => @h_res[k].map{|e| (@h_dgrp_lines[e.name]) ? @h_dgrp_lines[e.name][0] : nil}.compact,
                   :text => @h_res[k].map{|e| (@h_dgrp_lines[e.name]) ? e.name : nil}.compact,
@@ -339,7 +340,7 @@ class PhenotypesController < ApplicationController
       #@times.push([tmp = Time.now, tmp-@times.last[0]])
       
       @h_gwas_results[s].select!{|e|
-        snp_genes = h_snp_genes[@h_all_snps[e[2]].id]
+        snp_genes = (snp = @h_all_snps[e[2]]) ? h_snp_genes[snp.id] : nil # DGRP3: a variant missing from snps must not break the page
         
         (session[:filter_gene_name] == '' or (snp_genes and snp_genes.map{|e| e.gene_id}.include? filter_gene_id)) and
           (session[:filter_binding_site] == '' or (@h_snps[e[2]] and @h_snps[e[2]]['binding_site_annot'] and ["TF_binding_site", "regulatory_region"].map{|k| (@h_snps[e[2]]['binding_site_annot'][k]) ? @h_snps[e[2]]['binding_site_annot'][k].keys : []}.flatten.uniq.include? session[:filter_binding_site])) and

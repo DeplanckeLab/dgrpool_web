@@ -13,7 +13,6 @@ class SnpsController < ApplicationController
     session[:vs_settings][:free_text] ||= '' if !params[:free_text]
     session[:vs_settings][:page] ||= 1 if !params[:page]
     session[:vs_settings][:search_view_type] = 'list'
-    session[:vs_settings][:assembly] ||= params[:assembly]
     
     if params[:nolayout] == "1"
       render :layout => nil
@@ -116,18 +115,11 @@ class SnpsController < ApplicationController
       pos_start = t2[0].to_i
       pos_end = t2[1].to_i
       ## bound parameters: never interpolate user input into SQL
-      if session[:vs_settings][:assembly] == 'dm3'
-        @snps |= Snp.where("chr = ? and pos <= ? and pos >= ?", chr, pos_end, pos_start).all
-      else
-        @snps |= Snp.where("chr_dm6 = ? and pos_dm6 <= ? and pos_dm6 >= ?", chr, pos_end, pos_start).all
-      end
+      ## DGRP3: chr/pos and identifier are dm6 (the *_dm6 columns hold the same values), there is no dm3 search anymore
+      @snps |= Snp.where("chr = ? and pos <= ? and pos >= ?", chr, pos_end, pos_start).all
     end
 
-    if session[:vs_settings][:assembly] == 'dm3'
-      @snps |= Snp.where(:identifier => snp_names).all
-    else
-      @snps |= Snp.where(:identifier_dm6 => snp_names).all
-    end
+    @snps |= Snp.where(:identifier => snp_names).all
 
     @h_snps = {}
     @h_snp_info ={}
@@ -200,7 +192,6 @@ class SnpsController < ApplicationController
     session[:vs_settings][:search_view_type] = params[:search_view_type] if params[:search_view_type] and params[:search_view_type] != ''
     session[:vs_settings][:free_text] ||= ''
     session[:vs_settings][:free_text]=params[:free_text] if params[:free_text]
-    session[:vs_settings][:assembly] = params[:assembly] if params[:assembly]
     session[:vs_settings][:search_type] ||= 'public'
     
     session[:vs_settings]["per_page".to_sym]||=50 #if !session[:settings][(prefix + "_per_page").to_sym] or session[:settings][(prefix + "_per_page").to_sym]== 0

@@ -1,6 +1,37 @@
 module Basic
 
+  ## DGRP3: files of tmp/<md5>/ that belong to the correlation analysis (kept when a user GWAS is recomputed)
+  CORRELATION_FILES = /\A(output\.json|output\.err|output\..+\.tsv|dataset_sum\.json|h_correlation_res\.json)\z/
+
   class << self
+
+    ## DGRP3: user GWAS results computed before the switch used the DGRP2 genotypes on dm3: their variant IDs are not
+    ## in the snps table anymore (or point to another variant). Their GWAS files are moved to tmp/<md5>/dgrp2_dm3/ and
+    ## the <md5>.tmp input is touched, so that the run_gwas worker recomputes them on DGRP3 (it picks the md5s that
+    ## have no gwas_output.json, oldest .tmp first). Returns true if the results were requeued.
+    def requeue_legacy_user_gwas(output_dir)
+      output_dir = Pathname.new(output_dir)
+      gwas_output_file = output_dir + 'gwas_output.json'
+      tmp_file = output_dir.dirname + "#{output_dir.basename}.tmp"
+      ## 'done' is written when the run is over: never touch a run in progress
+      return false if !File.exist?(gwas_output_file) or !File.exist?(output_dir + 'done') or !File.exist?(tmp_file)
+      content = File.read(gwas_output_file)
+      ## runs that stopped before choosing a genotype file (input errors) are not genotype-dependent
+      return false if !content.include?('"genotype_file"') or content.include?('dgrp3.gwas')
+
+      archive_dir = output_dir + 'dgrp2_dm3'
+      FileUtils.mkdir_p(archive_dir)
+      files = Dir.children(output_dir).select{|f| File.file?(output_dir + f) and !f.match?(CORRELATION_FILES)}
+      ## gwas_output.json and done last: the worker only requeues the md5 once gwas_output.json is gone
+      (files - ['gwas_output.json', 'done'] + ['done', 'gwas_output.json']).each do |f|
+        begin
+          File.rename(output_dir + f, archive_dir + f)
+        rescue Errno::ENOENT ## already moved by a concurrent request
+        end
+      end
+      FileUtils.touch(tmp_file)
+      true
+    end
 
     def compute_correlation t_header, content, tmp_dir #, pheno_name
 

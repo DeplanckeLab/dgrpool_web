@@ -1,0 +1,86 @@
+nohup: ignoring input
+== load_snp_genes Fri Nov 20 11:08:03 CET 2026
+time="2026-11-20T11:08:03+01:00" level=warning msg="/srv/dgrpool/docker-compose.yaml: `version` is obsolete"
+Executing...
+loading existing objects...
+continuing from snp_id 5707931...
+page 5800/9164: 237275 snp_genes created
+page 5900/9164: 463963 snp_genes created
+page 6000/9164: 730523 snp_genes created
+page 6100/9164: 992511 snp_genes created
+page 6200/9164: 1235667 snp_genes created
+page 6300/9164: 1496461 snp_genes created
+page 6400/9164: 1760664 snp_genes created
+page 6500/9164: 1993139 snp_genes created
+page 6600/9164: 2235453 snp_genes created
+page 6700/9164: 2432126 snp_genes created
+page 6800/9164: 2649997 snp_genes created
+page 6900/9164: 2863049 snp_genes created
+page 7000/9164: 3094924 snp_genes created
+page 7100/9164: 3283108 snp_genes created
+page 7200/9164: 3504150 snp_genes created
+page 7300/9164: 3702725 snp_genes created
+page 7400/9164: 3912935 snp_genes created
+page 7500/9164: 4040043 snp_genes created
+page 7600/9164: 4272722 snp_genes created
+page 7700/9164: 4479874 snp_genes created
+page 7800/9164: 4692223 snp_genes created
+page 7900/9164: 4916772 snp_genes created
+page 8000/9164: 5130030 snp_genes created
+page 8100/9164: 5374140 snp_genes created
+page 8200/9164: 5612437 snp_genes created
+page 8300/9164: 5815159 snp_genes created
+page 8400/9164: 6039181 snp_genes created
+page 8500/9164: 6244612 snp_genes created
+page 8600/9164: 6439741 snp_genes created
+page 8700/9164: 6641866 snp_genes created
+page 8800/9164: 6850882 snp_genes created
+page 8900/9164: 7040564 snp_genes created
+page 9000/9164: 7261376 snp_genes created
+page 9100/9164: 7450260 snp_genes created
+Done: 7551386 snp_genes created, 10307791 in total
+== load_phewas Fri Nov 20 11:18:01 CET 2026
+time="2026-11-20T11:18:01+01:00" level=warning msg="/srv/dgrpool/docker-compose.yaml: `version` is obsolete"
+Executing...
+Parse files...
+200 files: 344123 inserted, 0 updated, 0 deleted
+400 files: 647438 inserted, 0 updated, 0 deleted
+600 files: 1003161 inserted, 0 updated, 0 deleted
+800 files: 1444752 inserted, 0 updated, 0 deleted
+1000 files: 1807646 inserted, 0 updated, 0 deleted
+1200 files: 2058532 inserted, 0 updated, 0 deleted
+1400 files: 2297824 inserted, 0 updated, 0 deleted
+1600 files: 2561054 inserted, 0 updated, 0 deleted
+1800 files: 2775425 inserted, 0 updated, 0 deleted
+2000 files: 3026937 inserted, 0 updated, 0 deleted
+2200 files: 3327981 inserted, 0 updated, 0 deleted
+2400 files: 3595636 inserted, 0 updated, 0 deleted
+2600 files: 3846205 inserted, 0 updated, 0 deleted
+2800 files: 4161857 inserted, 0 updated, 0 deleted
+3000 files: 4373960 inserted, 0 updated, 0 deleted
+3200 files: 4555678 inserted, 0 updated, 0 deleted
+3400 files: 4806848 inserted, 0 updated, 0 deleted
+3600 files: 5085155 inserted, 0 updated, 0 deleted
+3800 files: 5325158 inserted, 0 updated, 0 deleted
+4000 files: 5623889 inserted, 0 updated, 0 deleted
+4200 files: 5931443 inserted, 0 updated, 0 deleted
+4400 files: 6265872 inserted, 0 updated, 0 deleted
+4600 files: 6597181 inserted, 0 updated, 0 deleted
+4800 files: 6863732 inserted, 0 updated, 0 deleted
+5000 files: 7150259 inserted, 0 updated, 0 deleted
+5200 files: 7419061 inserted, 0 updated, 0 deleted
+5400 files: 7810356 inserted, 0 updated, 0 deleted
+5600 files: 8228144 inserted, 0 updated, 0 deleted
+5800 files: 8506421 inserted, 0 updated, 0 deleted
+6000 files: 8709224 inserted, 0 updated, 0 deleted
+6200 files: 8941296 inserted, 0 updated, 0 deleted
+6400 files: 9318020 inserted, 0 updated, 0 deleted
+Done: 6538 files: 9550073 inserted, 0 updated, 0 deleted; 9550073 gwas_results in total
+== db:migrate Fri Nov 20 11:38:33 CET 2026
+time="2026-11-20T11:38:33+01:00" level=warning msg="/srv/dgrpool/docker-compose.yaml: `version` is obsolete"
+== 20261120120000 AddSnpIdIndexToGwasResults: migrating =======================
+-- add_index(:gwas_results, :snp_id)
+   -> 3.2899s
+== 20261120120000 AddSnpIdIndexToGwasResults: migrated (3.2900s) ==============
+
+== done Fri Nov 20 11:38:37 CET 2026

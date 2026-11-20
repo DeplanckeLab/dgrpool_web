@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_18_120000) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_20_120000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -142,6 +142,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_18_120000) do
     t.float "fdr"
     t.text "sex"
     t.index ["phenotype_id", "sex"], name: "gwas_results_phenotype_id_sex"
+    t.index ["snp_id"], name: "index_gwas_results_on_snp_id"
   end
 
   create_table "human_orthologs", id: :serial, force: :cascade do |t|

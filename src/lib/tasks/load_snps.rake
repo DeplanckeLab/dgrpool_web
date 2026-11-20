@@ -16,7 +16,9 @@ task load_snps: :environment do
   # Checks done BEFORE anything is deleted: the file is readable, and its line order (line 1) is the one stored in
   # dgrp_lines.geno_index by 'rake load_dgrp_statuses' (which must be run first, on the same file).
   abort "#{file} not found" if !File.exist?(file)
-  header_line, column_line, first_line = Zlib::GzipReader.open(file){|f| [f.gets, f.gets, f.gets]}
+  # The file is BGZF (bgzip: many concatenated gzip members) and Zlib::GzipReader stops after the first member,
+  # so it is read through zcat, which reads all members.
+  header_line, column_line, first_line = IO.popen(["zcat", file.to_s]){|f| [f.gets, f.gets, f.gets]}
   file_lines = DgrpLine.parse_geno_header(header_line)
   db_lines = DgrpLine.where.not(:geno_index => nil).order(:geno_index).pluck(:name)
   abort "The line order in #{file} differs from dgrp_lines.geno_index: run 'rake load_dgrp_statuses' first" if file_lines != db_lines
@@ -37,33 +39,35 @@ task load_snps: :environment do
   ActiveRecord::Base.transaction do
     if nb_existing > 0
       puts "RESET=1: deleting gwas_results, snp_genes and snps (kept if the load fails)..."
-      GwasResult.delete_all
-      SnpGene.delete_all
-      Snp.delete_all
+      # TRUNCATE, not delete_all: with DELETE, each deleted snp triggers a foreign key check on gwas_results, which has
+      # no index on snp_id (one full scan of ~2M rows per snp: days for 4.4M snps). TRUNCATE of the three tables
+      # together skips these checks, and is transactional in PostgreSQL (rolled back if the load fails).
+      # It locks the tables until the load is committed: pages reading snps/gwas_results wait during the load.
+      ActiveRecord::Base.connection.execute("TRUNCATE gwas_results, snp_genes, snps")
     end
-    File.open(file, 'rb') do |fh|
-      Zlib::GzipReader.wrap(fh) do |f|
-        f.gets # line names
-        f.gets # column names
-        while (l = f.gets) do
-          t = l.chomp.split("\t")
-          raise "Unexpected line in #{file} (#{t.size} columns, geno_string of #{t[5].to_s.size} characters instead of #{nb_lines}): #{l[0, 100]}" if t.size != header.size or t[5].size != nb_lines
-          h = {}
-          (0 .. t.size-1).to_a.map{|i| h[header[i]] = t[i]}
-          h[:pos] = h[:pos].to_i
-          h[:chr_dm6] = h[:chr] # DGRP3
-          h[:pos_dm6] = h[:pos] # DGRP3
-          h[:identifier_dm6] = h[:identifier] # DGRP3
-          batch.push h
-          if batch.size == 10000 # DGRP3: batched inserts (4.7M rows) instead of one save per row
-            Snp.insert_all(batch)
-            n += batch.size
-            batch = []
-            puts "#{n} variants read" if n % 500000 == 0
-          end
+    IO.popen(["zcat", file.to_s]) do |f| # BGZF file: see above
+      f.gets # line names
+      f.gets # column names
+      while (l = f.gets) do
+        t = l.chomp.split("\t")
+        raise "Unexpected line in #{file} (#{t.size} columns, geno_string of #{t[5].to_s.size} characters instead of #{nb_lines}): #{l[0, 100]}" if t.size != header.size or t[5].size != nb_lines
+        h = {}
+        (0 .. t.size-1).to_a.map{|i| h[header[i]] = t[i]}
+        h[:pos] = h[:pos].to_i
+        h[:chr_dm6] = h[:chr] # DGRP3
+        h[:pos_dm6] = h[:pos] # DGRP3
+        h[:identifier_dm6] = h[:identifier] # DGRP3
+        batch.push h
+        if batch.size == 10000 # DGRP3: batched inserts (4.7M rows) instead of one save per row
+          Snp.insert_all(batch)
+          n += batch.size
+          batch = []
+          puts "#{n} variants read" if n % 500000 == 0
         end
       end
     end
+    # A truncated or corrupt file makes zcat fail: raise so that the transaction is rolled back
+    raise "zcat failed on #{file} (exit status #{$?.exitstatus}): nothing was changed" if !$?.success?
     Snp.insert_all(batch) if batch.size > 0
     n += batch.size
     nb_loaded = Snp.count
