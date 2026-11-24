@@ -4,6 +4,11 @@ module ApplicationHelper
 
     html = []
 
+    if !shapiro.is_a?(Hash) or !shapiro['pvalue'].is_a?(Numeric)
+      return "" if !shapiro.is_a?(Hash) or !shapiro['error']
+      return "<b>Shapiro-Wilk test of normality</b><br/>The test could not be computed (#{ERB::Util.html_escape(shapiro['error'])})."
+    end
+
     shapiro_result = (shapiro['pvalue'] <= 0.05) ? "Null Hypothesis is rejected (p<=0.05). <br/>Interpretation: <span class='badge bg-danger'>NOT NORMAL</span> distribution of this phenotype" : "Null hypothesis is not rejected (p>0.05).<br/> Interpretation: <span class='badge bg-success'>NORMAL</span> distribution of this phenotype"
     sci_val = '%.3E' % shapiro['pvalue']
     val = sci_val

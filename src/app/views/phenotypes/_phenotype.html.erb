@@ -64,7 +64,11 @@
 	<div class='card-body'>
 	  <h5>Analyses</h5>
           <div class='float-begin'>
+            <% if @phenotype.obsolete == true %>
+            <span class='text-muted' title='No GWAS: this phenotype is obsolete'><i class='fa fa-tools'></i> GWAS analysis (not available for obsolete phenotypes)</span><br/>
+            <% else %>
             <%= link_to raw("<i class='fa fa-tools'></i> GWAS analysis"), gwas_analysis_phenotype_path(@phenotype), {:data => {:turbo => 'false', :method => 'get'}, :target => "_blank", :class => ''} %><br/>
+            <% end %>
             <%= link_to raw("<i class='fa fa-tools'></i> Correlation with other phenotypes"), compute_correlation_phenotype_path(@phenotype), {:data => {:turbo => 'false', :method => 'get'}, :target => "_blank", :class => ''} %>
 	  </div>
 	  

@@ -11,6 +11,8 @@ class SnpsController < ApplicationController
   
   def search
     session[:vs_settings][:free_text] ||= '' if !params[:free_text]
+    ## direct link (/snps?q=...): q is forwarded by index, don't rely on the session alone
+    session[:vs_settings][:free_text] = params[:q] if params[:q]
     session[:vs_settings][:page] ||= 1 if !params[:page]
     session[:vs_settings][:search_view_type] = 'list'
     

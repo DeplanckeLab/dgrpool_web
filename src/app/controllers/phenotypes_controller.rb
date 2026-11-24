@@ -393,6 +393,8 @@ class PhenotypesController < ApplicationController
               #{"shapiro"={"statistic":0.846767333431102,"pvalue":2.85529301422287e-12}}
             elsif m = l.chomp.match(/^{"shapiro"=(.+?)\}$/)
               @shapiro[s] = Basic.safe_parse_json(m[1], {})
+            elsif l.match(/^Shapiro test failed/)
+              @shapiro[s] = {'error' => l.chomp.sub(/^Shapiro test failed\s*:\s*/, '')}
             elsif m = l.match(/\{"covariate"\:/)
               tmp_kruskal += l.chomp
             else
@@ -548,6 +550,7 @@ class PhenotypesController < ApplicationController
   # filters (only_curated_studies, no_obsolete, all).
   def table_data
     base = phenotypes_for_index
+    base = base.where(:obsolete => false) if !curator? # obsolete phenotypes are only listed for curators/admins
     rows = base.joins("LEFT JOIN units ON units.id = phenotypes.unit_id")
              .joins("LEFT JOIN summary_types ON summary_types.id = phenotypes.summary_type_id")
 
@@ -557,7 +560,8 @@ class PhenotypesController < ApplicationController
                   "CASE WHEN phenotypes.is_summary THEN 'Summary ' || coalesce(summary_types.name, 'na') " \
                   "ELSE 'By sample Dataset ' || coalesce(phenotypes.dataset_id::text, '') END, " \
                   "CASE WHEN phenotypes.is_numeric THEN 'Numeric' ELSE 'Text' END, " \
-                  "CASE WHEN phenotypes.is_continuous THEN 'Continuous' ELSE 'Discrete' END)"
+                  "CASE WHEN phenotypes.is_continuous THEN 'Continuous' ELSE 'Discrete' END, " \
+                  "CASE WHEN phenotypes.obsolete THEN 'Obsolete' END)"
     params.dig(:search, :value).to_s.split.first(10).each do |word|
       rows = rows.where("#{search_text} ILIKE ?", "%#{Phenotype.sanitize_sql_like(word)}%")
     end
@@ -594,13 +598,15 @@ class PhenotypesController < ApplicationController
     data = phenotypes.map do |p|
       buttons = [
         helpers.link_to("Show", phenotype_path(p), :data => {:turbo => 'false', :method => 'get'}, :class => 'btn btn-sm btn-primary'),
-        helpers.link_to("GWAS", gwas_analysis_phenotype_path(p), :data => {:turbo => 'false', :method => 'get'}, :class => 'btn btn-sm btn-primary'),
+        ((p.obsolete == true) ?
+           "<span title='No GWAS: this phenotype is obsolete'><span class='btn btn-sm btn-secondary disabled' aria-disabled='true'>GWAS</span></span>" :
+           helpers.link_to("GWAS", gwas_analysis_phenotype_path(p), :data => {:turbo => 'false', :method => 'get'}, :class => 'btn btn-sm btn-primary')),
         helpers.link_to("Correlation", compute_correlation_phenotype_path(p), :data => {:turbo => 'false', :method => 'get'}, :class => 'btn btn-sm btn-primary')
       ]
       buttons.push helpers.link_to("Edit", edit_phenotype_path(p), :data => {:turbo => 'false', :method => 'get'}, :class => 'btn btn-sm btn-success') if curator?
       {
         :id => p.id,
-        :name => ERB::Util.html_escape(p.name),
+        :name => ERB::Util.html_escape(p.name).to_str + ((p.obsolete == true) ? " <span class='badge bg-warning text-dark' title='This phenotype was deactivated and is considered as obsolete'>Obsolete</span>" : ""),
         :study => helpers.display_reference_short2(h_studies[p.study_id]),
         :description => "<small>#{p.description} #{(u = h_units[p.unit_id]) ? "[#{u.label_html}]" : ''}</small>",
         :source_type => helpers.display_source_type(p, h_summary_types),

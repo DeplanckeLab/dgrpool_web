@@ -278,6 +278,8 @@ class HomeController < ApplicationController
              #{"shapiro"={"statistic":0.846767333431102,"pvalue":2.85529301422287e-12}}              
             elsif m = l.chomp.match(/^{"shapiro"=(.+?)\}$/)
               @shapiro[s] = Basic.safe_parse_json(m[1], {})
+            elsif l.match(/^Shapiro test failed/)
+              @shapiro[s] = {'error' => l.chomp.sub(/^Shapiro test failed\s*:\s*/, '')}
             elsif m = l.match(/\{"covariate"\:/)
               tmp_kruskal += l.chomp
             else

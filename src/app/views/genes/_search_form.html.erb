@@ -79,7 +79,7 @@ $(".gene_search_view_btn").click(function(){
 })
 
 <% if params[:q] %>
- $("#gene_free_text").val('<%= params[:q] %>')
+ $("#gene_free_text").val('<%= j params[:q] %>')
 <% end %>
 
 function gene_search(p, h) {

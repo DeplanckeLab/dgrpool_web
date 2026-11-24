@@ -47,9 +47,9 @@
 	  <% end %>
 	</h3>
 	
-	<% if @shapiro[sex] %>
+	<% if (shapiro_html = shapiro_results(@shapiro[sex])) != '' %>
 	<div class='alert alert-info mt-3'>
-	  <%= raw shapiro_results(@shapiro[sex]) %>
+	  <%= raw shapiro_html %>
 	</div>
 	<% end %>
 	
@@ -240,6 +240,20 @@
 	   <% end %> <%# } %>
 	  </tbody>
 	</table>
+	<% else %>
+	<% plink2_file = output_dir + h_files[:plink2]
+	   nber_lines = (File.exist?(plink2_file)) ? File.foreach(plink2_file).count - 1 : nil %>
+	<div class='alert alert-warning'>
+	  <b>No variant reached significance at p-value &lt; 0.001.</b>
+	  The GWAS was run<%= " on #{nber_lines} DGRP lines" if nber_lines %>, but none of the tested variants passed this threshold.
+	  <% if nber_lines and nber_lines < 40 %>
+	  This is expected when the number of phenotyped lines is small: each variant then splits the lines into very small genotype groups,
+	  so the test has little statistical power and the p-values cannot reach such low values (see the QQ and Manhattan plots above).
+	  Results from GWAS on fewer than ~40 lines should be interpreted with caution.
+	  <% else %>
+	  This suggests that the phenotype has no strong genetic association detectable with this sample size (see the QQ and Manhattan plots above).
+	  <% end %>
+	</div>
 	<% end %>
 	<%= javascript_tag do %>
 //	console.log("test2")
@@ -281,7 +295,13 @@
     </div>
     
     <% else %>
-    <div class='alert alert-danger mt-3'>Missing results</div>
+    <% if @phenotype and @phenotype.obsolete == true %>
+    <div class='alert alert-warning mt-3'><b>No GWAS results.</b> This phenotype was deactivated (obsolete), so it was excluded from the precomputed GWAS analyses.</div>
+    <% elsif @phenotype and @phenotype.is_numeric == false %>
+    <div class='alert alert-warning mt-3'><b>No GWAS results.</b> GWAS analyses are only precomputed for numeric phenotypes.</div>
+    <% else %>
+    <div class='alert alert-danger mt-3'>Missing results. The GWAS analysis was not yet performed for this phenotype (or maybe failed). Please contact us if you need it.</div>
+    <% end %>
     <% end %>
 
 

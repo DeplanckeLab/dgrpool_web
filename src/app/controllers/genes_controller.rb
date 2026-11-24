@@ -62,6 +62,8 @@ class GenesController < ApplicationController
   
   def search
     session[:gs_settings][:free_text] ||= '' if !params[:free_text]
+    ## direct link (/genes?q=...): q is forwarded by index, don't rely on the session alone
+    session[:gs_settings][:free_text] = params[:q] if params[:q]
     session[:gs_settings][:page] ||= 1 if !params[:page]
     session[:gs_settings][:search_view_type] = 'list'
     if params[:nolayout] == "1"

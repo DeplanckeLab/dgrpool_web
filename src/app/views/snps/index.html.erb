@@ -6,7 +6,7 @@
 
 //document.addEventListener('DOMContentLoaded', function () {
 
-refresh("search_container", "<%= raw search_snps_path(:nolayout => 1, :assembly => ((params[:assembly] == 'dm3') ? 'dm3' : nil)) %>", {loading:'fa-2x'})
+refresh("search_container", "<%= raw search_snps_path(:nolayout => 1, :q => params[:q], :assembly => ((params[:assembly] == 'dm3') ? 'dm3' : nil)) %>", {loading:'fa-2x'})
 
 //})
 

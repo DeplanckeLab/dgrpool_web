@@ -9,7 +9,7 @@
 
  document.addEventListener('DOMContentLoaded', function () {
 
-refresh("search_container", "<%= search_genes_path(:nolayout => 1) %>", {loading:'fa-2x'})
+refresh("search_container", "<%= raw search_genes_path(:nolayout => 1, :q => params[:q]) %>", {loading:'fa-2x'})
 
 })
 

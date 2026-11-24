@@ -53,7 +53,7 @@ $(".variant_search_view_btn").click(function(){
 })
 
 <% if params[:q] %>
- $("#variant_free_text").val('<%= params[:q] %>')
+ $("#variant_free_text").val('<%= j params[:q] %>')
 <% end %>
 
 
