@@ -30,6 +30,14 @@ class Release < ApplicationRecord
     self.class.downloads_root.join(name)
   end
 
+  ## most recent release whose download directory contains the file (nil if none)
+  def self.latest_with_file(filename)
+    return nil unless filename.to_s.match?(Download::FILENAME_FORMAT)
+    all.sort_by { |release| version_key(release.name) }.reverse.find do |release|
+      release.download_directory.join(filename).file?
+    end
+  end
+
   def file_path(download)
     filename = download.filename.to_s
     return nil unless filename.match?(Download::FILENAME_FORMAT)

@@ -113,7 +113,8 @@ class PhenotypesController < ApplicationController
               @h_traces[sex]||=[]            
               @h_dgrp_lines = {}
               
-              dgrp_lines.map{|d| @h_dgrp_lines[d] = @h_pheno_sum[d][phenotype_key][sex_i]}
+              # lines of the study that were not measured for this phenotype have no entry for phenotype_key
+              dgrp_lines.map{|d| v = @h_pheno_sum[d]; @h_dgrp_lines[d] = (v.is_a?(Hash) and v[phenotype_key].is_a?(Array)) ? v[phenotype_key][sex_i] : nil}
              # logger.debug("H_DGRP_LINES: " + sex_i.to_s + ": " + @h_pheno_sum["2765"].to_json)
               ['0', '2'].each do |k|
                 next if !@h_res[k] # DGRP3: no line with this genotype among the genotyped lines

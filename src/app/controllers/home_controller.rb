@@ -116,6 +116,8 @@ class HomeController < ApplicationController
       render :plain => "Invalid parameters", :status => :bad_request and return
     end
 
+    ## results of an older release are recomputed with the current one (the page then shows the queue position)
+    Basic.refresh_user_results(Pathname.new(APP_CONFIG[:data_dir]) + 'tmp' + @md5)
     ## DGRP3: results computed on DGRP2/dm3 are recomputed on DGRP3 (the page then shows the queue position)
     Basic.requeue_legacy_user_gwas(Pathname.new(APP_CONFIG[:data_dir]) + 'tmp' + @md5)
     
@@ -348,6 +350,8 @@ class HomeController < ApplicationController
     end
 
     if params[:md5]
+      ## results of an older release are recomputed with the current one
+      Basic.refresh_user_results(tmp_dir + params[:md5])
       h_res_file = Pathname.new(APP_CONFIG[:data_dir]) + "tmp" + params[:md5] + 'h_correlation_res.json'
       if File.exist? h_res_file
         tmp_correlation_res = Basic.safe_parse_json(File.read(h_res_file), {})

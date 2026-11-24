@@ -1,7 +1,14 @@
 module Basic
 
   ## DGRP3: files of tmp/<md5>/ that belong to the correlation analysis (kept when a user GWAS is recomputed)
-  CORRELATION_FILES = /\A(output\.json|output\.err|output\..+\.tsv|dataset_sum\.json|h_correlation_res\.json)\z/
+  CORRELATION_FILES = /\A(output\.json|output\.err|output\..+\.tsv|dataset_sum\.json|h_correlation_res\.json|release\.txt)\z/
+
+  ## phenotype mean matrix published with each release (see lib/tasks/create_export.rake)
+  MEAN_DATA_FILE = 'all_phenotype_mean_data.tsv'
+  ## name of the release whose data was used to compute the results of a tmp/<md5>/ or tmp/correlations/<md5>/ directory
+  RELEASE_STAMP_FILE = 'release.txt'
+  ## files kept when results are recomputed for a new release (summary of the user's own data)
+  RELEASE_INDEPENDENT_FILES = ['dataset_sum.json']
 
   class << self
 
@@ -33,6 +40,55 @@ module Basic
       true
     end
 
+    ## release whose data new results are computed with
+    def current_release
+      Release.latest_with_file(MEAN_DATA_FILE)
+    end
+
+    ## true if the results of output_dir were computed with another release than the current one
+    ## (results without a stamp predate release tracking and are stale too)
+    def stale_results?(output_dir, release = current_release)
+      output_dir = Pathname.new(output_dir)
+      return false if release.nil? or !output_dir.directory?
+      stamp_file = output_dir + RELEASE_STAMP_FILE
+      !(stamp_file.file? and stamp_file.read.strip == release.name)
+    end
+
+    ## Deletes the release-dependent results of output_dir (correlations and GWAS) so that they are recomputed:
+    ## compute_correlation reruns the correlation, then the run_gwas worker picks the md5 again (it needs output.json
+    ## and no gwas_output.json). Returns true if the results were removed.
+    def clear_stale_results(output_dir, release = current_release)
+      output_dir = Pathname.new(output_dir)
+      return false if !stale_results?(output_dir, release)
+      ## never touch a GWAS in progress ('done' is written when the run is over); retried at the next view
+      return false if File.exist?(output_dir + 'gwas_output.json') and !File.exist?(output_dir + 'done')
+      files = Dir.children(output_dir).select{|f| File.file?(output_dir + f)} - RELEASE_INDEPENDENT_FILES
+      ## output.json first (the worker stops considering the md5), gwas_output.json last
+      (['output.json'] + (files - ['output.json', 'gwas_output.json']) + ['gwas_output.json']).each do |f|
+        File.delete(output_dir + f) if files.include?(f)
+      rescue Errno::ENOENT ## already removed by a concurrent request
+      end
+      true
+    end
+
+    ## Recomputes the results of a user upload (tmp/<md5>/) if they come from an older release: the correlation
+    ## from the saved <md5>.tmp input (h_correlation_res.json is rewritten), the GWAS through the run_gwas worker.
+    def refresh_user_results(output_dir)
+      output_dir = Pathname.new(output_dir)
+      tmp_file = output_dir.dirname + "#{output_dir.basename}.tmp"
+      release = current_release
+      return false if !tmp_file.file? or !stale_results?(output_dir, release)
+      t_header, content = File.read(tmp_file).split("\n", 2)
+      content ||= ''
+      ## the directory is named by the digest of the data: recompute only from the matching input
+      return false if Digest::SHA256.hexdigest(content) != output_dir.basename.to_s
+      h_res = compute_correlation(t_header.split("\t"), content, output_dir.dirname)
+      return false if h_res[:cmd].nil?
+      File.write(output_dir + 'h_correlation_res.json', h_res.to_json)
+      FileUtils.touch(tmp_file) ## the worker runs the oldest .tmp first
+      true
+    end
+
     def compute_correlation t_header, content, tmp_dir #, pheno_name
 
       h_res = {}
@@ -43,7 +99,11 @@ module Basic
       tmp_file = tmp_dir + "#{md5}.tmp"
       output_dir = tmp_dir + md5
       
-      export_mean_file = data_dir + 'export_mean.tsv'
+      ## phenotype mean matrix from the latest release; results of an older release are recomputed
+      release = current_release
+      export_mean_file = release && release.download_directory.join(MEAN_DATA_FILE)
+      clear_stale_results(output_dir, release)
+      cmd = nil
       t_header[0] = 'DGRP'
       if !File.exist? tmp_file
 #        Dir.mkdir(output_dir) if !File.exist? output_dir
@@ -62,12 +122,13 @@ module Basic
       #      if !File.exist? output_dir
       output_json = output_dir + 'output.json'
 
-      if !File.exist? output_dir
-        Dir.mkdir output_dir 
-        # if !File.exist? output_json
+      ## output.json is missing for a new upload or after clear_stale_results
+      if export_mean_file and !File.exist? output_json
+        FileUtils.mkdir_p output_dir
+        ## stamp first, so that a concurrent request does not see a run in progress as stale
+        File.write(output_dir + RELEASE_STAMP_FILE, release.name + "\n")
         cmd = "java -jar ./lib/DGRPool-1.0.jar AllCorrelations --pheno #{tmp_file} --phenodb #{export_mean_file} -o #{output_dir} 1> #{output_dir + 'output.json'} 2> #{output_dir + 'output.err'}"
         res = `#{cmd}`
-        # end
       end
         #      end
         #      File.delete tmp_file if File.exist? tmp_file
