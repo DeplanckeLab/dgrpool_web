@@ -93,7 +93,7 @@ var bsa_table = $('<table width="750">');
 						       var row = $('<tr>').addClass('')
 						       var cell = $('<td>').text(genes[i])
 						       row.append(cell)
-						       var link = $('<a class="" target="_blank" href="<%= genes_path() %>?gene_name=' + genes[i] + '">Link</a>')
+						       var link = $('<a class="" target="_blank" href="<%= genes_path() %>?q=' + encodeURIComponent(genes[i]) + '">Link</a>')
 
 						       cell = $('<td>')
 						       cell.append(link)
